@@ -1,10 +1,9 @@
-import {getSource, registerSource} from '../src/';
-import {PostgresDataSource} from '../src/sources/postgres/postgres-data-source';
+
+import {PostgresDataSource, DataSources} from '../src/';
 
 describe("Queries", () => {
     test("Simple queries", () => {
-        registerSource("main", new PostgresDataSource());
-
-        getSource("main").getTable("user").find();
+        DataSources.register("main", new PostgresDataSource());
+        DataSources.get("main").getTable("user").find();
     });
 });
