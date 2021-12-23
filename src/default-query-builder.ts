@@ -3,7 +3,7 @@ import {Statement} from './statement';
 import {QueryBuilder} from './query-builder';
 
 export class DefaultQueryBuilder extends QueryBuilder {
-    
+
     private static readonly SPACE = " ";
     // private static readonly COMMA = ",";
     // private static readonly DOUBLE_QUOTES = "\"";
@@ -16,7 +16,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     // private static readonly INTO = "INTO";
     // private static readonly SET = "SET";
     // private static readonly VALUES = "VALUES";
-    // private static readonly DISTINCT = "DISTINCT";
+    private static readonly DISTINCT = "DISTINCT";
     private static readonly ALL = "*";
     // private static readonly AS = "AS";
     // private static readonly POINT = ".";
@@ -61,6 +61,10 @@ export class DefaultQueryBuilder extends QueryBuilder {
 
     private buildSelectQuery(dataObject: DataObject, statement: Statement) {
         statement.sql = DefaultQueryBuilder.SELECT;
+        if (dataObject.isDistinct()) {
+            statement.sql += DefaultQueryBuilder.SPACE;
+            statement.sql += DefaultQueryBuilder.DISTINCT;
+        }
         statement.sql += DefaultQueryBuilder.SPACE;
         statement.sql += DefaultQueryBuilder.ALL;
         statement.sql += DefaultQueryBuilder.SPACE;

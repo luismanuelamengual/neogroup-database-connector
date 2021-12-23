@@ -6,7 +6,8 @@ export class DataObject {
     private source: DataSource;
     private queryBuilder: QueryBuilder;
     private name: string;
-    private fields: DataSet = {}
+    private fields: DataSet = {};
+    private distinct: boolean;
 
     constructor(source: DataSource, queryBuilder: QueryBuilder, name: string) {
         this.source = source;
@@ -43,6 +44,15 @@ export class DataObject {
 
     public has(field: string): boolean {
         return field in this.fields;
+    }
+
+    public setDistinct(distinct: boolean): DataObject {
+        this.distinct = distinct;
+        return this;
+    }
+
+    public isDistinct(): boolean {
+        return this.distinct;
     }
 
     public async find(): Promise<Array<DataSet>> {
