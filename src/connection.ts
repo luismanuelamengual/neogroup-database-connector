@@ -6,23 +6,21 @@ export abstract class Connection {
 
     public abstract execute(sql: string, bindings?: Array<any>): Promise<number>;
 
-    public abstract beginTransaction(): void;
+    public abstract beginTransaction(): Promise<void>;
 
-    public abstract rollbackTransaction(): void;
+    public abstract rollbackTransaction(): Promise<void>;
 
-    public abstract commitTransaction(): void;
+    public abstract commitTransaction(): Promise<void>;
 
-    public abstract close(): void;
+    public abstract close(): Promise<void>;
 
-    public abstract lastInsertedId(): any;
-
-    public executeTransaction(transaction: () => void) {
-        this.beginTransaction();
+    public async executeTransaction(transaction: () => Promise<void>) {
+        await this.beginTransaction();
         try {
-            transaction();
-            this.commitTransaction();
+            await transaction();
+            await this.commitTransaction();
         } catch (e) {
-            this.rollbackTransaction();
+            await this.rollbackTransaction();
         }
     }
 }
