@@ -1,0 +1,1 @@
+type DataObject = { [key: string]: any; };
