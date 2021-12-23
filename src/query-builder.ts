@@ -1,5 +1,6 @@
 require('./data-object');
+require('./statement');
 
 abstract class QueryBuilder {
-    public abstract buildSelectQuery(dataObject: DataObject): string;
+    public abstract getSelectQuery(dataObject: DataObject): Statement;
 }
