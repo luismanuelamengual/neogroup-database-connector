@@ -1,15 +1,15 @@
+import {QueryBuilder} from '.';
 import {DataSet} from './data-set';
-import {Connection} from './connection';
-import {QueryBuilder} from './query-builder';
+import {DataSource} from './data-source';
 
 export class DataObject {
-    private connection: Connection;
+    private source: DataSource;
     private queryBuilder: QueryBuilder;
     private name: string;
     private fields: DataSet = {}
 
-    constructor(connection: Connection, queryBuilder: QueryBuilder, name: string) {
-        this.connection = connection;
+    constructor(source: DataSource, queryBuilder: QueryBuilder, name: string) {
+        this.source = source;
         this.queryBuilder = queryBuilder;
         this.name = name;
     }
@@ -45,8 +45,9 @@ export class DataObject {
         return field in this.fields;
     }
 
-    public find(): Promise<Array<DataSet>> {
-        const statement = this.queryBuilder.getSelectStatement(this)
-        return this.connection.query(statement.sql, statement.bindings);
+    public async find(): Promise<Array<DataSet>> {
+        const statement = this.queryBuilder.getSelectStatement(this);
+        const connection = await this.source.getConnection();
+        return connection.query(statement.sql, statement.bindings);
     }
 }

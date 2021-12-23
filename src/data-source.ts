@@ -12,8 +12,8 @@ export abstract class DataSource {
     }
 
     public getTable(tableName: string): DataObject {
-        return new DataObject(this.getConnection(), this.queryBuilder, tableName);
+        return new DataObject(this, this.queryBuilder, tableName);
     }
 
-    public abstract getConnection(): Connection;
+    public abstract getConnection(): Promise<Connection>;
 }

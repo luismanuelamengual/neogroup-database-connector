@@ -4,22 +4,20 @@ import {PostgresConnection} from './postgres-connection';
 
 export class PostgresDataSource extends DataSource {
 
-    private postgreLib: any;
+    private lib: any;
     private pool: any;
 
-    constructor() {
+    constructor(config?: {host?: string, port?: number, user?: string, password?: string, database?: string}) {
         super();
         try {
-            this.postgreLib = require("pg");
+            this.lib = require("pg");
         } catch (e) {
             throw new Error("PostgreSQL module not found. Please install it via \"npm install -S pg\"");
         }
-        
-        this.pool = new this.postgreLib.Pool();
-        console.log(this.pool);
+        this.pool = new this.lib.Pool(config);
     }
 
-    public getConnection(): Connection {
-        return new PostgresConnection();
+    public async getConnection(): Promise<Connection> {
+        return new PostgresConnection(await this.pool.connect());
     }
 }

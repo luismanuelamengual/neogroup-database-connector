@@ -3,10 +3,16 @@ import {DataSet} from '../../data-set';
 
 export class PostgresConnection extends Connection {
     
-    public query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>> {
-        console.log(sql);
-        console.log(bindings);
-        return new Promise((resolve) => { resolve([] )});
+    private client: any;
+
+    constructor(client: any) {
+        super();
+        this.client = client;
+    }
+
+    public async query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>> {
+        const response = await this.client.query(sql, bindings);
+        return response.rows;
     }
 
     public execute(sql: string, bindings?: Array<any>): Promise<number> {
@@ -25,7 +31,7 @@ export class PostgresConnection extends Connection {
     }
 
     public close(): void {
-
+        this.client.release();
     }
 
     public lastInsertedId(): any {
