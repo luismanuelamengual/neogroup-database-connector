@@ -3,12 +3,15 @@ require('../../data-set');
 
 class PostgresConnection extends Connection {
     
-    public query(sql: string, values?: Array<any>): Promise<Array<DataSet>> {
-        console.log('Executing sql: ' + sql);
+    public query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>> {
+        console.log(sql);
+        console.log(bindings);
         return new Promise((resolve) => { resolve([] )});
     }
 
-    public execute(sql: string, values?: Array<any>): Promise<number> {
+    public execute(sql: string, bindings?: Array<any>): Promise<number> {
+        console.log(sql);
+        console.log(bindings);
         return new Promise((resolve) => { resolve(0)});
     }
 

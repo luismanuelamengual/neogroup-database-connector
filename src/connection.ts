@@ -2,9 +2,9 @@ require('./data-set');
 
 abstract class Connection {
 
-    public abstract query(sql: string, values?: Array<any>): Promise<Array<DataSet>>;
+    public abstract query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>>;
 
-    public abstract execute(sql: string, values?: Array<any>): Promise<number>;
+    public abstract execute(sql: string, bindings?: Array<any>): Promise<number>;
 
     public abstract beginTransaction(): void;
 
