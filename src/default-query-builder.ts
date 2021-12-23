@@ -65,6 +65,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
         statement.sql += DefaultQueryBuilder.ALL;
         statement.sql += DefaultQueryBuilder.SPACE;
         statement.sql += DefaultQueryBuilder.FROM;
+        statement.sql += DefaultQueryBuilder.SPACE;
         statement.sql += dataObject.getName();
     }
 }

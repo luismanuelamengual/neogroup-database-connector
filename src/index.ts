@@ -1,7 +1,12 @@
-import {DataSource} from './data-source';
+export * from './data-source';
+export * from './data-sources';
+export * from './data-set';
+export * from './data-object';
+export * from './connection';
+export * from './default-query-builder';
+export * from './query-builder';
+export * from './statement';
 
-const sources = new Map<string, DataSource>();
-
-export const registerSource = (sourceName: string, source: DataSource) => sources.set(sourceName, source);
-
-export const getSource = (sourceName: string): DataSource => sources.get(sourceName);
+//Postgres
+export * from './sources/postgres/postgres-connection';
+export * from './sources/postgres/postgres-data-source';
