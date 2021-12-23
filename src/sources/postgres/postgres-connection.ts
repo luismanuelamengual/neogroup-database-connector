@@ -15,26 +15,24 @@ export class PostgresConnection extends Connection {
         return response.rows;
     }
 
-    public execute(sql: string, bindings?: Array<any>): Promise<number> {
-        console.log(sql);
-        console.log(bindings);
-        return new Promise((resolve) => { resolve(0)});
+    public async execute(sql: string, bindings?: Array<any>): Promise<number> {
+        const response = await this.client.query(sql, bindings);
+        return response.rowCount;
     }
 
-    public beginTransaction(): void {
+    public async beginTransaction(): Promise<void> {
+        await this.client.query('BEGIN');
     }
 
-    public rollbackTransaction(): void {
+    public async rollbackTransaction(): Promise<void> {
+        await this.client.query('ROLLBACK');
     }
 
-    public commitTransaction(): void {
+    public async commitTransaction(): Promise<void> {
+        await this.client.query('COMMIT');
     }
 
-    public close(): void {
-        this.client.release();
-    }
-
-    public lastInsertedId(): any {
-        return 0;
+    public async close(): Promise<void> {
+        await this.client.release();
     }
 }

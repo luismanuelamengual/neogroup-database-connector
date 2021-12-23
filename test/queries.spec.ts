@@ -12,5 +12,7 @@ describe("Queries", () => {
         }));
         const response = await DataSources.get("main").getTable("liveness").find();
         console.log(response[0].id);
+        const response2 = await DataSources.get("main").getTable("liveness").find();
+        console.log(response2[1].id);
     });
 });

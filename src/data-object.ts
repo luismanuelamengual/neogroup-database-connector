@@ -48,6 +48,8 @@ export class DataObject {
     public async find(): Promise<Array<DataSet>> {
         const statement = this.queryBuilder.getSelectStatement(this);
         const connection = await this.source.getConnection();
-        return connection.query(statement.sql, statement.bindings);
+        const resultSet = connection.query(statement.sql, statement.bindings); 
+        connection.close();
+        return resultSet;
     }
 }
