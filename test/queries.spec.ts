@@ -1,5 +1,7 @@
+const { registerSource } = require('../src/');
+
 describe("Queries", () => {
     test("Simple queries", () => {
-        console.log('hola');
+        registerSource("main", new PostgresDataSource());
     });
 });

@@ -46,6 +46,7 @@ class DataObject {
     }
 
     public find(): Promise<Array<DataSet>> {
-        return this.connection.query(this.queryBuilder.buildSelectQuery(this));
+        const statement = this.queryBuilder.getSelectStatement(this)
+        return this.connection.query(statement.sql, statement.bindings);
     }
 }

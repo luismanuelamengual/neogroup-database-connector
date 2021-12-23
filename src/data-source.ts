@@ -1,34 +1,19 @@
 require('./data-object');
 require('./query-builder');
-require('./connection-pool');
+require('./default-query-builder');
+require('./connection');
 
 abstract class DataSource {
 
-    private connectionPool: ConnectionPool;
     private queryBuilder: QueryBuilder;
 
-    constructor(connectionPool?: ConnectionPool, queryBuilder?: QueryBuilder) {
-        this.connectionPool = connectionPool;
-        this.queryBuilder = queryBuilder;
-    }
-
-    public getConnectionPool(): ConnectionPool {
-        return this.connectionPool;
-    }
-
-    public setConnectionPool(connectionPool: ConnectionPool) {
-        this.connectionPool = connectionPool;
-    }
-
-    public getQueryBuilder(): QueryBuilder {
-        return this.queryBuilder;
-    }
-
-    public setQueryBuilder(queryBuilder: QueryBuilder) {
-        this.queryBuilder = queryBuilder;
+    constructor(queryBuilder?: QueryBuilder) {
+        this.queryBuilder = queryBuilder ?? (new DefaultQueryBuilder());
     }
 
     public getTable(tableName: string): DataObject {
-        return new DataObject(this.connectionPool.getConnection(), this.queryBuilder, tableName);
+        return new DataObject(this.getConnection(), this.queryBuilder, tableName);
     }
+
+    public abstract getConnection(): Connection;
 }
