@@ -1,9 +1,9 @@
-require('./data-object');
-require('./query-builder');
-require('./default-query-builder');
-require('./connection');
+import {DataObject} from './data-object';
+import {QueryBuilder} from './query-builder';
+import {DefaultQueryBuilder} from './default-query-builder';
+import {Connection} from './connection';
 
-abstract class DataSource {
+export abstract class DataSource {
 
     private queryBuilder: QueryBuilder;
 

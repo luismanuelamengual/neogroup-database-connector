@@ -1,11 +1,7 @@
-require('./data-source');
-require('./sources/postgres/postgres-data-source');
+import {DataSource} from './data-source';
 
 const sources = new Map<string, DataSource>();
 
-exports.registerSource = (sourceName: string, source: DataSource) => sources.set(sourceName, source);
+export const registerSource = (sourceName: string, source: DataSource) => sources.set(sourceName, source);
 
-exports.getSource = (sourceName: string): DataSource => sources.get(sourceName);
-
-exports.DataSource = DataSource;
-exports.PostgresDataSource = PostgresDataSource;
+export const getSource = (sourceName: string): DataSource => sources.get(sourceName);

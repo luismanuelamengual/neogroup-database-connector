@@ -1,8 +1,8 @@
-require('./data-set');
-require('./connection');
-require('./query-builder');
+import {DataSet} from './data-set';
+import {Connection} from './connection';
+import {QueryBuilder} from './query-builder';
 
-class DataObject {
+export class DataObject {
     private connection: Connection;
     private queryBuilder: QueryBuilder;
     private name: string;

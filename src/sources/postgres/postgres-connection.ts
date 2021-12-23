@@ -1,7 +1,7 @@
-require('../../connection');
-require('../../data-set');
+import {Connection} from '../../connection';
+import {DataSet} from '../../data-set';
 
-class PostgresConnection extends Connection {
+export class PostgresConnection extends Connection {
     
     public query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>> {
         console.log(sql);

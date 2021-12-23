@@ -1,8 +1,8 @@
-require('./data-object');
-require('./statement');
-require('./query-builder');
+import {DataObject} from './data-object';
+import {Statement} from './statement';
+import {QueryBuilder} from './query-builder';
 
-class DefaultQueryBuilder extends QueryBuilder {
+export class DefaultQueryBuilder extends QueryBuilder {
     
     private static readonly SPACE = " ";
     // private static readonly COMMA = ",";

@@ -1,1 +1,1 @@
-type DataSet = { [key: string]: any; };
+export type DataSet = { [key: string]: any; };

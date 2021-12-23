@@ -1,6 +1,6 @@
-require('./data-object');
-require('./statement');
+import {DataObject} from './data-object';
+import {Statement} from './statement';
 
-abstract class QueryBuilder {
+export abstract class QueryBuilder {
     public abstract getSelectStatement(dataObject: DataObject): Statement;
 }

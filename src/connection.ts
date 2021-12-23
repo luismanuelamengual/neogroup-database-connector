@@ -1,6 +1,6 @@
-require('./data-set');
+import {DataSet} from './data-set';
 
-abstract class Connection {
+export abstract class Connection {
 
     public abstract query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>>;
 
