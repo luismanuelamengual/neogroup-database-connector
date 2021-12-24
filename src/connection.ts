@@ -14,10 +14,10 @@ export abstract class Connection {
 
     public abstract close(): Promise<void>;
 
-    public async executeTransaction(transaction: () => Promise<void>) {
+    public async executeTransaction(transaction: (connection: Connection) => Promise<void>) {
         await this.beginTransaction();
         try {
-            await transaction();
+            await transaction(this);
             await this.commitTransaction();
         } catch (e) {
             await this.rollbackTransaction();
