@@ -16,4 +16,6 @@ export abstract class DataSource {
     }
 
     public abstract getConnection(): Promise<Connection>;
+
+    public abstract close(): Promise<void>;
 }

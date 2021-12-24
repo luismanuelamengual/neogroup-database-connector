@@ -3,7 +3,6 @@ import {Connection} from '../../connection';
 import {PostgresConnection} from './postgres-connection';
 
 export class PostgresDataSource extends DataSource {
-
     private lib: any;
     private pool: any;
 
@@ -19,5 +18,9 @@ export class PostgresDataSource extends DataSource {
 
     public async getConnection(): Promise<Connection> {
         return new PostgresConnection(await this.pool.connect());
+    }
+
+    public async close(): Promise<void> {
+        await this.pool.end();
     }
 }
