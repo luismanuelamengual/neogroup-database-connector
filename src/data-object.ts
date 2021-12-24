@@ -1,4 +1,4 @@
-import {QueryBuilder} from '.';
+import {QueryBuilder} from './query-builder';
 import {DataSet} from './data-set';
 import {DataSource} from './data-source';
 
