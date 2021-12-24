@@ -8,5 +8,4 @@ export * from './query-builder';
 export * from './statement';
 
 //Postgres
-export * from './sources/postgres/postgres-connection';
-export * from './sources/postgres/postgres-data-source';
+export * from './sources/postgres';
