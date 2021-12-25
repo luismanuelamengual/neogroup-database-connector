@@ -1,18 +1,18 @@
 
-import {PostgresDataSource, DataSources} from '../src/';
+import {PostgresDataSource, DataSources, registerSource, getTable} from '../src/';
 
 describe("Queries", () => {
     test("Simple queries", async () => {
-        DataSources.register("main", new PostgresDataSource({
+        registerSource(new PostgresDataSource({
             host: 'localhost',
             port: 5432,
             database: 'biometrics',
             user: 'postgres',
             password: 'postgres'
         }));
-        const response = await DataSources.get("main").getTable("liveness").find();
+        const response = await getTable("liveness").find();
         console.log(response[0].id);
-        const response2 = await DataSources.get("main").getTable("liveness").find();
+        const response2 = await getTable("liveness").find();
         console.log(response2[1].id);
         await DataSources.get("main").close();
     });

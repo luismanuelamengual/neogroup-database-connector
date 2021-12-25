@@ -6,6 +6,7 @@ export * from './connection';
 export * from './default-query-builder';
 export * from './query-builder';
 export * from './statement';
+export * from './utilities';
 
 //Postgres
 export * from './sources/postgres';
