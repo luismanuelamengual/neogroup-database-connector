@@ -5,14 +5,14 @@ import {Connection} from './connection';
 
 export abstract class DataSource {
 
-    private queryBuilder: QueryBuilder;
+    protected queryBuilder: QueryBuilder;
 
     constructor(queryBuilder?: QueryBuilder) {
         this.queryBuilder = queryBuilder ?? (new DefaultQueryBuilder());
     }
 
     public getTable(tableName: string): DataObject {
-        return new DataObject(this, this.queryBuilder, tableName);
+        return new DataObject(tableName, this, this.queryBuilder);
     }
 
     public abstract getConnection(): Promise<Connection>;

@@ -1,12 +1,14 @@
 import {Connection} from '../../connection';
 import {DataSet} from '../../data-set';
+import {DataSource} from '../../data-source';
+import {QueryBuilder} from '../../query-builder';
 
 export class PostgresConnection extends Connection {
     
     private client: any;
 
-    constructor(client: any) {
-        super();
+    constructor(source: DataSource, queryBuilder: QueryBuilder, client: any) {
+        super(source, queryBuilder);
         this.client = client;
     }
 

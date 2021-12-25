@@ -1,17 +1,20 @@
 import {QueryBuilder} from './query-builder';
 import {DataSet} from './data-set';
 import {DataSource} from './data-source';
+import {Connection} from './connection';
 
 export class DataObject {
     private source: DataSource;
     private queryBuilder: QueryBuilder;
+    private connection: Connection;
     private name: string;
     private fields: DataSet = {};
     private distinct: boolean;
 
-    constructor(source: DataSource, queryBuilder: QueryBuilder, name: string) {
+    constructor(name: string, source: DataSource, queryBuilder: QueryBuilder, connection?: Connection) {
         this.source = source;
         this.queryBuilder = queryBuilder;
+        this.connection = connection;
         this.name = name;
     }
 
@@ -57,9 +60,14 @@ export class DataObject {
 
     public async find(): Promise<Array<DataSet>> {
         const statement = this.queryBuilder.getSelectStatement(this);
-        const connection = await this.source.getConnection();
-        const resultSet = connection.query(statement.sql, statement.bindings); 
-        connection.close();
+        let resultSet: Array<DataSet>;
+        if (this.connection) {
+            resultSet = await this.connection.query(statement.sql, statement.bindings);
+        } else {
+            const connection = await this.source.getConnection();
+            resultSet = await connection.query(statement.sql, statement.bindings); 
+            await connection.close();
+        }
         return resultSet;
     }
 }

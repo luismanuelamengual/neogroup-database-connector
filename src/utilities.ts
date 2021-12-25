@@ -1,3 +1,4 @@
+import { Connection } from ".";
 import {DataObject} from "./data-object";
 import {DataSource} from "./data-source";
 import {DataSources} from "./data-sources";
@@ -12,4 +13,8 @@ export function getSource(sourceName?: string) {
 
 export function getTable(tableName: string, sourceName?: string): DataObject {
     return getSource(sourceName).getTable(tableName);
+}
+
+export async function getConnection(sourceName?: string): Promise<Connection> {
+    return await getSource(sourceName).getConnection();
 }

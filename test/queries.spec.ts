@@ -1,5 +1,5 @@
 
-import {PostgresDataSource, DataSources, registerSource, getTable} from '../src/';
+import {PostgresDataSource, registerSource, getTable, getConnection, getSource} from '../src/';
 
 describe("Queries", () => {
     test("Simple queries", async () => {
@@ -14,6 +14,12 @@ describe("Queries", () => {
         console.log(response[0].id);
         const response2 = await getTable("liveness").find();
         console.log(response2[1].id);
-        await DataSources.get("main").close();
+        
+        const connection = await getConnection();
+        const response3 = await connection.getTable("liveness").find();
+        console.log(response3[2].host);
+        await connection.close();
+
+        await getSource().close();
     });
 });
