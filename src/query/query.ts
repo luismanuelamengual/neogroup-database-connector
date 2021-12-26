@@ -1,9 +1,9 @@
 import {QueryBuilder} from './query-builder';
-import {DataSet} from './data-set';
-import {DataSource} from './data-source';
-import {Connection} from './connection';
+import {DataSet} from '../data-set';
+import {DataSource} from '../data-source';
+import {Connection} from '../connection';
 
-export class DataObject {
+export class Query {
     private source: DataSource;
     private queryBuilder: QueryBuilder;
     private connection: Connection;
@@ -18,7 +18,7 @@ export class DataObject {
         this.name = name;
     }
 
-    public setName(name: string): DataObject {
+    public setName(name: string): Query {
         this.name = name;
         return this;
     }
@@ -27,7 +27,7 @@ export class DataObject {
         return this.name;
     }
 
-    public setFields(fields: DataSet): DataObject {
+    public setFields(fields: DataSet): Query {
         this.fields = fields;
         return this;
     }
@@ -36,7 +36,7 @@ export class DataObject {
         return this.fields;
     }
 
-    public set(field: string, value: any): DataObject {
+    public set(field: string, value: any): Query {
         this.fields[field] = value;
         return this;
     }
@@ -49,7 +49,7 @@ export class DataObject {
         return field in this.fields;
     }
 
-    public setDistinct(distinct: boolean): DataObject {
+    public setDistinct(distinct: boolean): Query {
         this.distinct = distinct;
         return this;
     }

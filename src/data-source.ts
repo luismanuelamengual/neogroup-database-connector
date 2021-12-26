@@ -1,6 +1,6 @@
-import {DataObject} from './data-object';
-import {QueryBuilder} from './query-builder';
-import {DefaultQueryBuilder} from './default-query-builder';
+import {Query} from './query/query';
+import {QueryBuilder} from './query/query-builder';
+import {DefaultQueryBuilder} from './query/default-query-builder';
 import {Connection} from './connection';
 
 export abstract class DataSource {
@@ -11,8 +11,8 @@ export abstract class DataSource {
         this.queryBuilder = queryBuilder ?? (new DefaultQueryBuilder());
     }
 
-    public getTable(tableName: string): DataObject {
-        return new DataObject(tableName, this, this.queryBuilder);
+    public getTable(tableName: string): Query {
+        return new Query(tableName, this, this.queryBuilder);
     }
 
     public abstract getConnection(): Promise<Connection>;

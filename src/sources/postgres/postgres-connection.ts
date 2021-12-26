@@ -1,7 +1,7 @@
 import {Connection} from '../../connection';
 import {DataSet} from '../../data-set';
 import {DataSource} from '../../data-source';
-import {QueryBuilder} from '../../query-builder';
+import {QueryBuilder} from '../../query/query-builder';
 
 export class PostgresConnection extends Connection {
     

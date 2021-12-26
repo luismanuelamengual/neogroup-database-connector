@@ -1,5 +1,5 @@
-import {DataObject} from './data-object';
-import {Statement} from './statement';
+import {Query} from './query';
+import {Statement} from '../statement';
 import {QueryBuilder} from './query-builder';
 
 export class DefaultQueryBuilder extends QueryBuilder {
@@ -53,15 +53,15 @@ export class DefaultQueryBuilder extends QueryBuilder {
     // private static readonly OPERATOR_LOWER_OR_EQUALS_THAN = "<=";
     // private static readonly WILDCARD = "?";
 
-    public getSelectStatement(dataObject: DataObject): Statement {
+    public getSelectStatement(query: Query): Statement {
         const statement = {sql: '', bindings: []};
-        this.buildSelectQuery(dataObject, statement);
+        this.buildSelectQuery(query, statement);
         return statement;
     }
 
-    private buildSelectQuery(dataObject: DataObject, statement: Statement) {
+    private buildSelectQuery(query: Query, statement: Statement) {
         statement.sql = DefaultQueryBuilder.SELECT;
-        if (dataObject.isDistinct()) {
+        if (query.isDistinct()) {
             statement.sql += DefaultQueryBuilder.SPACE;
             statement.sql += DefaultQueryBuilder.DISTINCT;
         }
@@ -70,6 +70,6 @@ export class DefaultQueryBuilder extends QueryBuilder {
         statement.sql += DefaultQueryBuilder.SPACE;
         statement.sql += DefaultQueryBuilder.FROM;
         statement.sql += DefaultQueryBuilder.SPACE;
-        statement.sql += dataObject.getName();
+        statement.sql += query.getName();
     }
 }

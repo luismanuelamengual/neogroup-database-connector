@@ -1,7 +1,7 @@
 import {DataSource} from './data-source';
 import {DataSet} from './data-set';
-import {DataObject} from './data-object';
-import {QueryBuilder} from './query-builder';
+import {Query} from './query/query';
+import {QueryBuilder} from './query/query-builder';
 
 export abstract class Connection {
 
@@ -25,8 +25,8 @@ export abstract class Connection {
 
     public abstract close(): Promise<void>;
 
-    public getTable(tableName: string): DataObject {
-        return new DataObject(tableName, this.source, this.queryBuilder, this);
+    public getTable(tableName: string): Query {
+        return new Query(tableName, this.source, this.queryBuilder, this);
     }
 
     public async executeTransaction(transaction: (connection: Connection) => Promise<void>) {

@@ -1,5 +1,5 @@
 import { Connection } from ".";
-import {DataObject} from "./data-object";
+import {Query} from "./query/query";
 import {DataSource} from "./data-source";
 import {DataSources} from "./data-sources";
 
@@ -11,7 +11,7 @@ export function getSource(sourceName?: string) {
     return (sourceName)? DataSources.get(sourceName) : DataSources.getAll()[0];
 }
 
-export function getTable(tableName: string, sourceName?: string): DataObject {
+export function getTable(tableName: string, sourceName?: string): Query {
     return getSource(sourceName).getTable(tableName);
 }
 
