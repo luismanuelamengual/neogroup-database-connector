@@ -1,11 +1,12 @@
 import {Query} from './query';
 import {Statement} from '../statement';
 import {QueryBuilder} from './query-builder';
+import {SelectField} from './select-field';
 
 export class DefaultQueryBuilder extends QueryBuilder {
 
     private static readonly SPACE = " ";
-    // private static readonly COMMA = ",";
+    private static readonly COMMA = ",";
     // private static readonly DOUBLE_QUOTES = "\"";
     // private static readonly PARENTHESIS_START = "(";
     // private static readonly PARENTHESIS_END = ")";
@@ -18,7 +19,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     // private static readonly VALUES = "VALUES";
     private static readonly DISTINCT = "DISTINCT";
     private static readonly ALL = "*";
-    // private static readonly AS = "AS";
+    private static readonly AS = "AS";
     // private static readonly POINT = ".";
     private static readonly FROM = "FROM";
     // private static readonly AND = "AND";
@@ -59,17 +60,44 @@ export class DefaultQueryBuilder extends QueryBuilder {
         return statement;
     }
 
-    private buildSelectQuery(query: Query, statement: Statement) {
+    protected buildSelectQuery(query: Query, statement: Statement) {
         statement.sql = DefaultQueryBuilder.SELECT;
         if (query.isDistinct()) {
             statement.sql += DefaultQueryBuilder.SPACE;
             statement.sql += DefaultQueryBuilder.DISTINCT;
         }
         statement.sql += DefaultQueryBuilder.SPACE;
-        statement.sql += DefaultQueryBuilder.ALL;
+        const selectFields = query.getSelectFields();
+        if (selectFields && selectFields.length > 0) {
+            let isFirst = true;
+            for (const field of selectFields) {
+                if (!isFirst) {
+                    statement.sql += DefaultQueryBuilder.COMMA;
+                    statement.sql += DefaultQueryBuilder.SPACE;
+                }
+                this.buildSelectField(field, statement);
+                isFirst = false;
+            }
+        } else {
+            statement.sql += DefaultQueryBuilder.ALL;
+        }
         statement.sql += DefaultQueryBuilder.SPACE;
         statement.sql += DefaultQueryBuilder.FROM;
         statement.sql += DefaultQueryBuilder.SPACE;
-        statement.sql += query.getName();
+        statement.sql += query.getTableName();
+    }
+
+    protected buildSelectField(field: SelectField, statement: Statement) {
+        if (typeof field === 'string') {
+            statement.sql += field;
+        } else {
+            statement.sql += field.name;
+            if (field.alias) {
+                statement.sql += DefaultQueryBuilder.SPACE;
+                statement.sql += DefaultQueryBuilder.AS;
+                statement.sql += DefaultQueryBuilder.SPACE;
+                statement.sql += field.alias;
+            }
+        }
     }
 }

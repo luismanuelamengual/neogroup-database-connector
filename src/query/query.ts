@@ -2,29 +2,31 @@ import {QueryBuilder} from './query-builder';
 import {DataSet} from '../data-set';
 import {DataSource} from '../data-source';
 import {Connection} from '../connection';
+import {SelectField} from './select-field';
 
 export class Query {
     private source: DataSource;
     private queryBuilder: QueryBuilder;
     private connection: Connection;
-    private name: string;
+    private tableName: string;
     private fields: DataSet = {};
     private distinct: boolean;
+    private selectFields: Array<SelectField> = [];
 
     constructor(name: string, source: DataSource, queryBuilder: QueryBuilder, connection?: Connection) {
         this.source = source;
         this.queryBuilder = queryBuilder;
         this.connection = connection;
-        this.name = name;
+        this.tableName = name;
     }
 
-    public setName(name: string): Query {
-        this.name = name;
+    public setTableName(tableName: string): Query {
+        this.tableName = tableName;
         return this;
     }
 
-    public getName(): string {
-        return this.name;
+    public getTableName(): string {
+        return this.tableName;
     }
 
     public setFields(fields: DataSet): Query {
@@ -56,6 +58,25 @@ export class Query {
 
     public isDistinct(): boolean {
         return this.distinct;
+    }
+
+    public select(...fields: Array<SelectField>): Query {
+        this.selectFields = this.selectFields.concat(fields);
+        return this;
+    }
+
+    public selectField(name: string, alias?: string): Query {
+        this.selectFields.push({name, alias});
+        return this;
+    }
+
+    public getSelectFields(): Array<SelectField> {
+        return this.selectFields;
+    }
+
+    public clearSelectFields(): Query {
+        this.selectFields = [];
+        return this;
     }
 
     public async find(): Promise<Array<DataSet>> {
