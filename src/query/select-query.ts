@@ -1,4 +1,5 @@
-import {Query, HasDistinct, HasFields, HasSelectFields, HasTable} from '.';
+import {Query} from './query';
+import {HasDistinct, HasFields, HasSelectFields, HasTable} from './features';
 import {applyMixins} from '../utilities';
 
 export class SelectQuery extends Query {
