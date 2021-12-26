@@ -1,5 +1,5 @@
 
-import {PostgresDataSource, registerSource, getTable, getConnection, getSource} from '../src/';
+import {PostgresDataSource, registerSource, getTable, getSource} from '../src/';
 
 describe("Queries", () => {
     test("Simple queries", async () => {
@@ -10,16 +10,13 @@ describe("Queries", () => {
             user: 'postgres',
             password: 'postgres'
         }));
+
+
         const response = await getTable("liveness").find();
         console.log(response[0].id);
         const response2 = await getTable("liveness").select('id', 'date', {name: 'clientid', alias: 'cid'}).find();
         console.log(response2[1].id);
         
-        const connection = await getConnection();
-        const response3 = await connection.getTable("liveness").find();
-        console.log(response3[2].host);
-        await connection.close();
-
         await getSource().close();
     });
 });

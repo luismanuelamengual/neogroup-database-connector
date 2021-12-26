@@ -16,8 +16,8 @@ export class PostgresDataSource extends DataSource {
         this.pool = new this.lib.Pool(config);
     }
 
-    public async getConnection(): Promise<Connection> {
-        return new PostgresConnection(this, this.queryBuilder, await this.pool.connect());
+    protected async openConnection(): Promise<Connection> {
+        return new PostgresConnection(await this.pool.connect());
     }
 
     public async close(): Promise<void> {

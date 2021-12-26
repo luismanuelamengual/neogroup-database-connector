@@ -1,1 +1,0 @@
-export type SelectField = string | {name: string, alias?: string};

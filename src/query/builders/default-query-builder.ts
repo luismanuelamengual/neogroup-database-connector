@@ -1,7 +1,9 @@
-import {Query} from './query';
-import {Statement} from '../statement';
+
+import {Statement} from '../../statement';
+import {Query} from '../query';
 import {QueryBuilder} from './query-builder';
-import {SelectField} from './select-field';
+import {SelectField} from '../fields/select-field';
+import {SelectQuery} from '../select-query';
 
 export class DefaultQueryBuilder extends QueryBuilder {
 
@@ -20,7 +22,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     private static readonly DISTINCT = "DISTINCT";
     private static readonly ALL = "*";
     private static readonly AS = "AS";
-    // private static readonly POINT = ".";
+    private static readonly POINT = ".";
     private static readonly FROM = "FROM";
     // private static readonly AND = "AND";
     // private static readonly OR = "OR";
@@ -54,13 +56,15 @@ export class DefaultQueryBuilder extends QueryBuilder {
     // private static readonly OPERATOR_LOWER_OR_EQUALS_THAN = "<=";
     // private static readonly WILDCARD = "?";
 
-    public getSelectStatement(query: Query): Statement {
+    public buildQuery(query: Query): Statement {
         const statement = {sql: '', bindings: []};
-        this.buildSelectQuery(query, statement);
+        if (query instanceof SelectQuery) {
+            this.buildSelectQuery(query, statement);
+        }
         return statement;
     }
 
-    protected buildSelectQuery(query: Query, statement: Statement) {
+    protected buildSelectQuery(query: SelectQuery, statement: Statement) {
         statement.sql = DefaultQueryBuilder.SELECT;
         if (query.isDistinct()) {
             statement.sql += DefaultQueryBuilder.SPACE;
@@ -91,6 +95,10 @@ export class DefaultQueryBuilder extends QueryBuilder {
         if (typeof field === 'string') {
             statement.sql += field;
         } else {
+            if (field.tableName) {
+                statement.sql += field.tableName;
+                statement.sql += DefaultQueryBuilder.POINT;
+            }
             statement.sql += field.name;
             if (field.alias) {
                 statement.sql += DefaultQueryBuilder.SPACE;
