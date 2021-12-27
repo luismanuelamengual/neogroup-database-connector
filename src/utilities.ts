@@ -1,4 +1,4 @@
-import { Connection } from ".";
+import {Connection} from "./connection";
 import {DataTable} from "./data-table";
 import {DataSource} from "./data-source";
 import {DataSources} from "./data-sources";
