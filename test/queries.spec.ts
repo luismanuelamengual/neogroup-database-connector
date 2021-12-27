@@ -10,11 +10,11 @@ describe("Queries", () => {
             user: 'postgres',
             password: 'postgres'
         }));
-
+        getSource().setDebugEnabled(true);
 
         const response = await getTable("liveness").find();
         console.log(response[0].id);
-        const response2 = await getTable("liveness").select('id', 'date', {name: 'clientid', alias: 'cid'}).find();
+        const response2 = await getTable("liveness").select({name:'id', tableName: 'liveness'}, 'date', {name: 'clientid', alias: 'cid'}).find();
         console.log(response2[1].id);
         
         await getSource().close();

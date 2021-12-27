@@ -2,15 +2,10 @@ import {SelectField} from '../fields/select-field';
 
 export abstract class HasSelectFields<R> {
 
-    protected selectFields: Array<SelectField> = [];
-    
-    public select(...fields: Array<SelectField>): R {
-        this.selectFields = this.selectFields.concat(fields);
-        return this as unknown as R;
-    }
+    protected selectFields: Array<SelectField>;
 
-    public selectField(name: string, alias?: string): R {
-        this.selectFields.push({name, alias});
+    public select(...fields: Array<SelectField>): R {
+        this.selectFields = (this.selectFields || []).concat(fields);
         return this as unknown as R;
     }
 
