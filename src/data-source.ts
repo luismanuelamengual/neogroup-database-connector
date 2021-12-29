@@ -8,7 +8,7 @@ export abstract class DataSource {
     protected debug = false;
     protected readonly = false;
     protected queryBuilder: QueryBuilder;
-
+    
     constructor(queryBuilder?: QueryBuilder) {
         this.queryBuilder = queryBuilder ?? (new DefaultQueryBuilder());
     }
@@ -34,12 +34,12 @@ export abstract class DataSource {
     }
 
     public async getConnection(): Promise<DataConnection> {
-        const connection = new DataConnection(await this.openConnection(), this.queryBuilder);
+        const connection = new DataConnection(await this.requestConnection(), this.queryBuilder);
         connection.setDebugEnabled(this.debug);
         connection.setReadonly(this.readonly);
         return connection;
     }
 
-    protected abstract openConnection(): Promise<Connection>;
+    protected abstract requestConnection(): Promise<Connection>;
     public abstract close(): Promise<void>;
 }
