@@ -10,8 +10,8 @@ export class DefaultQueryBuilder extends QueryBuilder {
     private static readonly SPACE = " ";
     private static readonly COMMA = ",";
     // private static readonly DOUBLE_QUOTES = "\"";
-    // private static readonly PARENTHESIS_START = "(";
-    // private static readonly PARENTHESIS_END = ")";
+    private static readonly PARENTHESIS_START = "(";
+    private static readonly PARENTHESIS_END = ")";
     private static readonly SELECT = "SELECT";
     // private static readonly INSERT = "INSERT";
     // private static readonly UPDATE = "UPDATE";
@@ -95,11 +95,18 @@ export class DefaultQueryBuilder extends QueryBuilder {
         if (typeof field === 'string') {
             statement.sql += field;
         } else {
-            if (field.tableName) {
-                statement.sql += field.tableName;
+            if (field.function) {
+                statement.sql += field.function.toUpperCase();
+                statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
+            }
+            if (field.table) {
+                statement.sql += field.table;
                 statement.sql += DefaultQueryBuilder.POINT;
             }
             statement.sql += field.name;
+            if (field.function) {
+                statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
+            }
             if (field.alias) {
                 statement.sql += DefaultQueryBuilder.SPACE;
                 statement.sql += DefaultQueryBuilder.AS;

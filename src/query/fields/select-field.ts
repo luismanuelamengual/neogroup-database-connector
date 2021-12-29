@@ -1,1 +1,1 @@
-export type SelectField = string | {name: string, tableName?: string, alias?: string};
+export type SelectField = string | {name: string, table?: string, alias?: string, function?: string};
