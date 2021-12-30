@@ -1,5 +1,4 @@
-import {DefaultQueryBuilder} from '../../query';
-import {Statement} from '../../statement';
+import {Statement, DefaultQueryBuilder} from '../../query';
 
 export class PostgresQueryBuilder extends DefaultQueryBuilder {
     

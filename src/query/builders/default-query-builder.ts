@@ -1,4 +1,4 @@
-import {Statement} from '../../statement';
+import {Statement} from '../statement';
 import {Query} from '../query';
 import {QueryBuilder} from './query-builder';
 import {SelectField} from '../fields/select-field';
