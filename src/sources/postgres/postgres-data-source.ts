@@ -1,6 +1,7 @@
 import {DataSource} from '../../data-source';
 import {Connection} from '../../connection';
 import {PostgresConnection} from './postgres-connection';
+import {PostgresQueryBuilder} from './postgres-query-builder';
 
 export class PostgresDataSource extends DataSource {
     
@@ -13,7 +14,7 @@ export class PostgresDataSource extends DataSource {
     private password: string;
 
     constructor() {
-        super();
+        super(new PostgresQueryBuilder());
         try {
             this.lib = require("pg");
         } catch (e) {

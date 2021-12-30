@@ -1,4 +1,4 @@
-import {SelectQuery, HasDistinct, HasFields, HasSelectFields, HasTable} from './query';
+import {SelectQuery, InsertQuery, HasDistinct, HasFields, HasSelectFields, HasTable} from './query';
 import {DataSet} from './data-set';
 import {DataSource} from './data-source';
 import {applyMixins} from './utilities';
@@ -18,9 +18,23 @@ export class DataTable {
         selectQuery.setFields(this.fields);
         selectQuery.setSelectFields(this.selectFields);
         const connection = await this.source.getConnection();
-        const resultSet = connection.query(selectQuery); 
-        await connection.close();
-        return resultSet;
+        try {
+            return await connection.query(selectQuery);
+        } finally {
+            await connection.close();
+        } 
+    }
+
+    public async insert(): Promise<number> {
+        const insertQuery = new InsertQuery();
+        insertQuery.setTableName(this.tableName);
+        insertQuery.setFields(this.fields);
+        const connection = await this.source.getConnection();
+        try {
+            return await connection.execute(insertQuery)
+        } finally {
+            await connection.close();
+        }
     }
 }
 

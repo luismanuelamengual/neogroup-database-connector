@@ -2,7 +2,7 @@ import {DataSet} from '../../data-set';
 
 export abstract class HasFields<R> {
 
-    protected fields: DataSet = {};
+    protected fields: DataSet;
 
     public setFields(fields: DataSet): R {
         this.fields = fields;
@@ -14,15 +14,18 @@ export abstract class HasFields<R> {
     }
 
     public set(field: string, value: any): R {
+        if (!this.fields) {
+            this.fields = {};
+        }
         this.fields[field] = value;
         return this as unknown as R;
     }
 
     public get(field: string): any {
-        return this.fields[field];
+        return this.fields && this.fields[field];
     }
 
     public has(field: string): boolean {
-        return field in this.fields;
+        return this.fields && field in this.fields;
     }
 }
