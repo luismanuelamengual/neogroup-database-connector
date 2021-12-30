@@ -3,7 +3,7 @@ export * from './data-sources';
 export * from './data-set';
 export * from './data-table';
 export * from './connection';
-export * from './utilities';
+export * from './functions';
 
 //Queries
 export * from './query';
