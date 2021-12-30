@@ -1,0 +1,1 @@
+export type Field = string | {name: string, table?: string, function?: string};
