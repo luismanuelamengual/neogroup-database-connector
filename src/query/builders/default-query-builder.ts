@@ -91,6 +91,14 @@ export class DefaultQueryBuilder extends QueryBuilder {
         statement.sql += DefaultQueryBuilder.FROM;
         statement.sql += DefaultQueryBuilder.SPACE;
         this.buildTableName(query.getTableName(), statement);
+        
+        const tableAlias = query.getTableAlias();
+        if (tableAlias != null) {
+            statement.sql += DefaultQueryBuilder.SPACE;
+            statement.sql += DefaultQueryBuilder.AS;
+            statement.sql += DefaultQueryBuilder.SPACE;
+            statement.sql += tableAlias;
+        }
     }
 
     protected buildInsertQuery(query: InsertQuery, statement: Statement) {
