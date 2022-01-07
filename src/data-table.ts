@@ -1,4 +1,4 @@
-import {SelectQuery, InsertQuery, HasDistinct, HasFields, HasSelectFields, HasTable, HasTableAlias} from './query';
+import {SelectQuery, InsertQuery, HasDistinct, HasFields, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions} from './query';
 import {DataSet} from './data-set';
 import {DataSource} from './data-source';
 import {applyMixins} from './utilities';
@@ -18,6 +18,7 @@ export class DataTable {
         selectQuery.setFields(this.fields);
         selectQuery.setSelectFields(this.selectFields);
         selectQuery.setTableAlias(this.tableAlias);
+        selectQuery.setWhereConditions(this.whereConditions);
         const connection = await this.source.getConnection();
         try {
             return await connection.query(selectQuery);
@@ -39,5 +40,18 @@ export class DataTable {
     }
 }
 
-export interface DataTable extends HasDistinct<DataTable>, HasFields<DataTable>, HasSelectFields<DataTable>, HasTable<DataTable>, HasTableAlias<DataTable>{}
-applyMixins(DataTable, [HasDistinct, HasFields, HasSelectFields, HasTable, HasTableAlias]);
+export interface DataTable extends 
+    HasDistinct<DataTable>, 
+    HasFields<DataTable>, 
+    HasSelectFields<DataTable>, 
+    HasTable<DataTable>, 
+    HasTableAlias<DataTable>,
+    HasWhereConditions<DataTable> {}
+applyMixins(DataTable, [
+    HasDistinct, 
+    HasFields, 
+    HasSelectFields, 
+    HasTable, 
+    HasTableAlias,
+    HasWhereConditions
+]);

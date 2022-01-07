@@ -3,18 +3,18 @@ import {Field} from '../fields';
 
 export abstract class HasWhereConditions<R> {
 
-    protected conditions: ConditionGroup;
+    protected whereConditions: ConditionGroup;
 
     public setWhereConditions(conditions: ConditionGroup): R {
-        this.conditions = conditions;
+        this.whereConditions = conditions;
         return this as unknown as R;
     }
 
     public getWhereConditions(): ConditionGroup {
-        if (!this.conditions) {
-            this.conditions = new ConditionGroup();
+        if (!this.whereConditions) {
+            this.whereConditions = new ConditionGroup();
         }
-        return this.conditions;
+        return this.whereConditions;
     }
 
     public clearWhereConditions(): R {
