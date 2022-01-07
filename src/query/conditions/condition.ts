@@ -1,5 +1,5 @@
 import {ConditionGroup} from './condition-group';
 import {Statement} from '../statement';
-import {ConditionType} from './condition-type';
+import {Field} from '../fields';
 
-export type Condition = string | Statement | ConditionGroup | {type: ConditionType, parameters?: { [key: string]: any; }};
+export type Condition = string | Statement | ConditionGroup | {field: Field, operator: string, value: any};
