@@ -1,5 +1,5 @@
 
-import {PostgresDataSource} from '../src/';
+import {PostgresDataSource, ConditionGroup} from '../src/';
 
 describe("Queries", () => {
     test("Simple queries", async () => {
@@ -28,8 +28,12 @@ describe("Queries", () => {
                 .set('password', 'pipi888')
                 .insert();*/
 
+            ;
+
             let response;
-            response = await source.getTable("user").where('userid', '<=', 2).orWhere('username', 'sigmund').find();
+            response = await source.getTable("user").where('userid', '<=', 2).orWhere((new ConditionGroup()).with('firstname', '=', 'Scarlet').with('password', 'like', 'rama')).find();
+            console.log(response);
+            response = await source.getTable("user").where('password', 'like', '%8%').find();
             console.log(response);
 
         } catch (e) {

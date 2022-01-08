@@ -70,7 +70,7 @@ export class DataConnection {
             bindings = statement.bindings;
         }
         if (this.debug) {
-            console.log('SQL: ' + sqlOrQuery);
+            console.log('SQL: ' + sqlOrQuery + ';' + (bindings? ('   [' + bindings.map((value) => typeof value === 'string' ? ('"' + value + '"') : value).join(', ') + ']'): ''));
         }
         return await this.connection.query(sqlOrQuery as string, bindings);
     }
@@ -84,7 +84,7 @@ export class DataConnection {
             bindings = statement.bindings;
         }
         if (this.debug) {
-            console.log('SQL: ' + sqlOrQuery);
+            console.log('SQL: ' + sqlOrQuery + ';' + (bindings? ('   [' + bindings.map((value) => typeof value === 'string' ? ('"' + value + '"') : value).join(', ') + ']'): ''));
         }
         return this.readonly? 0 : await this.connection.execute(sqlOrQuery as string, bindings);
     }
