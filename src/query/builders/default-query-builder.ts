@@ -1,9 +1,10 @@
 import {Statement} from '../statement';
 import {Query} from '../query';
 import {QueryBuilder} from './query-builder';
-import {SelectField} from '../fields/select-field';
 import {SelectQuery} from '../select-query';
-import { InsertQuery } from '..';
+import {InsertQuery} from '../insert-query';
+import {ConditionConnector, ConditionGroup, Condition} from '../conditions';
+import {Field, SelectField} from '../fields';
 
 export class DefaultQueryBuilder extends QueryBuilder {
 
@@ -24,14 +25,14 @@ export class DefaultQueryBuilder extends QueryBuilder {
     private static readonly AS = "AS";
     private static readonly POINT = ".";
     private static readonly FROM = "FROM";
-    // private static readonly AND = "AND";
-    // private static readonly OR = "OR";
-    // private static readonly NULL = "NULL";
-    // private static readonly IS = "IS";
-    // private static readonly NOT = "NOT";
+    private static readonly AND = "AND";
+    private static readonly OR = "OR";
+    private static readonly NULL = "NULL";
+    private static readonly IS = "IS";
+    private static readonly NOT = "NOT";
     // private static readonly IN = "IN";
     // private static readonly ON = "ON";
-    // private static readonly WHERE = "WHERE";
+    private static readonly WHERE = "WHERE";
     // private static readonly HAVING = "HAVING";
     // private static readonly GROUP = "GROUP";
     // private static readonly ORDER = "ORDER";
@@ -99,6 +100,14 @@ export class DefaultQueryBuilder extends QueryBuilder {
             statement.sql += DefaultQueryBuilder.SPACE;
             statement.sql += tableAlias;
         }
+
+        const whereConditions = query.getWhereConditions();
+        if (whereConditions) {
+            statement.sql += DefaultQueryBuilder.SPACE;
+            statement.sql += DefaultQueryBuilder.WHERE;
+            statement.sql += DefaultQueryBuilder.SPACE;
+            this.buildConditionGroup(whereConditions, statement);
+        }
     }
 
     protected buildInsertQuery(query: InsertQuery, statement: Statement) {
@@ -137,6 +146,25 @@ export class DefaultQueryBuilder extends QueryBuilder {
         statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
     }
 
+    protected buildField(field: Field, statement: Statement) {
+        if (typeof field === 'string') {
+            statement.sql += field;
+        } else {
+            if (field.function) {
+                statement.sql += field.function.toUpperCase();
+                statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
+            }
+            if (field.table) {
+                this.buildTableName(field.table, statement);
+                statement.sql += DefaultQueryBuilder.POINT;
+            }
+            statement.sql += field.name;
+            if (field.function) {
+                statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
+            }
+        }
+    }
+
     protected buildSelectField(field: SelectField, statement: Statement) {
         if (typeof field === 'string') {
             statement.sql += field;
@@ -162,12 +190,114 @@ export class DefaultQueryBuilder extends QueryBuilder {
         }
     }
 
+    protected buildConditionGroup(conditionGroup: ConditionGroup, statement: Statement) {
+        let isFirst = true;
+        for (const condition of conditionGroup.getConditions()) {
+            if (!isFirst) {
+                statement.sql += DefaultQueryBuilder.SPACE;
+                statement.sql += condition.connector == ConditionConnector.AND ? DefaultQueryBuilder.AND : DefaultQueryBuilder.OR;
+                statement.sql += DefaultQueryBuilder.SPACE;
+            }
+            if (condition.condition instanceof ConditionGroup) {
+                statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
+                this.buildConditionGroup (condition.condition, statement);
+                statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
+            } else {
+                this.buildCondition(condition.condition, statement);
+            }
+        }
+    }
+
+    protected buildCondition(condition: Condition, statement: Statement) {
+        if (typeof condition === 'string') {
+            statement.sql += condition;
+        } else if (condition instanceof ConditionGroup) {
+            this.buildConditionGroup (condition, statement);
+        } else if (typeof condition === 'object' && condition !== null) {
+            if (condition.sql) {
+                statement.sql += condition.sql;
+                if (condition.bindings) {
+                    statement.bindings.push(...condition.bindings);
+                }
+            } else if (condition.field && condition.operator) {
+                if (condition.value === null) {
+                    if (condition.operator === '=') {
+                        // @ts-ignore
+                        this.buildNullCondition(condition, statement);
+                    } else if (condition.operator == '!=' || condition.operator == '<>') {
+                        // @ts-ignore
+                        this.buildNotNullCondition(condition, statement);
+                    } 
+                } else {
+                    // @ts-ignore
+                    this.buildBasicCondition(condition, statement);
+                }    
+            }
+        }
+    }
+
+    protected buildBasicCondition(condition: {field: Field, operator: string, value?: any}, statement: Statement) {
+        this.buildField(condition.field, statement);
+        statement.sql += DefaultQueryBuilder.SPACE;
+        this.buildOperator(condition.operator, statement);
+        statement.sql += DefaultQueryBuilder.SPACE;
+        if (condition.value) {
+            this.buildValue(condition.value, statement);
+        }
+    }
+    
+    protected buildNullCondition(condition: {field: Field}, statement: Statement) {
+        this.buildField(condition.field, statement);
+        statement.sql += DefaultQueryBuilder.SPACE;
+        statement.sql += DefaultQueryBuilder.IS;
+        statement.sql += DefaultQueryBuilder.SPACE;
+        statement.sql += DefaultQueryBuilder.NULL;
+    }
+
+    protected buildNotNullCondition(condition: {field: Field}, statement: Statement) {
+        this.buildField(condition.field, statement);
+        statement.sql += DefaultQueryBuilder.SPACE;
+        statement.sql += DefaultQueryBuilder.IS;
+        statement.sql += DefaultQueryBuilder.SPACE;
+        statement.sql += DefaultQueryBuilder.NOT;
+        statement.sql += DefaultQueryBuilder.SPACE;
+        statement.sql += DefaultQueryBuilder.NULL;
+    }
+
     protected buildTableName(tableName: string, statement: Statement) {
         statement.sql += tableName;
     }
 
     protected buildValue(value: any, statement: Statement) {
+        if (Array.isArray(value)) {
+            this.buildArrayValue(value, statement);
+        } else if (typeof value === 'object' && value.field) {
+            this.buildField(value, statement);
+        } else {
+            this.buildSingleValue(value, statement);
+        }
+    }
+
+    protected buildArrayValue(value: Array<any>, statement: Statement) {
+        statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
+        let isFirst = true;
+        for (const valueItem of value) {
+            if (!isFirst) {
+                statement.sql += DefaultQueryBuilder.COMMA;
+                statement.sql += DefaultQueryBuilder.SPACE;
+            }
+            this.buildValue(valueItem, statement);
+            isFirst = false;
+        }
+        statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
+    }
+
+    protected buildSingleValue(value: any, statement: Statement) {
         statement.sql += DefaultQueryBuilder.WILDCARD;
         statement.bindings.push(value);
     }
+
+    protected buildOperator(operator: string, statement: Statement) {
+        statement.sql += operator.toUpperCase();
+    } 
 }

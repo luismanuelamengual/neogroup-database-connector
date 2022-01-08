@@ -8,7 +8,7 @@ export class PostgresQueryBuilder extends DefaultQueryBuilder {
         statement.sql += (tableName === 'user')? ('"' + tableName + '"') : tableName;
     }
 
-    protected buildValue(value: any, statement: Statement) {
+    protected buildSingleValue(value: any, statement: Statement) {
         statement.sql += PostgresQueryBuilder.CURRENCY + (statement.bindings.length + 1);
         statement.bindings.push(value);
     }
