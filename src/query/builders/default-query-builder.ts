@@ -205,6 +205,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
             } else {
                 this.buildCondition(condition.condition, statement);
             }
+            isFirst = false;
         }
     }
 

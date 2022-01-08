@@ -22,9 +22,9 @@ export abstract class HasWhereConditions<R> {
         return this as unknown as R;
     }
 
-    public where (condition: Condition);
-    public where (field: Field, value: any);
-    public where (field: Field, operator: string, value: any);
+    public where (condition: Condition): R;
+    public where (field: Field, value: any): R;
+    public where (field: Field, operator: string, value: any): R;
     public where (conditionOrfield: Field | Condition, operatorOrValue?: any, value?: any): R {
         switch (arguments.length) {
             case 1:
@@ -40,9 +40,9 @@ export abstract class HasWhereConditions<R> {
         return this as unknown as R;
     }
 
-    public orWhere (condition: Condition);
-    public orWhere (field: Field, value: any);
-    public orWhere (field: Field, operator: string, value: any);
+    public orWhere (condition: Condition): R;
+    public orWhere (field: Field, value: any): R;
+    public orWhere (field: Field, operator: string, value: any): R;
     public orWhere (conditionOrfield: Field | Condition, operatorOrValue?: any, value?: any): R {
         switch (arguments.length) {
             case 1:

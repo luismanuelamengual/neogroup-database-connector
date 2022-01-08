@@ -21,12 +21,16 @@ describe("Queries", () => {
             const response3 = await source.getTable("liveness").select({name: '*', function: 'count', alias: 'cuenta'}).find();
             console.log(response3[0].cuenta);*/
             
-            await source.getTable('user')
-                .set('firstname', 'Scarlett')
-                .set('lastname', 'Johansson')
-                .set('username', 'blackwidow')
-                .set('password', '123qwe')
-                .insert();
+            /*await source.getTable('user')
+                .set('firstname', 'Jay')
+                .set('lastname', 'Mammon')
+                .set('username', 'jayman')
+                .set('password', 'pipi888')
+                .insert();*/
+
+            let response;
+            response = await source.getTable("user").where('userid', '<=', 2).orWhere('username', 'sigmund').find();
+            console.log(response);
 
         } catch (e) {
             console.log(e);
