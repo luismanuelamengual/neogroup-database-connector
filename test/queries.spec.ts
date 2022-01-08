@@ -28,8 +28,6 @@ describe("Queries", () => {
                 .set('password', 'pipi888')
                 .insert();*/
 
-            ;
-
             let response;
             response = await source.getTable("user").where('userid', '<=', 2).orWhere((new ConditionGroup()).with('firstname', '=', 'Scarlet').with('password', 'like', 'rama')).find();
             console.log(response);
@@ -41,7 +39,5 @@ describe("Queries", () => {
         }
 
         await source.close();
-
-
     });
 });

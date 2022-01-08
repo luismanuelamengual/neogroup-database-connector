@@ -30,7 +30,6 @@ export class DefaultQueryBuilder extends QueryBuilder {
     private static readonly NULL = "NULL";
     private static readonly IS = "IS";
     private static readonly NOT = "NOT";
-    // private static readonly IN = "IN";
     // private static readonly ON = "ON";
     private static readonly WHERE = "WHERE";
     // private static readonly HAVING = "HAVING";
@@ -39,8 +38,6 @@ export class DefaultQueryBuilder extends QueryBuilder {
     // private static readonly BY = "BY";
     // private static readonly LIMIT = "LIMIT";
     // private static readonly OFFSET = "OFFSET";
-    // private static readonly LIKE = "LIKE";
-    // private static readonly LIKE_WILDCARD = "%";
     // private static readonly ASC = "ASC";
     // private static readonly DESC = "DESC";
     // private static readonly JOIN = "JOIN";
@@ -49,12 +46,6 @@ export class DefaultQueryBuilder extends QueryBuilder {
     // private static readonly LEFT = "LEFT";
     // private static readonly RIGHT = "RIGHT";
     // private static readonly CROSS = "CROSS";
-    // private static readonly OPERATOR_EQUALS = "=";
-    // private static readonly OPERATOR_DISTINCT = "!=";
-    // private static readonly OPERATOR_GREATER_THAN = ">";
-    // private static readonly OPERATOR_GREATER_OR_EQUALS_THAN = ">=";
-    // private static readonly OPERATOR_LOWER_THAN = "<";
-    // private static readonly OPERATOR_LOWER_OR_EQUALS_THAN = "<=";
     private static readonly WILDCARD = "?";
 
     public buildQuery(query: Query): Statement {
