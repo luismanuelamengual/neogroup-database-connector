@@ -22,39 +22,33 @@ export abstract class HasWhereConditions<R> {
         return this as unknown as R;
     }
 
-    public where (condition: Condition): R;
-    public where (field: Field, value: any): R;
-    public where (field: Field, operator: string, value: any): R;
-    public where (conditionOrfield: Field | Condition, operatorOrValue?: any, value?: any): R {
-        switch (arguments.length) {
-            case 1:
-                this.getWhereConditions().with(conditionOrfield as Condition);
-                break;
-            case 2:
-                this.getWhereConditions().with(conditionOrfield as Field, operatorOrValue);
-                break;
-            case 3:
-                this.getWhereConditions().with(conditionOrfield as Field, operatorOrValue, value);
-                break;
-        }
+    public where(sql: string): R;
+    public where(condition: Condition): R;
+    public where(sql: string, bindings: Array<any>): R;
+    public where(field: Field, value: any): R;
+    public where(field: string, value: any): R;
+    public where(field: {name: string, table?: string, functionName?: string}, value: any): R;
+    public where(field: Field, operator: string, value: any): R;
+    public where(field: string, operator: string, value: any): R;
+    public where(field: {name: string, table?: string, functionName?: string}, operator: string, value: any): R;
+    public where(): R {
+        // @ts-ignore
+        this.getWhereConditions().with(...arguments);
         return this as unknown as R;
     }
 
-    public orWhere (condition: Condition): R;
-    public orWhere (field: Field, value: any): R;
-    public orWhere (field: Field, operator: string, value: any): R;
-    public orWhere (conditionOrfield: Field | Condition, operatorOrValue?: any, value?: any): R {
-        switch (arguments.length) {
-            case 1:
-                this.getWhereConditions().orWith(conditionOrfield as Condition);
-                break;
-            case 2:
-                this.getWhereConditions().orWith(conditionOrfield as Field, operatorOrValue);
-                break;
-            case 3:
-                this.getWhereConditions().orWith(conditionOrfield as Field, operatorOrValue, value);
-                break;
-        }
+    public orWhere(sql: string): R;
+    public orWhere(condition: Condition): R;
+    public orWhere(sql: string, bindings: Array<any>): R;
+    public orWhere(field: Field, value: any): R;
+    public orWhere(field: string, value: any): R;
+    public orWhere(field: {name: string, table?: string, functionName?: string}, value: any): R;
+    public orWhere(field: Field, operator: string, value: any): R;
+    public orWhere(field: string, operator: string, value: any): R;
+    public orWhere(field: {name: string, table?: string, functionName?: string}, operator: string, value: any): R;
+    public orWhere(): R {
+        // @ts-ignore
+        this.getWhereConditions().orWith(...arguments);
         return this as unknown as R;
     }
 }

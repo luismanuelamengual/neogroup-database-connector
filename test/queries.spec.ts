@@ -39,6 +39,8 @@ describe("Queries", () => {
             console.log(response);
             response = await source.getTable("user").where('password', 'like', '%8%').find();
             console.log(response);
+            response = await source.getTable("user").select({name: '*', functionName: 'count', alias: 'cuenta'}).find();
+            console.log(response);
 
         } catch (e) {
             console.log(e);

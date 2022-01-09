@@ -4,7 +4,7 @@ import {QueryBuilder} from './query-builder';
 import {SelectQuery} from '../select-query';
 import {InsertQuery} from '../insert-query';
 import {ConditionConnector, ConditionGroup, Condition, RawCondition, BasicCondition} from '../conditions';
-import {Field, SelectField} from '../fields';
+import {Field, SelectField, BasicField, FunctionField, RawField} from '../fields';
 
 export class DefaultQueryBuilder extends QueryBuilder {
 
@@ -73,7 +73,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
                     statement.sql += DefaultQueryBuilder.COMMA;
                     statement.sql += DefaultQueryBuilder.SPACE;
                 }
-                this.buildSelectField(field, statement);
+                this.buildField(field, statement);
                 isFirst = false;
             }
         } else {
@@ -93,7 +93,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
         }
 
         const whereConditions = query.getWhereConditions();
-        if (whereConditions) {
+        if (whereConditions && whereConditions.getConditionsCount() > 0) {
             statement.sql += DefaultQueryBuilder.SPACE;
             statement.sql += DefaultQueryBuilder.WHERE;
             statement.sql += DefaultQueryBuilder.SPACE;
@@ -138,45 +138,27 @@ export class DefaultQueryBuilder extends QueryBuilder {
     }
 
     protected buildField(field: Field, statement: Statement) {
-        if (typeof field === 'string') {
-            statement.sql += field;
-        } else {
-            if (field.function) {
-                statement.sql += field.function.toUpperCase();
+        if (field instanceof RawField) {
+            statement.sql += field.getSql();
+        } else if (field instanceof BasicField) {
+            const functionName = (field instanceof FunctionField)? field.getFunctionName() : null;
+            if (functionName) {
+                statement.sql += functionName.toUpperCase();
                 statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
             }
-            if (field.table) {
-                this.buildTableName(field.table, statement);
+            if (field.getTable()) {
+                this.buildTableName(field.getTable(), statement);
                 statement.sql += DefaultQueryBuilder.POINT;
             }
-            statement.sql += field.name;
-            if (field.function) {
+            statement.sql += field.getName();
+            if (functionName) {
                 statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
             }
-        }
-    }
-
-    protected buildSelectField(field: SelectField, statement: Statement) {
-        if (typeof field === 'string') {
-            statement.sql += field;
-        } else {
-            if (field.function) {
-                statement.sql += field.function.toUpperCase();
-                statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
-            }
-            if (field.table) {
-                this.buildTableName(field.table, statement);
-                statement.sql += DefaultQueryBuilder.POINT;
-            }
-            statement.sql += field.name;
-            if (field.function) {
-                statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
-            }
-            if (field.alias) {
+            if ((field instanceof SelectField) && field.getAlias()) {
                 statement.sql += DefaultQueryBuilder.SPACE;
                 statement.sql += DefaultQueryBuilder.AS;
                 statement.sql += DefaultQueryBuilder.SPACE;
-                statement.sql += field.alias;
+                statement.sql += field.getAlias();
             }
         }
     }

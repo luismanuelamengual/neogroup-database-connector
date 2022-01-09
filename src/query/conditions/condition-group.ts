@@ -1,4 +1,4 @@
-import {Field} from '../fields';
+import {Field, RawField, FunctionField} from '../fields';
 import {Condition} from './condition';
 import {RawCondition} from './raw-condition';
 import {BasicCondition} from './basic-condition';
@@ -27,11 +27,19 @@ export class ConditionGroup extends Condition {
         return this;
     }
 
-    public with(sql: string);
-    public with(condition: Condition);
-    public with(sql: string, bindings: Array<any>);
-    public with(field: Field, value: any);
-    public with(field: Field, operator: string, value: any);
+    public getConditionsCount(): number {
+        return this.conditions.length;
+    }
+
+    public with(sql: string): ConditionGroup;
+    public with(condition: Condition): ConditionGroup;
+    public with(sql: string, bindings: Array<any>): ConditionGroup;
+    public with(field: Field, value: any): ConditionGroup;
+    public with(field: string, value: any): ConditionGroup;
+    public with(field: {name: string, table?: string, functionName?: string}, value: any): ConditionGroup;
+    public with(field: Field, operator: string, value: any): ConditionGroup;
+    public with(field: string, operator: string, value: any): ConditionGroup;
+    public with(field: {name: string, table?: string, functionName?: string}, operator: string, value: any): ConditionGroup;
     public with(): ConditionGroup {
         let condition: Condition;
         switch (arguments.length) {
@@ -46,22 +54,42 @@ export class ConditionGroup extends Condition {
                 if (Array.isArray(arguments[1])) {
                     condition = new RawCondition(arguments[0], arguments[1]);
                 } else {
-                    condition = new BasicCondition(arguments[0], '=', arguments[1]);
+                    let field: Field;
+                    if (arguments[0] instanceof Field) {
+                        field = arguments[0];
+                    } else if (typeof arguments[0] === 'string') {
+                        field = new RawField(arguments[0]);
+                    } else {
+                        field = new FunctionField(arguments[0].name, arguments[0].table, arguments[0].functionName);
+                    }
+                    condition = new BasicCondition(field, '=', arguments[1]);
                 }
                 break;
             case 3:
-                condition = new BasicCondition(arguments[0], arguments[1], arguments[2]);
+                let field: Field;
+                if (arguments[0] instanceof Field) {
+                    field = arguments[0];
+                } else if (typeof arguments[0] === 'string') {
+                    field = new RawField(arguments[0]);
+                } else {
+                    field = new FunctionField(arguments[0].name, arguments[0].table, arguments[0].functionName);
+                }
+                condition = new BasicCondition(field, arguments[1], arguments[2]);
                 break;
         }
         this.addCondition(condition);
         return this;
     }
 
-    public orWith(sql: string);
-    public orWith(condition: Condition);
-    public orWith(sql: string, bindings: Array<any>);
-    public orWith(field: Field, value: any);
-    public orWith(field: Field, operator: string, value: any);
+    public orWith(sql: string): ConditionGroup;
+    public orWith(condition: Condition): ConditionGroup;
+    public orWith(sql: string, bindings: Array<any>): ConditionGroup;
+    public orWith(field: Field, value: any): ConditionGroup;
+    public orWith(field: string, value: any): ConditionGroup;
+    public orWith(field: {name: string, table?: string, functionName?: string}, value: any): ConditionGroup;
+    public orWith(field: Field, operator: string, value: any): ConditionGroup;
+    public orWith(field: string, operator: string, value: any): ConditionGroup;
+    public orWith(field: {name: string, table?: string, functionName?: string}, operator: string, value: any): ConditionGroup;
     public orWith(): ConditionGroup {
         let condition: Condition;
         switch (arguments.length) {
@@ -76,14 +104,30 @@ export class ConditionGroup extends Condition {
                 if (Array.isArray(arguments[1])) {
                     condition = new RawCondition(arguments[0], arguments[1]);
                 } else {
-                    condition = new BasicCondition(arguments[0], '=', arguments[1]);
+                    let field: Field;
+                    if (arguments[0] instanceof Field) {
+                        field = arguments[0];
+                    } else if (typeof arguments[0] === 'string') {
+                        field = new RawField(arguments[0]);
+                    } else {
+                        field = new FunctionField(arguments[0].name, arguments[0].table, arguments[0].functionName);
+                    }
+                    condition = new BasicCondition(field, '=', arguments[1]);
                 }
                 break;
             case 3:
-                condition = new BasicCondition(arguments[0], arguments[1], arguments[2]);
+                let field: Field;
+                if (arguments[0] instanceof Field) {
+                    field = arguments[0];
+                } else if (typeof arguments[0] === 'string') {
+                    field = new RawField(arguments[0]);
+                } else {
+                    field = new FunctionField(arguments[0].name, arguments[0].table, arguments[0].functionName);
+                }
+                condition = new BasicCondition(field, arguments[1], arguments[2]);
                 break;
         }
-        this.addCondition(condition);
+        this.addCondition(condition, ConditionConnector.OR);
         return this;
     }
 }
