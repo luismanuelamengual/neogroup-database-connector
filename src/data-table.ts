@@ -1,4 +1,4 @@
-import {SelectQuery, InsertQuery, HasDistinct, HasFields, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions} from './query';
+import {SelectQuery, InsertQuery, HasDistinct, HasFieldValues, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions} from './query';
 import {DataSet} from './data-set';
 import {DataSource} from './data-source';
 import {applyMixins} from './utilities';
@@ -15,7 +15,7 @@ export class DataTable {
         const selectQuery = new SelectQuery();
         selectQuery.setTableName(this.tableName);
         selectQuery.setDistinct(this.distinct);
-        selectQuery.setFields(this.fields);
+        selectQuery.setFieldValues(this.fieldValues);
         selectQuery.setSelectFields(this.selectFields);
         selectQuery.setTableAlias(this.tableAlias);
         selectQuery.setWhereConditions(this.whereConditions);
@@ -30,7 +30,7 @@ export class DataTable {
     public async insert(): Promise<number> {
         const insertQuery = new InsertQuery();
         insertQuery.setTableName(this.tableName);
-        insertQuery.setFields(this.fields);
+        insertQuery.setFieldValues(this.fieldValues);
         const connection = await this.source.getConnection();
         try {
             return await connection.execute(insertQuery)
@@ -42,14 +42,14 @@ export class DataTable {
 
 export interface DataTable extends 
     HasDistinct<DataTable>, 
-    HasFields<DataTable>, 
+    HasFieldValues<DataTable>, 
     HasSelectFields<DataTable>, 
     HasTable<DataTable>, 
     HasTableAlias<DataTable>,
     HasWhereConditions<DataTable> {}
 applyMixins(DataTable, [
     HasDistinct, 
-    HasFields, 
+    HasFieldValues, 
     HasSelectFields, 
     HasTable, 
     HasTableAlias,

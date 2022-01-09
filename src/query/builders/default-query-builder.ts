@@ -8,45 +8,45 @@ import {Field, SelectField, BasicField, FunctionField, RawField} from '../fields
 
 export class DefaultQueryBuilder extends QueryBuilder {
 
-    private static readonly SPACE = " ";
-    private static readonly COMMA = ",";
-    // private static readonly DOUBLE_QUOTES = "\"";
-    private static readonly PARENTHESIS_START = "(";
-    private static readonly PARENTHESIS_END = ")";
-    private static readonly SELECT = "SELECT";
-    private static readonly INSERT = "INSERT";
-    // private static readonly UPDATE = "UPDATE";
-    // private static readonly DELETE = "DELETE";
-    private static readonly INTO = "INTO";
-    // private static readonly SET = "SET";
-    private static readonly VALUES = "VALUES";
-    private static readonly DISTINCT = "DISTINCT";
-    private static readonly ALL = "*";
-    private static readonly AS = "AS";
-    private static readonly POINT = ".";
-    private static readonly FROM = "FROM";
-    private static readonly AND = "AND";
-    private static readonly OR = "OR";
-    private static readonly NULL = "NULL";
-    private static readonly IS = "IS";
-    private static readonly NOT = "NOT";
-    // private static readonly ON = "ON";
-    private static readonly WHERE = "WHERE";
-    // private static readonly HAVING = "HAVING";
-    // private static readonly GROUP = "GROUP";
-    // private static readonly ORDER = "ORDER";
-    // private static readonly BY = "BY";
-    // private static readonly LIMIT = "LIMIT";
-    // private static readonly OFFSET = "OFFSET";
-    // private static readonly ASC = "ASC";
-    // private static readonly DESC = "DESC";
-    // private static readonly JOIN = "JOIN";
-    // private static readonly INNER = "INNER";
-    // private static readonly OUTER = "OUTER";
-    // private static readonly LEFT = "LEFT";
-    // private static readonly RIGHT = "RIGHT";
-    // private static readonly CROSS = "CROSS";
-    private static readonly WILDCARD = "?";
+    protected static readonly SPACE = " ";
+    protected static readonly COMMA = ",";
+    // protected static readonly DOUBLE_QUOTES = "\"";
+    protected static readonly PARENTHESIS_START = "(";
+    protected static readonly PARENTHESIS_END = ")";
+    protected static readonly SELECT = "SELECT";
+    protected static readonly INSERT = "INSERT";
+    // protected static readonly UPDATE = "UPDATE";
+    // protected static readonly DELETE = "DELETE";
+    protected static readonly INTO = "INTO";
+    // protected static readonly SET = "SET";
+    protected static readonly VALUES = "VALUES";
+    protected static readonly DISTINCT = "DISTINCT";
+    protected static readonly ALL = "*";
+    protected static readonly AS = "AS";
+    protected static readonly POINT = ".";
+    protected static readonly FROM = "FROM";
+    protected static readonly AND = "AND";
+    protected static readonly OR = "OR";
+    protected static readonly NULL = "NULL";
+    protected static readonly IS = "IS";
+    protected static readonly NOT = "NOT";
+    // protected static readonly ON = "ON";
+    protected static readonly WHERE = "WHERE";
+    // protected static readonly HAVING = "HAVING";
+    // protected static readonly GROUP = "GROUP";
+    // protected static readonly ORDER = "ORDER";
+    // protected static readonly BY = "BY";
+    // protected static readonly LIMIT = "LIMIT";
+    // protected static readonly OFFSET = "OFFSET";
+    // protected static readonly ASC = "ASC";
+    // protected static readonly DESC = "DESC";
+    // protected static readonly JOIN = "JOIN";
+    // protected static readonly INNER = "INNER";
+    // protected static readonly OUTER = "OUTER";
+    // protected static readonly LEFT = "LEFT";
+    // protected static readonly RIGHT = "RIGHT";
+    // protected static readonly CROSS = "CROSS";
+    protected static readonly WILDCARD = "?";
 
     public buildQuery(query: Query): Statement {
         const statement = {sql: '', bindings: []};
@@ -109,7 +109,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
         this.buildTableName(query.getTableName(), statement);
         statement.sql += DefaultQueryBuilder.SPACE;
         statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
-        const fields = query.getFields();
+        const fields = query.getFieldValues();
         let isFirst = true;
         for (const fieldName in fields) {
             if (!isFirst) {

@@ -1,5 +1,5 @@
 import {Query} from './query';
-import {HasFields, HasTable} from './features';
+import {HasFieldValues, HasTable} from './features';
 import {applyMixins} from '../utilities';
 
 export class InsertQuery extends Query {
@@ -10,5 +10,5 @@ export class InsertQuery extends Query {
     }
 }
 
-export interface InsertQuery extends HasTable<InsertQuery>, HasFields<InsertQuery> {}
-applyMixins(InsertQuery, [HasTable, HasFields]);
+export interface InsertQuery extends HasTable<InsertQuery>, HasFieldValues<InsertQuery> {}
+applyMixins(InsertQuery, [HasTable, HasFieldValues]);
