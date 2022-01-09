@@ -3,7 +3,7 @@ import {Query} from '../query';
 import {QueryBuilder} from './query-builder';
 import {SelectQuery} from '../select-query';
 import {InsertQuery} from '../insert-query';
-import {ConditionConnector, ConditionGroup, Condition} from '../conditions';
+import {ConditionConnector, ConditionGroup, Condition, RawCondition, BasicCondition} from '../conditions';
 import {Field, SelectField} from '../fields';
 
 export class DefaultQueryBuilder extends QueryBuilder {
@@ -181,6 +181,47 @@ export class DefaultQueryBuilder extends QueryBuilder {
         }
     }
 
+    protected buildCondition(condition: Condition, statement: Statement) {
+        if (condition instanceof RawCondition) {
+            this.buildRawCondition(condition, statement);
+        } else if (condition instanceof BasicCondition) {
+            this.buildBasicCondition(condition, statement);
+        } else if (condition instanceof ConditionGroup) {
+            this.buildConditionGroup(condition, statement);
+        }
+    }
+
+    protected buildRawCondition(condition: RawCondition, statement: Statement) {
+        statement.sql = condition.getSql();
+        const bindings = condition.getBindings();
+        if (bindings) {
+            statement.bindings.push(...bindings);
+        }
+    }
+
+    protected buildBasicCondition(condition: BasicCondition, statement: Statement) {
+        this.buildField(condition.getField(), statement);
+        statement.sql += DefaultQueryBuilder.SPACE;
+        const operator = condition.getOperator();
+        const value = condition.getValue();
+        if (value === null && (operator === '=' || operator === '!=')) {
+            statement.sql += DefaultQueryBuilder.SPACE;
+            statement.sql += DefaultQueryBuilder.IS;
+            statement.sql += DefaultQueryBuilder.SPACE;
+            if (operator !== '=') {    
+                statement.sql += DefaultQueryBuilder.NOT;
+                statement.sql += DefaultQueryBuilder.SPACE;
+            }
+            statement.sql += DefaultQueryBuilder.NULL;
+        } else {
+            this.buildOperator(operator, statement);
+            statement.sql += DefaultQueryBuilder.SPACE;
+            if (value) {
+                this.buildValue(value, statement);
+            }
+        }
+    }
+
     protected buildConditionGroup(conditionGroup: ConditionGroup, statement: Statement) {
         let isFirst = true;
         for (const condition of conditionGroup.getConditions()) {
@@ -198,62 +239,6 @@ export class DefaultQueryBuilder extends QueryBuilder {
             }
             isFirst = false;
         }
-    }
-
-    protected buildCondition(condition: Condition, statement: Statement) {
-        if (typeof condition === 'string') {
-            statement.sql += condition;
-        } else if (condition instanceof ConditionGroup) {
-            this.buildConditionGroup (condition, statement);
-        } else if (typeof condition === 'object' && condition !== null) {
-            if (condition.sql) {
-                statement.sql += condition.sql;
-                if (condition.bindings) {
-                    statement.bindings.push(...condition.bindings);
-                }
-            } else if (condition.field && condition.operator) {
-                if (condition.value === null) {
-                    if (condition.operator === '=') {
-                        // @ts-ignore
-                        this.buildNullCondition(condition, statement);
-                    } else if (condition.operator == '!=' || condition.operator == '<>') {
-                        // @ts-ignore
-                        this.buildNotNullCondition(condition, statement);
-                    } 
-                } else {
-                    // @ts-ignore
-                    this.buildBasicCondition(condition, statement);
-                }    
-            }
-        }
-    }
-
-    protected buildBasicCondition(condition: {field: Field, operator: string, value?: any}, statement: Statement) {
-        this.buildField(condition.field, statement);
-        statement.sql += DefaultQueryBuilder.SPACE;
-        this.buildOperator(condition.operator, statement);
-        statement.sql += DefaultQueryBuilder.SPACE;
-        if (condition.value) {
-            this.buildValue(condition.value, statement);
-        }
-    }
-    
-    protected buildNullCondition(condition: {field: Field}, statement: Statement) {
-        this.buildField(condition.field, statement);
-        statement.sql += DefaultQueryBuilder.SPACE;
-        statement.sql += DefaultQueryBuilder.IS;
-        statement.sql += DefaultQueryBuilder.SPACE;
-        statement.sql += DefaultQueryBuilder.NULL;
-    }
-
-    protected buildNotNullCondition(condition: {field: Field}, statement: Statement) {
-        this.buildField(condition.field, statement);
-        statement.sql += DefaultQueryBuilder.SPACE;
-        statement.sql += DefaultQueryBuilder.IS;
-        statement.sql += DefaultQueryBuilder.SPACE;
-        statement.sql += DefaultQueryBuilder.NOT;
-        statement.sql += DefaultQueryBuilder.SPACE;
-        statement.sql += DefaultQueryBuilder.NULL;
     }
 
     protected buildTableName(tableName: string, statement: Statement) {

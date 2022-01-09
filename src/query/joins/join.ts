@@ -25,4 +25,28 @@ export class Join extends ConditionGroup {
             this.type = type;
         }
     }
+
+    public setTable(table: string) {
+        this.table = table;
+    }
+
+    public getTable(): string {
+        return this.table;
+    }
+
+    public setAlias(alias: string) {
+        this.alias = alias;
+    }
+
+    public getAlias(): string {
+        return this.alias;
+    }
+
+    public setType(type: JoinType) {
+        this.type = type;
+    }
+
+    public getType(): JoinType {
+        return this.type;
+    }
 }
