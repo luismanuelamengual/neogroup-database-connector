@@ -6,3 +6,4 @@ export * from './features';
 export * from './fields';
 export * from './statement';
 export * from './conditions';
+export * from './joins';

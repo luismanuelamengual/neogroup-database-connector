@@ -29,7 +29,13 @@ describe("Queries", () => {
                 .insert();*/
 
             let response;
-            response = await source.getTable("user").where('userid', '<=', 2).orWhere((new ConditionGroup()).with('firstname', '=', 'Scarlet').with('password', 'like', 'rama')).find();
+            response = await source.getTable("user")
+                .where('userid', '<=', 2)
+                .orWhere((new ConditionGroup())
+                    .with('firstname', '=', 'Scarlet')
+                    .with('password', 'like', 'rama'))
+                .find();
+                
             console.log(response);
             response = await source.getTable("user").where('password', 'like', '%8%').find();
             console.log(response);
