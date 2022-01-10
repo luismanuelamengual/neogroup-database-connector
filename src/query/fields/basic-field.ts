@@ -4,10 +4,23 @@ export class BasicField extends Field {
     private name: string;
     private table: string;
 
-    constructor(name: string, table?: string) {
+    constructor(value: string)
+    constructor(name: string, table: string)
+    constructor() {
         super();
-        this.name = name;
-        this.table = table;
+        if (arguments.length == 1) {
+            const value = arguments[0];
+            const valueParts = value.split('\.');
+            if (valueParts.length > 1) {
+                this.table = valueParts[0];
+                this.name = valueParts[1];    
+            } else {
+                this.name = valueParts[0];
+            }
+        } else {
+            this.name = arguments[0];
+            this.table = arguments[1];
+        }
     }
 
     public setName(name: string) {

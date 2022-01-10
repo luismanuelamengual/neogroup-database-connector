@@ -1,4 +1,4 @@
-import {Field, RawField, FunctionField} from '../fields';
+import {Field, FunctionField} from '../fields';
 import {Condition} from './condition';
 import {RawCondition} from './raw-condition';
 import {BasicCondition} from './basic-condition';
@@ -58,7 +58,7 @@ export class ConditionGroup extends Condition {
                     if (arguments[0] instanceof Field) {
                         field = arguments[0];
                     } else if (typeof arguments[0] === 'string') {
-                        field = new RawField(arguments[0]);
+                        field = new FunctionField(arguments[0]);
                     } else {
                         field = new FunctionField(arguments[0].name, arguments[0].table, arguments[0].functionName);
                     }
@@ -70,7 +70,7 @@ export class ConditionGroup extends Condition {
                 if (arguments[0] instanceof Field) {
                     field = arguments[0];
                 } else if (typeof arguments[0] === 'string') {
-                    field = new RawField(arguments[0]);
+                    field = new FunctionField(arguments[0]);
                 } else {
                     field = new FunctionField(arguments[0].name, arguments[0].table, arguments[0].functionName);
                 }
@@ -108,7 +108,7 @@ export class ConditionGroup extends Condition {
                     if (arguments[0] instanceof Field) {
                         field = arguments[0];
                     } else if (typeof arguments[0] === 'string') {
-                        field = new RawField(arguments[0]);
+                        field = new FunctionField(arguments[0]);
                     } else {
                         field = new FunctionField(arguments[0].name, arguments[0].table, arguments[0].functionName);
                     }
@@ -120,7 +120,7 @@ export class ConditionGroup extends Condition {
                 if (arguments[0] instanceof Field) {
                     field = arguments[0];
                 } else if (typeof arguments[0] === 'string') {
-                    field = new RawField(arguments[0]);
+                    field = new FunctionField(arguments[0]);
                 } else {
                     field = new FunctionField(arguments[0].name, arguments[0].table, arguments[0].functionName);
                 }

@@ -3,7 +3,6 @@ import {PostgresDataSource, ConditionGroup} from '../src/';
 
 describe("Queries", () => {
     test("Simple queries", async () => {
-
         const source = new PostgresDataSource();
         source.setHost('localhost');
         source.setPort(5432);
@@ -41,6 +40,9 @@ describe("Queries", () => {
             console.log(response);
             response = await source.getTable("user").select({name: '*', functionName: 'count', alias: 'cuenta'}).find();
             console.log(response);
+
+            /*response = await source.getTable("user").innerJoin("person", "user.userid", "person.userid").find();
+            console.log(response);*/
 
         } catch (e) {
             console.log(e);

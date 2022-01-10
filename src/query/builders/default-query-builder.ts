@@ -5,20 +5,21 @@ import {SelectQuery} from '../select-query';
 import {InsertQuery} from '../insert-query';
 import {ConditionConnector, ConditionGroup, Condition, RawCondition, BasicCondition} from '../conditions';
 import {Field, SelectField, BasicField, FunctionField, RawField} from '../fields';
+import {Join, JoinType} from '../joins';
 
 export class DefaultQueryBuilder extends QueryBuilder {
 
     protected static readonly SPACE = " ";
     protected static readonly COMMA = ",";
-    // protected static readonly DOUBLE_QUOTES = "\"";
+    protected static readonly DOUBLE_QUOTES = "\"";
     protected static readonly PARENTHESIS_START = "(";
     protected static readonly PARENTHESIS_END = ")";
     protected static readonly SELECT = "SELECT";
     protected static readonly INSERT = "INSERT";
-    // protected static readonly UPDATE = "UPDATE";
-    // protected static readonly DELETE = "DELETE";
+    protected static readonly UPDATE = "UPDATE";
+    protected static readonly DELETE = "DELETE";
     protected static readonly INTO = "INTO";
-    // protected static readonly SET = "SET";
+    protected static readonly SET = "SET";
     protected static readonly VALUES = "VALUES";
     protected static readonly DISTINCT = "DISTINCT";
     protected static readonly ALL = "*";
@@ -30,22 +31,22 @@ export class DefaultQueryBuilder extends QueryBuilder {
     protected static readonly NULL = "NULL";
     protected static readonly IS = "IS";
     protected static readonly NOT = "NOT";
-    // protected static readonly ON = "ON";
+    protected static readonly ON = "ON";
     protected static readonly WHERE = "WHERE";
-    // protected static readonly HAVING = "HAVING";
-    // protected static readonly GROUP = "GROUP";
-    // protected static readonly ORDER = "ORDER";
-    // protected static readonly BY = "BY";
-    // protected static readonly LIMIT = "LIMIT";
-    // protected static readonly OFFSET = "OFFSET";
-    // protected static readonly ASC = "ASC";
-    // protected static readonly DESC = "DESC";
-    // protected static readonly JOIN = "JOIN";
-    // protected static readonly INNER = "INNER";
-    // protected static readonly OUTER = "OUTER";
-    // protected static readonly LEFT = "LEFT";
-    // protected static readonly RIGHT = "RIGHT";
-    // protected static readonly CROSS = "CROSS";
+    protected static readonly HAVING = "HAVING";
+    protected static readonly GROUP = "GROUP";
+    protected static readonly ORDER = "ORDER";
+    protected static readonly BY = "BY";
+    protected static readonly LIMIT = "LIMIT";
+    protected static readonly OFFSET = "OFFSET";
+    protected static readonly ASC = "ASC";
+    protected static readonly DESC = "DESC";
+    protected static readonly JOIN = "JOIN";
+    protected static readonly INNER = "INNER";
+    protected static readonly OUTER = "OUTER";
+    protected static readonly LEFT = "LEFT";
+    protected static readonly RIGHT = "RIGHT";
+    protected static readonly CROSS = "CROSS";
     protected static readonly WILDCARD = "?";
 
     public buildQuery(query: Query): Statement {
@@ -90,6 +91,14 @@ export class DefaultQueryBuilder extends QueryBuilder {
             statement.sql += DefaultQueryBuilder.AS;
             statement.sql += DefaultQueryBuilder.SPACE;
             statement.sql += tableAlias;
+        }
+
+        const joins = query.getJoins();
+        if (joins != null && joins.length > 0) {
+            for (const join of joins) {
+                statement.sql += DefaultQueryBuilder.SPACE;
+                this.buildJoin(join, statement);
+            }
         }
 
         const whereConditions = query.getWhereConditions();
@@ -223,6 +232,46 @@ export class DefaultQueryBuilder extends QueryBuilder {
         }
     }
 
+    protected buildJoin(join: Join, statement: Statement) {
+        switch (join.getType()) {
+            case JoinType.INNER_JOIN:
+                statement.sql += DefaultQueryBuilder.INNER;
+                statement.sql += DefaultQueryBuilder.SPACE;
+                break;
+            case JoinType.OUTER_JOIN:
+                statement.sql += DefaultQueryBuilder.OUTER;
+                statement.sql += DefaultQueryBuilder.SPACE;
+                break;
+            case JoinType.LEFT_JOIN:
+                statement.sql += DefaultQueryBuilder.LEFT;
+                statement.sql += DefaultQueryBuilder.SPACE;
+                break;
+            case JoinType.RIGHT_JOIN:
+                statement.sql += DefaultQueryBuilder.RIGHT;
+                statement.sql += DefaultQueryBuilder.SPACE;
+                break;
+            case JoinType.CROSS_JOIN:
+                statement.sql += DefaultQueryBuilder.CROSS;
+                statement.sql += DefaultQueryBuilder.SPACE;
+                break;
+        }
+        statement.sql += DefaultQueryBuilder.JOIN;
+        statement.sql += DefaultQueryBuilder.SPACE;
+        this.buildTableName(join.getTable(), statement);
+
+        const tableAlias = join.getAlias();
+        if (tableAlias != null) {
+            statement.sql += DefaultQueryBuilder.SPACE;
+            statement.sql += DefaultQueryBuilder.AS;
+            statement.sql += DefaultQueryBuilder.SPACE;
+            statement.sql += tableAlias;
+        }
+        statement.sql += DefaultQueryBuilder.SPACE;
+        statement.sql += DefaultQueryBuilder.ON;
+        statement.sql += DefaultQueryBuilder.SPACE;
+        this.buildConditionGroup(join.getConditionGroup(), statement);
+    }
+
     protected buildTableName(tableName: string, statement: Statement) {
         statement.sql += tableName;
     }
@@ -230,7 +279,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     protected buildValue(value: any, statement: Statement) {
         if (Array.isArray(value)) {
             this.buildArrayValue(value, statement);
-        } else if (typeof value === 'object' && value.field) {
+        } else if (value instanceof Field) {
             this.buildField(value, statement);
         } else {
             this.buildSingleValue(value, statement);
