@@ -7,3 +7,5 @@ export * from './joins';
 export * from './query';
 export * from './select-query';
 export * from './statement';
+export * from './update-query';
+

@@ -9,7 +9,7 @@
   "rules": {
     "quotes": ["error", "single"],
     "no-empty": ["error", { "allowEmptyCatch": true }],
-    "no-console": "error",
+    "no-console": "off",
     "no-unused-vars": "off",
     "no-trailing-spaces": "error",
     "no-constant-condition":"off",

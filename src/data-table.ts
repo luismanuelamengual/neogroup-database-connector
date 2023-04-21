@@ -1,6 +1,6 @@
 import { DataSet } from './data-set';
 import { DataSource } from './data-source';
-import { HasDistinct, HasFieldValues, HasJoins, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery } from './query';
+import { HasDistinct, HasFieldValues, HasJoins, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
 import { applyMixins } from './utilities';
 
 export class DataTable {
@@ -35,6 +35,19 @@ export class DataTable {
     const connection = await this.source.getConnection();
     try {
       return await connection.execute(insertQuery);
+    } finally {
+      await connection.close();
+    }
+  }
+
+  public async update(): Promise<number> {
+    const updateQuery = new UpdateQuery();
+    updateQuery.setTableName(this.tableName);
+    updateQuery.setFieldValues(this.fieldValues);
+    updateQuery.setWhereConditions(this.whereConditions);
+    const connection = await this.source.getConnection();
+    try {
+      return await connection.execute(updateQuery);
     } finally {
       await connection.close();
     }

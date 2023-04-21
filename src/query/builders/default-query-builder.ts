@@ -5,6 +5,7 @@ import { Join, JoinType } from '../joins';
 import { Query } from '../query';
 import { SelectQuery } from '../select-query';
 import { Statement } from '../statement';
+import { UpdateQuery } from '../update-query';
 import { QueryBuilder } from './query-builder';
 
 export class DefaultQueryBuilder extends QueryBuilder {
@@ -12,6 +13,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
   protected static readonly SPACE = ' ';
   protected static readonly COMMA = ',';
   protected static readonly DOUBLE_QUOTES = '"';
+  protected static readonly EQUALS = '=';
   protected static readonly PARENTHESIS_START = '(';
   protected static readonly PARENTHESIS_END = ')';
   protected static readonly SELECT = 'SELECT';
@@ -55,6 +57,8 @@ export class DefaultQueryBuilder extends QueryBuilder {
       this.buildSelectQuery(query, statement);
     } else if (query instanceof InsertQuery) {
       this.buildInsertQuery(query, statement);
+    } else if (query instanceof UpdateQuery) {
+      this.buildUpdateQuery(query, statement);
     }
     return statement;
   }
@@ -144,6 +148,36 @@ export class DefaultQueryBuilder extends QueryBuilder {
       isFirst = false;
     }
     statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
+  }
+
+  protected buildUpdateQuery(query: UpdateQuery, statement: Statement) {
+    statement.sql += DefaultQueryBuilder.UPDATE;
+    statement.sql += DefaultQueryBuilder.SPACE;
+    this.buildTableName(query.getTableName(), statement);
+    statement.sql += DefaultQueryBuilder.SPACE;
+    statement.sql += DefaultQueryBuilder.SET;
+    statement.sql += DefaultQueryBuilder.SPACE;
+    const fields = query.getFieldValues();
+    let isFirst = true;
+    for (const fieldName in fields) {
+      if (!isFirst) {
+        statement.sql += DefaultQueryBuilder.COMMA;
+        statement.sql += DefaultQueryBuilder.SPACE;
+      }
+      statement.sql += fieldName;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.EQUALS;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      this.buildValue(fields[fieldName], statement);
+      isFirst = false;
+    }
+    const whereConditions = query.getWhereConditions();
+    if (whereConditions && whereConditions.getConditionsCount() > 0) {
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.WHERE;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      this.buildConditionGroup(whereConditions, statement);
+    }
   }
 
   protected buildField(field: Field, statement: Statement) {
