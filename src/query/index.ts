@@ -1,5 +1,6 @@
 export * from './builders';
 export * from './conditions';
+export * from './delete-query';
 export * from './features';
 export * from './fields';
 export * from './insert-query';

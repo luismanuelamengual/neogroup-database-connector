@@ -1,6 +1,6 @@
 import { DataSet } from './data-set';
 import { DataSource } from './data-source';
-import { HasDistinct, HasFieldValues, HasJoins, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
+import { DeleteQuery, HasDistinct, HasFieldValues, HasJoins, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
 import { applyMixins } from './utilities';
 
 export class DataTable {
@@ -48,6 +48,18 @@ export class DataTable {
     const connection = await this.source.getConnection();
     try {
       return await connection.execute(updateQuery);
+    } finally {
+      await connection.close();
+    }
+  }
+
+  public async delete(): Promise<number> {
+    const deleteQuery = new DeleteQuery();
+    deleteQuery.setTableName(this.tableName);
+    deleteQuery.setWhereConditions(this.whereConditions);
+    const connection = await this.source.getConnection();
+    try {
+      return await connection.execute(deleteQuery);
     } finally {
       await connection.close();
     }

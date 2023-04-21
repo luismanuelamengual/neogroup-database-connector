@@ -1,4 +1,5 @@
 import { BasicCondition, Condition, ConditionConnector, ConditionGroup, RawCondition } from '../conditions';
+import { DeleteQuery } from '../delete-query';
 import { BasicField, Field, FunctionField, RawField, SelectField } from '../fields';
 import { InsertQuery } from '../insert-query';
 import { Join, JoinType } from '../joins';
@@ -59,6 +60,8 @@ export class DefaultQueryBuilder extends QueryBuilder {
       this.buildInsertQuery(query, statement);
     } else if (query instanceof UpdateQuery) {
       this.buildUpdateQuery(query, statement);
+    } else if (query instanceof DeleteQuery) {
+      this.buildDeleteQuery(query, statement);
     }
     return statement;
   }
@@ -171,6 +174,21 @@ export class DefaultQueryBuilder extends QueryBuilder {
       this.buildValue(fields[fieldName], statement);
       isFirst = false;
     }
+    const whereConditions = query.getWhereConditions();
+    if (whereConditions && whereConditions.getConditionsCount() > 0) {
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.WHERE;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      this.buildConditionGroup(whereConditions, statement);
+    }
+  }
+
+  protected buildDeleteQuery(query: DeleteQuery, statement: Statement) {
+    statement.sql += DefaultQueryBuilder.DELETE;
+    statement.sql += DefaultQueryBuilder.SPACE;
+    statement.sql += DefaultQueryBuilder.FROM;
+    statement.sql += DefaultQueryBuilder.SPACE;
+    this.buildTableName(query.getTableName(), statement);
     const whereConditions = query.getWhereConditions();
     if (whereConditions && whereConditions.getConditionsCount() > 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
