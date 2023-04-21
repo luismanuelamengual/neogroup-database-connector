@@ -115,6 +115,20 @@ export class DefaultQueryBuilder extends QueryBuilder {
       statement.sql += DefaultQueryBuilder.SPACE;
       this.buildConditionGroup(whereConditions, statement);
     }
+
+    if (query.getOffset() >= 0) {
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.OFFSET;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += query.getOffset();
+    }
+
+    if (query.getLimit() >= 0) {
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.LIMIT;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += query.getLimit();
+    }
   }
 
   protected buildInsertQuery(query: InsertQuery, statement: Statement) {

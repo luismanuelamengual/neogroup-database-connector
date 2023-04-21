@@ -1,6 +1,6 @@
 import { DataSet } from './data-set';
 import { DataSource } from './data-source';
-import { DeleteQuery, HasDistinct, HasFieldValues, HasJoins, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
+import { DeleteQuery, HasDistinct, HasFieldValues, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
 import { applyMixins } from './utilities';
 
 export class DataTable {
@@ -15,6 +15,8 @@ export class DataTable {
     const selectQuery = new SelectQuery();
     selectQuery.setTableName(this.tableName);
     selectQuery.setDistinct(this.distinct);
+    selectQuery.setLimit(this.limit);
+    selectQuery.setOffset(this.offset);
     selectQuery.setFieldValues(this.fieldValues);
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);
@@ -68,6 +70,8 @@ export class DataTable {
 
 export interface DataTable extends
   HasDistinct<DataTable>,
+  HasLimit<DataTable>,
+  HasOffset<DataTable>,
   HasFieldValues<DataTable>,
   HasSelectFields<DataTable>,
   HasTable<DataTable>,
@@ -76,6 +80,8 @@ export interface DataTable extends
   HasJoins<DataTable> {}
 applyMixins(DataTable, [
   HasDistinct,
+  HasLimit,
+  HasOffset,
   HasFieldValues,
   HasSelectFields,
   HasTable,
