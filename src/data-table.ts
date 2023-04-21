@@ -30,6 +30,26 @@ export class DataTable {
     }
   }
 
+  public async first(): Promise<DataSet | null> {
+    const selectQuery = new SelectQuery();
+    selectQuery.setTableName(this.tableName);
+    selectQuery.setDistinct(this.distinct);
+    selectQuery.setLimit(1);
+    selectQuery.setOffset(this.offset);
+    selectQuery.setFieldValues(this.fieldValues);
+    selectQuery.setSelectFields(this.selectFields);
+    selectQuery.setTableAlias(this.tableAlias);
+    selectQuery.setWhereConditions(this.whereConditions);
+    selectQuery.setJoins(this.joins);
+    const connection = await this.source.getConnection();
+    try {
+      const records = await connection.query(selectQuery);
+      return records && records.length > 0 ? records[0] : null;
+    } finally {
+      await connection.close();
+    }
+  }
+
   public async insert(): Promise<number> {
     const insertQuery = new InsertQuery();
     insertQuery.setTableName(this.tableName);
