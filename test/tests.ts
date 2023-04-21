@@ -1,20 +1,20 @@
 import { PostgresDataSource, getTable, registerSource } from '../src';
 
+// Add support for "dotenv"
+require('dotenv').config();
+
+// Registering the postgres data source();
 const source = new PostgresDataSource();
-source.setHost('localhost');
-source.setDatabaseName('postgres');
-source.setUsername('postgres');
-source.setPassword('postgres');
+source.setHost(String(process.env.POSTGRES_SOURCE_HOST));
+source.setDatabaseName(String(process.env.POSTGRES_SOURCE_DATABASE_NAME));
+source.setUsername(String(process.env.POSTGRES_SOURCE_USERNAME));
+source.setPassword(String(process.env.POSTGRES_SOURCE_PASSWORD));
 source.setDebugEnabled(true);
 registerSource(source);
 
 async function executeBasicTest() {
-  const response = await getTable('users').find();
-  console.log(response);
-  const response2 = await getTable('users').where('username', 'Neo').find();
-  console.log(response2);
+  const users = await getTable('users').find();
+  console.log(users);
 }
 
 executeBasicTest();
-
-
