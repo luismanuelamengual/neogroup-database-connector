@@ -1,29 +1,29 @@
-import {Condition} from './condition';
+import { Condition } from './condition';
 
 export class RawCondition extends Condition {
 
-    private sql: string;
-    private bindings: Array<any>;
+  private sql: string;
+  private bindings: Array<any>;
 
-    constructor(sql: string, bindings?: Array<any>) {
-        super();
-        this.sql = sql;
-        this.bindings = bindings;
-    }
+  constructor(sql: string, bindings?: Array<any>) {
+    super();
+    this.sql = sql;
+    this.bindings = bindings;
+  }
 
-    public setSql(sql: string) {
-        this.sql = sql;
-    }
+  public setSql(sql: string) {
+    this.sql = sql;
+  }
 
-    public getSql(): string {
-        return this.sql;
-    }
+  public getSql(): string {
+    return this.sql;
+  }
 
-    public setBindings(bindings: Array<any>) {
-        this.bindings = bindings;
-    }
+  public setBindings(bindings: Array<any>) {
+    this.bindings = bindings;
+  }
 
-    public getBindings(): Array<any> {
-        return this.bindings;
-    }
+  public getBindings(): Array<any> {
+    return this.bindings;
+  }
 }

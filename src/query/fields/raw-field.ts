@@ -1,18 +1,18 @@
-import {Field} from './field';
+import { Field } from './field';
 
 export class RawField extends Field {
-    private sql: string;
+  private sql: string;
 
-    constructor(sql: string) {
-        super();
-        this.sql = sql;
-    }
+  constructor(sql: string) {
+    super();
+    this.sql = sql;
+  }
 
-    public setSql(sql: string) {
-        this.sql = sql;
-    }
+  public setSql(sql: string) {
+    this.sql = sql;
+  }
 
-    public getSql(): string {
-        return this.sql;
-    }
+  public getSql(): string {
+    return this.sql;
+  }
 }

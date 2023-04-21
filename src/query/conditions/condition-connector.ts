@@ -1,4 +1,4 @@
 export enum ConditionConnector {
-    AND,
-    OR
+  AND,
+  OR
 }

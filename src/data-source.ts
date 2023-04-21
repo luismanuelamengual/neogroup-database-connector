@@ -1,45 +1,45 @@
-import {DataTable} from './data-table';
-import {QueryBuilder, DefaultQueryBuilder} from './query';
-import {Connection} from './connection';
-import {DataConnection} from './data-connection';
+import { Connection } from './connection';
+import { DataConnection } from './data-connection';
+import { DataTable } from './data-table';
+import { DefaultQueryBuilder, QueryBuilder } from './query';
 
 export abstract class DataSource {
 
-    protected debug = false;
-    protected readonly = false;
-    protected queryBuilder: QueryBuilder;
-    
-    constructor(queryBuilder?: QueryBuilder) {
-        this.queryBuilder = queryBuilder ?? (new DefaultQueryBuilder());
-    }
+  protected debug = false;
+  protected readonly = false;
+  protected queryBuilder: QueryBuilder;
 
-    public setDebugEnabled(debug: boolean) {
-        this.debug = debug;
-    }
+  constructor(queryBuilder?: QueryBuilder) {
+    this.queryBuilder = queryBuilder ?? (new DefaultQueryBuilder());
+  }
 
-    public isDebugEnabled(): boolean {
-        return this.debug;
-    }
+  public setDebugEnabled(debug: boolean) {
+    this.debug = debug;
+  }
 
-    public setReadonly(readonly: boolean) {
-        this.readonly = readonly;
-    }
+  public isDebugEnabled(): boolean {
+    return this.debug;
+  }
 
-    public isReadonly(): boolean {
-        return this.readonly;
-    }
+  public setReadonly(readonly: boolean) {
+    this.readonly = readonly;
+  }
 
-    public getTable(tableName: string): DataTable {
-        return new DataTable(this, tableName);
-    }
+  public isReadonly(): boolean {
+    return this.readonly;
+  }
 
-    public async getConnection(): Promise<DataConnection> {
-        const connection = new DataConnection(await this.requestConnection(), this.queryBuilder);
-        connection.setDebugEnabled(this.debug);
-        connection.setReadonly(this.readonly);
-        return connection;
-    }
+  public getTable(tableName: string): DataTable {
+    return new DataTable(this, tableName);
+  }
 
-    protected abstract requestConnection(): Promise<Connection>;
-    public abstract close(): Promise<void>;
+  public async getConnection(): Promise<DataConnection> {
+    const connection = new DataConnection(await this.requestConnection(), this.queryBuilder);
+    connection.setDebugEnabled(this.debug);
+    connection.setReadonly(this.readonly);
+    return connection;
+  }
+
+  protected abstract requestConnection(): Promise<Connection>;
+  public abstract close(): Promise<void>;
 }
