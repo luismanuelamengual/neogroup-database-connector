@@ -1,37 +1,37 @@
-import {Connection} from '../../connection';
-import {DataSet} from '../../data-set';
+import { Connection } from '../../connection';
+import { DataSet } from '../../data-set';
 
 export class PostgresConnection implements Connection {
-    
-    private client: any;
 
-    constructor(client: any) {
-        this.client = client;
-    }
+  private client: any;
 
-    public async query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>> {
-        const response = await this.client.query(sql, bindings);
-        return response.rows;
-    }
+  constructor(client: any) {
+    this.client = client;
+  }
 
-    public async execute(sql: string, bindings?: Array<any>): Promise<number> {
-        const response = await this.client.query(sql, bindings);
-        return response.rowCount;
-    }
+  public async query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>> {
+    const response = await this.client.query(sql, bindings);
+    return response.rows;
+  }
 
-    public async beginTransaction(): Promise<void> {
-        await this.client.query('BEGIN');
-    }
+  public async execute(sql: string, bindings?: Array<any>): Promise<number> {
+    const response = await this.client.query(sql, bindings);
+    return response.rowCount;
+  }
 
-    public async rollbackTransaction(): Promise<void> {
-        await this.client.query('ROLLBACK');
-    }
+  public async beginTransaction(): Promise<void> {
+    await this.client.query('BEGIN');
+  }
 
-    public async commitTransaction(): Promise<void> {
-        await this.client.query('COMMIT');
-    }
+  public async rollbackTransaction(): Promise<void> {
+    await this.client.query('ROLLBACK');
+  }
 
-    public async close(): Promise<void> {
-        await this.client.release();
-    }
+  public async commitTransaction(): Promise<void> {
+    await this.client.query('COMMIT');
+  }
+
+  public async close(): Promise<void> {
+    await this.client.release();
+  }
 }
