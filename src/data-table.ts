@@ -20,7 +20,7 @@ export class DataTable {
     selectQuery.setOffset(this.offset);
     selectQuery.setOrderByFields(this.orderByFields);
     selectQuery.setGroupByFields(this.groupByFields);
-    selectQuery.setFieldValues(this.fieldValues);
+    selectQuery.fields(this._fields);
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);
     selectQuery.setWhereConditions(this.whereConditions);
@@ -42,7 +42,7 @@ export class DataTable {
     selectQuery.setOffset(this.offset);
     selectQuery.setOrderByFields(this.orderByFields);
     selectQuery.setGroupByFields(this.groupByFields);
-    selectQuery.setFieldValues(this.fieldValues);
+    selectQuery.fields(this._fields);
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);
     selectQuery.setWhereConditions(this.whereConditions);
@@ -60,7 +60,7 @@ export class DataTable {
   public async insert(): Promise<number> {
     const insertQuery = new InsertQuery();
     insertQuery.setTableName(this.tableName);
-    insertQuery.setFieldValues(this.fieldValues);
+    insertQuery.fields(this._fields);
     const connection = await this.source.getConnection();
     try {
       return await connection.execute(insertQuery);
@@ -72,7 +72,7 @@ export class DataTable {
   public async update(): Promise<number> {
     const updateQuery = new UpdateQuery();
     updateQuery.setTableName(this.tableName);
-    updateQuery.setFieldValues(this.fieldValues);
+    updateQuery.fields(this._fields);
     updateQuery.setWhereConditions(this.whereConditions);
     const connection = await this.source.getConnection();
     try {

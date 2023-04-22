@@ -2,30 +2,32 @@ import { DataSet } from '../../data-set';
 
 export abstract class HasFieldValues<R> {
 
-  protected fieldValues: DataSet;
+  protected _fields: DataSet;
 
-  public setFieldValues(fieldValues: DataSet): R {
-    this.fieldValues = fieldValues;
-    return this as unknown as R;
-  }
-
-  public getFieldValues(): DataSet{
-    return this.fieldValues;
+  public fields(fields: DataSet): R;
+  public fields(): DataSet;
+  public fields(fields?: DataSet): R | DataSet {
+    if (fields != undefined) {
+      this._fields = fields;
+      return this as unknown as R;
+    } else {
+      return this._fields;
+    }
   }
 
   public set(field: string, value: any): R {
-    if (!this.fieldValues) {
-      this.fieldValues = {};
+    if (!this._fields) {
+      this._fields = {};
     }
-    this.fieldValues[field] = value;
+    this._fields[field] = value;
     return this as unknown as R;
   }
 
   public get(field: string): any {
-    return this.fieldValues && this.fieldValues[field];
+    return this._fields && this._fields[field];
   }
 
   public has(field: string): boolean {
-    return this.fieldValues && field in this.fieldValues;
+    return this._fields && field in this._fields;
   }
 }

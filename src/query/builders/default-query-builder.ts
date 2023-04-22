@@ -183,7 +183,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     this.buildTableName(query.getTableName(), statement);
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
-    const fields = query.getFieldValues();
+    const fields = query.fields();
     let isFirst = true;
     for (const fieldName in fields) {
       if (!isFirst) {
@@ -218,7 +218,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.SET;
     statement.sql += DefaultQueryBuilder.SPACE;
-    const fields = query.getFieldValues();
+    const fields = query.fields();
     let isFirst = true;
     for (const fieldName in fields) {
       if (!isFirst) {
