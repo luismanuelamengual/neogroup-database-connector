@@ -1,5 +1,6 @@
 export * from './has-distinct';
 export * from './has-field-values';
+export * from './has-group-by';
 export * from './has-joins';
 export * from './has-limit';
 export * from './has-offset';

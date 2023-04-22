@@ -10,7 +10,7 @@ export class BasicField extends Field {
     super();
     if (arguments.length == 1) {
       const value = arguments[0];
-      const valueParts = value.split('\.');
+      const valueParts = value.split('.');
       if (valueParts.length > 1) {
         this.table = valueParts[0];
         this.name = valueParts[1];

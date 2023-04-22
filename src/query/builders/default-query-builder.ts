@@ -116,6 +116,24 @@ export class DefaultQueryBuilder extends QueryBuilder {
       this.buildConditionGroup(whereConditions, statement);
     }
 
+    const groupByFields = query.getGroupByFields();
+    if (groupByFields && groupByFields.length > 0) {
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.GROUP;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.BY;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      let isFirst = true;
+      for (const field of groupByFields) {
+        if (!isFirst) {
+          statement.sql += DefaultQueryBuilder.COMMA;
+          statement.sql += DefaultQueryBuilder.SPACE;
+        }
+        this.buildField(field, statement);
+        isFirst = false;
+      }
+    }
+
     if (query.getOffset() >= 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.OFFSET;
