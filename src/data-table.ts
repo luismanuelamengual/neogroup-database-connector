@@ -1,6 +1,6 @@
 import { DataSet } from './data-set';
 import { DataSource } from './data-source';
-import { DeleteQuery, HasDistinct, HasFieldValues, HasGroupByFields, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
+import { DeleteQuery, HasDistinct, HasFieldValues, HasGroupByFields, HasHavingConditions, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
 import { HasOrderByFields } from './query/features/has-order-by-fields';
 import { applyMixins } from './utilities';
 
@@ -24,6 +24,7 @@ export class DataTable {
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);
     selectQuery.setWhereConditions(this.whereConditions);
+    selectQuery.setHavingConditions(this.havingConditions);
     selectQuery.setJoins(this.joins);
     const connection = await this.source.getConnection();
     try {
@@ -39,10 +40,13 @@ export class DataTable {
     selectQuery.setDistinct(this.distinct);
     selectQuery.setLimit(1);
     selectQuery.setOffset(this.offset);
+    selectQuery.setOrderByFields(this.orderByFields);
+    selectQuery.setGroupByFields(this.groupByFields);
     selectQuery.setFieldValues(this.fieldValues);
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);
     selectQuery.setWhereConditions(this.whereConditions);
+    selectQuery.setHavingConditions(this.havingConditions);
     selectQuery.setJoins(this.joins);
     const connection = await this.source.getConnection();
     try {
@@ -102,6 +106,7 @@ export interface DataTable extends
   HasTable<DataTable>,
   HasTableAlias<DataTable>,
   HasWhereConditions<DataTable>,
+  HasHavingConditions<DataTable>,
   HasJoins<DataTable> {}
 applyMixins(DataTable, [
   HasDistinct,
@@ -114,5 +119,6 @@ applyMixins(DataTable, [
   HasTable,
   HasTableAlias,
   HasWhereConditions,
+  HasHavingConditions,
   HasJoins
 ]);

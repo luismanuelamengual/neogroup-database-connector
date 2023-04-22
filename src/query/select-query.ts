@@ -1,5 +1,5 @@
 import { applyMixins } from '../utilities';
-import { HasDistinct, HasFieldValues, HasGroupByFields, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions } from './features';
+import { HasDistinct, HasFieldValues, HasGroupByFields, HasHavingConditions, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions } from './features';
 import { HasOrderByFields } from './features/has-order-by-fields';
 import { Query } from './query';
 
@@ -17,6 +17,7 @@ export interface SelectQuery extends
   HasOffset<SelectQuery>,
   HasOrderByFields<SelectQuery>,
   HasGroupByFields<SelectQuery>,
+  HasHavingConditions<SelectQuery>,
   HasFieldValues<SelectQuery>,
   HasSelectFields<SelectQuery>,
   HasTable<SelectQuery>,
@@ -29,6 +30,7 @@ applyMixins(SelectQuery, [
   HasOffset,
   HasOrderByFields,
   HasGroupByFields,
+  HasHavingConditions,
   HasFieldValues,
   HasSelectFields,
   HasTable,

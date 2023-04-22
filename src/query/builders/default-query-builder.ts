@@ -134,6 +134,14 @@ export class DefaultQueryBuilder extends QueryBuilder {
       }
     }
 
+    const havingConditions = query.getHavingConditions();
+    if (havingConditions && havingConditions.getConditionsCount() > 0) {
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.HAVING;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      this.buildConditionGroup(havingConditions, statement);
+    }
+
     const orderByFields = query.getOrderByFields();
     if (orderByFields && orderByFields.length > 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
