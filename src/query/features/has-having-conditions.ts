@@ -3,23 +3,17 @@ import { Field } from '../fields';
 
 export abstract class HasHavingConditions<R> {
 
-  protected havingConditions: ConditionGroup;
+  protected _havingConditions: ConditionGroup;
 
-  public setHavingConditions(conditions: ConditionGroup): R {
-    this.havingConditions = conditions;
-    return this as unknown as R;
-  }
-
-  public getHavingConditions(): ConditionGroup {
-    if (!this.havingConditions) {
-      this.havingConditions = new ConditionGroup();
+  public havingConditions(conditions: ConditionGroup): R;
+  public havingConditions(): ConditionGroup;
+  public havingConditions(conditions?: ConditionGroup): R | ConditionGroup {
+    if (conditions != undefined) {
+      this._havingConditions = conditions;
+      return this as unknown as R;
+    } else {
+      return this._havingConditions;
     }
-    return this.havingConditions;
-  }
-
-  public clearHavingConditions(): R {
-    this.getHavingConditions().clearConditions();
-    return this as unknown as R;
   }
 
   public having(sql: string): R;
@@ -33,7 +27,7 @@ export abstract class HasHavingConditions<R> {
   public having(field: {name: string, table?: string, functionName?: string}, operator: string, value: any): R;
   public having(): R {
     // @ts-ignore
-    this.getHavingConditions().with(...arguments);
+    this.havingConditions().with(...arguments);
     return this as unknown as R;
   }
 
@@ -48,7 +42,7 @@ export abstract class HasHavingConditions<R> {
   public orHaving(field: {name: string, table?: string, functionName?: string}, operator: string, value: any): R;
   public orHaving(): R {
     // @ts-ignore
-    this.getHavingConditions().orWith(...arguments);
+    this.havingConditions().orWith(...arguments);
     return this as unknown as R;
   }
 }

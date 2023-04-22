@@ -24,7 +24,7 @@ export class DataTable {
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);
     selectQuery.setWhereConditions(this.whereConditions);
-    selectQuery.setHavingConditions(this.havingConditions);
+    selectQuery.havingConditions(this._havingConditions);
     selectQuery.setJoins(this.joins);
     const connection = await this.source.getConnection();
     try {
@@ -46,7 +46,7 @@ export class DataTable {
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);
     selectQuery.setWhereConditions(this.whereConditions);
-    selectQuery.setHavingConditions(this.havingConditions);
+    selectQuery.havingConditions(this._havingConditions);
     selectQuery.setJoins(this.joins);
     const connection = await this.source.getConnection();
     try {

@@ -134,7 +134,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
       }
     }
 
-    const havingConditions = query.getHavingConditions();
+    const havingConditions = query.havingConditions();
     if (havingConditions && havingConditions.getConditionsCount() > 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.HAVING;
