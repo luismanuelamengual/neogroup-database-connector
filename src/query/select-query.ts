@@ -1,5 +1,5 @@
 import { applyMixins } from '../utilities';
-import { HasDistinct, HasFieldValues, HasGroupByFields, HasHavingConditions, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions } from './features';
+import { HasAlias, HasDistinct, HasFieldValues, HasGroupByFields, HasHavingConditions, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasWhereConditions } from './features';
 import { HasOrderByFields } from './features/has-order-by-fields';
 import { Query } from './query';
 
@@ -7,7 +7,7 @@ export class SelectQuery extends Query {
 
   constructor (tableName?: string) {
     super();
-    this.setTableName(tableName);
+    this.setTable(tableName);
   }
 }
 
@@ -21,7 +21,7 @@ export interface SelectQuery extends
   HasFieldValues<SelectQuery>,
   HasSelectFields<SelectQuery>,
   HasTable<SelectQuery>,
-  HasTableAlias<SelectQuery>,
+  HasAlias<SelectQuery>,
   HasWhereConditions<SelectQuery>,
   HasJoins<SelectQuery> {}
 applyMixins(SelectQuery, [
@@ -34,7 +34,7 @@ applyMixins(SelectQuery, [
   HasFieldValues,
   HasSelectFields,
   HasTable,
-  HasTableAlias,
+  HasAlias,
   HasWhereConditions,
   HasJoins
 ]);

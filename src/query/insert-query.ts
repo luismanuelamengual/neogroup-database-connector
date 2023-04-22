@@ -6,7 +6,7 @@ export class InsertQuery extends Query {
 
   constructor (tableName?: string) {
     super();
-    this.setTableName(tableName);
+    this.setTable(tableName);
   }
 }
 

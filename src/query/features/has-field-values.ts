@@ -4,15 +4,13 @@ export abstract class HasFieldValues<R> {
 
   protected _fields: DataSet;
 
-  public fields(fields: DataSet): R;
-  public fields(): DataSet;
-  public fields(fields?: DataSet): R | DataSet {
-    if (fields != undefined) {
-      this._fields = fields;
-      return this as unknown as R;
-    } else {
-      return this._fields;
-    }
+  public setFields(fields: DataSet): R {
+    this._fields = fields;
+    return this as unknown as R;
+  }
+
+  public getFields(): DataSet {
+    return this._fields;
   }
 
   public set(field: string, value: any): R {

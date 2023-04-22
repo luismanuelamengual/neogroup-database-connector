@@ -68,7 +68,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
 
   protected buildSelectQuery(query: SelectQuery, statement: Statement) {
     statement.sql = DefaultQueryBuilder.SELECT;
-    if (query.distinct()) {
+    if (query.isDistinct()) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.DISTINCT;
     }
@@ -90,9 +90,9 @@ export class DefaultQueryBuilder extends QueryBuilder {
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.FROM;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildTableName(query.getTableName(), statement);
+    this.buildTableName(query.getTable(), statement);
 
-    const tableAlias = query.getTableAlias();
+    const tableAlias = query.getAlias();
     if (tableAlias != null) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.AS;
@@ -116,7 +116,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
       this.buildConditionGroup(whereConditions, statement);
     }
 
-    const groupByFields = query.groupByFields();
+    const groupByFields = query.getGroupByFields();
     if (groupByFields && groupByFields.length > 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.GROUP;
@@ -134,7 +134,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
       }
     }
 
-    const havingConditions = query.havingConditions();
+    const havingConditions = query.getHavingConditions();
     if (havingConditions && havingConditions.getConditionsCount() > 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.HAVING;
@@ -180,10 +180,10 @@ export class DefaultQueryBuilder extends QueryBuilder {
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.INTO;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildTableName(query.getTableName(), statement);
+    this.buildTableName(query.getTable(), statement);
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
-    const fields = query.fields();
+    const fields = query.getFields();
     let isFirst = true;
     for (const fieldName in fields) {
       if (!isFirst) {
@@ -214,11 +214,11 @@ export class DefaultQueryBuilder extends QueryBuilder {
   protected buildUpdateQuery(query: UpdateQuery, statement: Statement) {
     statement.sql += DefaultQueryBuilder.UPDATE;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildTableName(query.getTableName(), statement);
+    this.buildTableName(query.getTable(), statement);
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.SET;
     statement.sql += DefaultQueryBuilder.SPACE;
-    const fields = query.fields();
+    const fields = query.getFields();
     let isFirst = true;
     for (const fieldName in fields) {
       if (!isFirst) {
@@ -246,7 +246,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.FROM;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildTableName(query.getTableName(), statement);
+    this.buildTableName(query.getTable(), statement);
     const whereConditions = query.getWhereConditions();
     if (whereConditions && whereConditions.getConditionsCount() > 0) {
       statement.sql += DefaultQueryBuilder.SPACE;

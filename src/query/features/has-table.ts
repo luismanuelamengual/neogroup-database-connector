@@ -1,14 +1,18 @@
 
 export abstract class HasTable<R> {
 
-  protected tableName: string = '';
+  protected _table: string = '';
 
-  public setTableName(tableName: string): R {
-    this.tableName = tableName;
+  public setTable(table: string): R {
+    this._table = table;
     return this as unknown as R;
   }
 
-  public getTableName(): string {
-    return this.tableName;
+  public getTable(): string {
+    return this._table;
+  }
+
+  public table(table: string): R {
+    return this.setTable(table);
   }
 }

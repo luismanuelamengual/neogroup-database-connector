@@ -5,15 +5,13 @@ export abstract class HasHavingConditions<R> {
 
   protected _havingConditions: ConditionGroup;
 
-  public havingConditions(conditions: ConditionGroup): R;
-  public havingConditions(): ConditionGroup;
-  public havingConditions(conditions?: ConditionGroup): R | ConditionGroup {
-    if (conditions != undefined) {
-      this._havingConditions = conditions;
-      return this as unknown as R;
-    } else {
-      return this._havingConditions;
-    }
+  public setHavingConditions(conditions: ConditionGroup): R {
+    this._havingConditions = conditions;
+    return this as unknown as R;
+  }
+
+  public getHavingConditions(): ConditionGroup {
+    return this._havingConditions;
   }
 
   public having(sql: string): R;
@@ -27,7 +25,7 @@ export abstract class HasHavingConditions<R> {
   public having(field: {name: string, table?: string, functionName?: string}, operator: string, value: any): R;
   public having(): R {
     // @ts-ignore
-    this.havingConditions().with(...arguments);
+    this.getHavingConditions().with(...arguments);
     return this as unknown as R;
   }
 
@@ -42,7 +40,7 @@ export abstract class HasHavingConditions<R> {
   public orHaving(field: {name: string, table?: string, functionName?: string}, operator: string, value: any): R;
   public orHaving(): R {
     // @ts-ignore
-    this.havingConditions().orWith(...arguments);
+    this.getHavingConditions().orWith(...arguments);
     return this as unknown as R;
   }
 }

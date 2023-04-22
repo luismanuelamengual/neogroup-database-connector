@@ -2,11 +2,19 @@ import { SelectField } from '../fields/select-field';
 
 export abstract class HasSelectFields<R> {
 
-  protected selectFields: Array<SelectField>;
+  protected _selectFields: Array<SelectField>;
+
+  public setSelectFields(selectFields: Array<SelectField>) {
+    this._selectFields = selectFields;
+  }
+
+  public getSelectFields(): Array<SelectField> {
+    return this._selectFields;
+  }
 
   public select(...fields: Array<SelectField | string | {name: string, table?: string, functionName?: string, alias?: string}>): R {
-    if (!this.selectFields) {
-      this.selectFields = [];
+    if (!this._selectFields) {
+      this._selectFields = [];
     }
     for (const field of fields) {
       let selectField: SelectField;
@@ -26,21 +34,8 @@ export abstract class HasSelectFields<R> {
           selectField.setAlias(field.alias);
         }
       }
-      this.selectFields.push(selectField);
+      this._selectFields.push(selectField);
     }
-    return this as unknown as R;
-  }
-
-  public setSelectFields(selectFields: Array<SelectField>) {
-    this.selectFields = selectFields;
-  }
-
-  public getSelectFields(): Array<SelectField> {
-    return this.selectFields;
-  }
-
-  public clearSelectFields(): R {
-    this.selectFields = [];
     return this as unknown as R;
   }
 }

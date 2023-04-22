@@ -3,17 +3,17 @@ import { Join, JoinType } from '../joins';
 
 export abstract class HasJoins<R> {
 
-  protected joins: Array<Join>;
+  protected _joins: Array<Join>;
 
   public getJoins(): Array<Join> {
-    if (!this.joins) {
-      this.joins = [];
+    if (!this._joins) {
+      this._joins = [];
     }
-    return this.joins;
+    return this._joins;
   }
 
   public setJoins(joins: Array<Join>): R {
-    this.joins = joins;
+    this._joins = joins;
     return this as unknown as R;
   }
 

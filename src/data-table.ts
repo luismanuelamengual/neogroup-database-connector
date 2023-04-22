@@ -1,6 +1,6 @@
 import { DataSet } from './data-set';
 import { DataSource } from './data-source';
-import { DeleteQuery, HasDistinct, HasFieldValues, HasGroupByFields, HasHavingConditions, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasTableAlias, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
+import { DeleteQuery, HasAlias, HasDistinct, HasFieldValues, HasGroupByFields, HasHavingConditions, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasWhereConditions, InsertQuery, SelectQuery, UpdateQuery } from './query';
 import { HasOrderByFields } from './query/features/has-order-by-fields';
 import { applyMixins } from './utilities';
 
@@ -9,23 +9,23 @@ export class DataTable {
 
   constructor(source: DataSource, name: string) {
     this.source = source;
-    this.setTableName(name);
+    this.setTable(name);
   }
 
   public async find(): Promise<Array<DataSet>> {
     const selectQuery = new SelectQuery();
-    selectQuery.setTableName(this.tableName);
-    selectQuery.distinct(this._distinct);
-    selectQuery.setLimit(this.limit);
-    selectQuery.setOffset(this.offset);
-    selectQuery.setOrderByFields(this.orderByFields);
-    selectQuery.groupByFields(this._groupByFields);
-    selectQuery.fields(this._fields);
-    selectQuery.setSelectFields(this.selectFields);
-    selectQuery.setTableAlias(this.tableAlias);
-    selectQuery.setWhereConditions(this.whereConditions);
-    selectQuery.havingConditions(this._havingConditions);
-    selectQuery.setJoins(this.joins);
+    selectQuery.setTable(this._table);
+    selectQuery.setDistinct(this._distinct);
+    selectQuery.setLimit(this._limit);
+    selectQuery.setOffset(this._offset);
+    selectQuery.setOrderByFields(this._orderByFields);
+    selectQuery.setGroupByFields(this._groupByFields);
+    selectQuery.setFields(this._fields);
+    selectQuery.setSelectFields(this._selectFields);
+    selectQuery.setAlias(this._alias);
+    selectQuery.setWhereConditions(this._whereConditions);
+    selectQuery.setHavingConditions(this._havingConditions);
+    selectQuery.setJoins(this._joins);
     const connection = await this.source.getConnection();
     try {
       return await connection.query(selectQuery);
@@ -36,18 +36,18 @@ export class DataTable {
 
   public async first(): Promise<DataSet | null> {
     const selectQuery = new SelectQuery();
-    selectQuery.setTableName(this.tableName);
-    selectQuery.distinct(this._distinct);
+    selectQuery.setTable(this._table);
+    selectQuery.setDistinct(this._distinct);
     selectQuery.setLimit(1);
-    selectQuery.setOffset(this.offset);
-    selectQuery.setOrderByFields(this.orderByFields);
-    selectQuery.groupByFields(this._groupByFields);
-    selectQuery.fields(this._fields);
-    selectQuery.setSelectFields(this.selectFields);
-    selectQuery.setTableAlias(this.tableAlias);
-    selectQuery.setWhereConditions(this.whereConditions);
-    selectQuery.havingConditions(this._havingConditions);
-    selectQuery.setJoins(this.joins);
+    selectQuery.setOffset(this._offset);
+    selectQuery.setOrderByFields(this._orderByFields);
+    selectQuery.setGroupByFields(this._groupByFields);
+    selectQuery.setFields(this._fields);
+    selectQuery.setSelectFields(this._selectFields);
+    selectQuery.setAlias(this._alias);
+    selectQuery.setWhereConditions(this._whereConditions);
+    selectQuery.setHavingConditions(this._havingConditions);
+    selectQuery.setJoins(this._joins);
     const connection = await this.source.getConnection();
     try {
       const records = await connection.query(selectQuery);
@@ -59,8 +59,8 @@ export class DataTable {
 
   public async insert(): Promise<number> {
     const insertQuery = new InsertQuery();
-    insertQuery.setTableName(this.tableName);
-    insertQuery.fields(this._fields);
+    insertQuery.setTable(this._table);
+    insertQuery.setFields(this._fields);
     const connection = await this.source.getConnection();
     try {
       return await connection.execute(insertQuery);
@@ -71,9 +71,9 @@ export class DataTable {
 
   public async update(): Promise<number> {
     const updateQuery = new UpdateQuery();
-    updateQuery.setTableName(this.tableName);
-    updateQuery.fields(this._fields);
-    updateQuery.setWhereConditions(this.whereConditions);
+    updateQuery.setTable(this._table);
+    updateQuery.setFields(this._fields);
+    updateQuery.setWhereConditions(this._whereConditions);
     const connection = await this.source.getConnection();
     try {
       return await connection.execute(updateQuery);
@@ -84,8 +84,8 @@ export class DataTable {
 
   public async delete(): Promise<number> {
     const deleteQuery = new DeleteQuery();
-    deleteQuery.setTableName(this.tableName);
-    deleteQuery.setWhereConditions(this.whereConditions);
+    deleteQuery.setTable(this._table);
+    deleteQuery.setWhereConditions(this._whereConditions);
     const connection = await this.source.getConnection();
     try {
       return await connection.execute(deleteQuery);
@@ -104,7 +104,7 @@ export interface DataTable extends
   HasFieldValues<DataTable>,
   HasSelectFields<DataTable>,
   HasTable<DataTable>,
-  HasTableAlias<DataTable>,
+  HasAlias<DataTable>,
   HasWhereConditions<DataTable>,
   HasHavingConditions<DataTable>,
   HasJoins<DataTable> {}
@@ -117,7 +117,7 @@ applyMixins(DataTable, [
   HasFieldValues,
   HasSelectFields,
   HasTable,
-  HasTableAlias,
+  HasAlias,
   HasWhereConditions,
   HasHavingConditions,
   HasJoins
