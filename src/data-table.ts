@@ -19,7 +19,7 @@ export class DataTable {
     selectQuery.setLimit(this.limit);
     selectQuery.setOffset(this.offset);
     selectQuery.setOrderByFields(this.orderByFields);
-    selectQuery.setGroupByFields(this.groupByFields);
+    selectQuery.groupByFields(this._groupByFields);
     selectQuery.fields(this._fields);
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);
@@ -41,7 +41,7 @@ export class DataTable {
     selectQuery.setLimit(1);
     selectQuery.setOffset(this.offset);
     selectQuery.setOrderByFields(this.orderByFields);
-    selectQuery.setGroupByFields(this.groupByFields);
+    selectQuery.groupByFields(this._groupByFields);
     selectQuery.fields(this._fields);
     selectQuery.setSelectFields(this.selectFields);
     selectQuery.setTableAlias(this.tableAlias);

@@ -116,7 +116,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
       this.buildConditionGroup(whereConditions, statement);
     }
 
-    const groupByFields = query.getGroupByFields();
+    const groupByFields = query.groupByFields();
     if (groupByFields && groupByFields.length > 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.GROUP;

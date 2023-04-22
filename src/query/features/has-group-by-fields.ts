@@ -2,11 +2,11 @@ import { BasicField } from '../fields';
 
 export abstract class HasGroupByFields<R> {
 
-  protected groupByFields: Array<BasicField>;
+  protected _groupByFields: Array<BasicField>;
 
   public groupBy(...fields: Array<BasicField | string>): R {
-    if (!this.groupByFields) {
-      this.groupByFields = [];
+    if (!this._groupByFields) {
+      this._groupByFields = [];
     }
     for (const field of fields) {
       let groupByField: BasicField;
@@ -15,21 +15,19 @@ export abstract class HasGroupByFields<R> {
       } else if (typeof field === 'string') {
         groupByField = new BasicField(field);
       }
-      this.groupByFields.push(groupByField);
+      this._groupByFields.push(groupByField);
     }
     return this as unknown as R;
   }
 
-  public setGroupByFields(selectFields: Array<BasicField>) {
-    this.groupByFields = selectFields;
-  }
-
-  public getGroupByFields(): Array<BasicField> {
-    return this.groupByFields;
-  }
-
-  public clearGroupByFields(): R {
-    this.groupByFields = [];
-    return this as unknown as R;
+  public groupByFields(groupByFields: Array<BasicField>): R;
+  public groupByFields(): Array<BasicField>;
+  public groupByFields(groupByFields?: Array<BasicField>): R | Array<BasicField> {
+    if (groupByFields != undefined) {
+      this._groupByFields = groupByFields;
+      return this as unknown as R;
+    } else {
+      return this._groupByFields;
+    }
   }
 }
