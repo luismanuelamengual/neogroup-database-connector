@@ -1,4 +1,4 @@
-import { PostgresDataSource, getTable, registerSource } from '../src';
+import { DB, PostgresDataSource } from '../src';
 
 // Add support for "dotenv"
 require('dotenv').config();
@@ -10,10 +10,10 @@ source.setDatabaseName(String(process.env.POSTGRES_SOURCE_DATABASE_NAME));
 source.setUsername(String(process.env.POSTGRES_SOURCE_USERNAME));
 source.setPassword(String(process.env.POSTGRES_SOURCE_PASSWORD));
 source.setDebugEnabled(true);
-registerSource(source);
+DB.register(source);
 
 async function executeBasicTest() {
-  const users = await getTable('users').find();
+  const users = await DB.table('users').find();
   console.log(users);
 }
 
