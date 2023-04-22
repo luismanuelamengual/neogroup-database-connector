@@ -1,14 +1,16 @@
 
 export abstract class HasDistinct<R> {
 
-  protected distinct: boolean = false;
+  protected _distinct: boolean = false;
 
-  public setDistinct(distinct: boolean): R {
-    this.distinct = distinct;
-    return this as unknown as R;
-  }
-
-  public isDistinct(): boolean {
-    return this.distinct;
+  public distinct(): boolean;
+  public distinct(distinct: boolean): R;
+  public distinct(distinct?: boolean): R | boolean {
+    if (distinct != undefined) {
+      this._distinct = distinct;
+      return this as unknown as R;
+    } else {
+      return this._distinct;
+    }
   }
 }

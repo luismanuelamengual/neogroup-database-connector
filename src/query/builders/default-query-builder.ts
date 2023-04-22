@@ -68,7 +68,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
 
   protected buildSelectQuery(query: SelectQuery, statement: Statement) {
     statement.sql = DefaultQueryBuilder.SELECT;
-    if (query.isDistinct()) {
+    if (query.distinct()) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.DISTINCT;
     }

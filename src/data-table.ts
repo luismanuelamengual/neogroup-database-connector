@@ -15,7 +15,7 @@ export class DataTable {
   public async find(): Promise<Array<DataSet>> {
     const selectQuery = new SelectQuery();
     selectQuery.setTableName(this.tableName);
-    selectQuery.setDistinct(this.distinct);
+    selectQuery.distinct(this._distinct);
     selectQuery.setLimit(this.limit);
     selectQuery.setOffset(this.offset);
     selectQuery.setOrderByFields(this.orderByFields);
@@ -37,7 +37,7 @@ export class DataTable {
   public async first(): Promise<DataSet | null> {
     const selectQuery = new SelectQuery();
     selectQuery.setTableName(this.tableName);
-    selectQuery.setDistinct(this.distinct);
+    selectQuery.distinct(this._distinct);
     selectQuery.setLimit(1);
     selectQuery.setOffset(this.offset);
     selectQuery.setOrderByFields(this.orderByFields);
