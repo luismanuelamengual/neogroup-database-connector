@@ -1,6 +1,6 @@
 import { BasicCondition, Condition, ConditionConnector, ConditionGroup, RawCondition } from '../conditions';
 import { DeleteQuery } from '../delete-query';
-import { BasicField, Field, FunctionField, RawField, SelectField } from '../fields';
+import { BasicField, Field, FunctionField, OrderByField, RawField, SelectField } from '../fields';
 import { InsertQuery } from '../insert-query';
 import { Join, JoinType } from '../joins';
 import { Query } from '../query';
@@ -134,6 +134,24 @@ export class DefaultQueryBuilder extends QueryBuilder {
       }
     }
 
+    const orderByFields = query.getOrderByFields();
+    if (orderByFields && orderByFields.length > 0) {
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.ORDER;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      statement.sql += DefaultQueryBuilder.BY;
+      statement.sql += DefaultQueryBuilder.SPACE;
+      let isFirst = true;
+      for (const field of orderByFields) {
+        if (!isFirst) {
+          statement.sql += DefaultQueryBuilder.COMMA;
+          statement.sql += DefaultQueryBuilder.SPACE;
+        }
+        this.buildField(field, statement);
+        isFirst = false;
+      }
+    }
+
     if (query.getOffset() >= 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.OFFSET;
@@ -252,6 +270,10 @@ export class DefaultQueryBuilder extends QueryBuilder {
         statement.sql += DefaultQueryBuilder.AS;
         statement.sql += DefaultQueryBuilder.SPACE;
         statement.sql += field.getAlias();
+      }
+      if (field instanceof OrderByField) {
+        statement.sql += DefaultQueryBuilder.SPACE;
+        statement.sql += field.getDirection();
       }
     }
   }
