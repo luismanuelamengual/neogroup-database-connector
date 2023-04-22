@@ -22,7 +22,7 @@ export abstract class DB {
   }
 
   public static table(tableName: string): DataTable {
-    return this.activeSource.getTable(tableName);
+    return this.activeSource.table(tableName);
   }
 
   public static connection(): Promise<DataConnection> {

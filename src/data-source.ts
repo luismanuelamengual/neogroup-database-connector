@@ -29,7 +29,7 @@ export abstract class DataSource {
     return this.readonly;
   }
 
-  public getTable(tableName: string): DataTable {
+  public table(tableName: string): DataTable {
     return new DataTable(this, tableName);
   }
 
