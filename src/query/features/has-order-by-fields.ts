@@ -1,4 +1,6 @@
-import { OrderByField } from '../fields';
+export type OrderByDirection = 'ASC' | 'DESC';
+
+export type OrderByField = string | [string, OrderByDirection] | {name: string, table?: string, schema?: string, direction?: OrderByDirection};
 
 export abstract class HasOrderByFields<R> {
 
@@ -12,19 +14,11 @@ export abstract class HasOrderByFields<R> {
     return this._orderByFields;
   }
 
-  public orderBy(...fields: Array<OrderByField | string>): R {
+  public orderBy(...fields: Array<OrderByField>): R {
     if (!this._orderByFields) {
       this._orderByFields = [];
     }
-    for (const field of fields) {
-      let orderByField: OrderByField;
-      if (field instanceof OrderByField) {
-        orderByField = field;
-      } else if (typeof field === 'string') {
-        orderByField = new OrderByField(field);
-      }
-      this._orderByFields.push(orderByField);
-    }
+    this._orderByFields.push(...fields);
     return this as unknown as R;
   }
 }

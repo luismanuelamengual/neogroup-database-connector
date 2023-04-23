@@ -1,4 +1,4 @@
-import { SelectField } from '../fields/select-field';
+export type SelectField = string | {name: string, table?: string, schema?: string, function?: string, alias?: string};
 
 export abstract class HasSelectFields<R> {
 
@@ -12,30 +12,11 @@ export abstract class HasSelectFields<R> {
     return this._selectFields;
   }
 
-  public select(...fields: Array<SelectField | string | {name: string, table?: string, functionName?: string, alias?: string}>): R {
+  public select(...fields: Array<SelectField>): R {
     if (!this._selectFields) {
       this._selectFields = [];
     }
-    for (const field of fields) {
-      let selectField: SelectField;
-      if (field instanceof SelectField) {
-        selectField = field;
-      } else if (typeof field === 'string') {
-        selectField = new SelectField(field);
-      } else {
-        selectField = new SelectField(field.name);
-        if (field.table) {
-          selectField.setTable(field.table);
-        }
-        if (field.functionName) {
-          selectField.setFunctionName(field.functionName);
-        }
-        if (field.alias) {
-          selectField.setAlias(field.alias);
-        }
-      }
-      this._selectFields.push(selectField);
-    }
+    this._selectFields.push(...fields);
     return this as unknown as R;
   }
 }

@@ -1,3 +1,4 @@
+export * from './has-alias';
 export * from './has-distinct';
 export * from './has-field-values';
 export * from './has-group-by-fields';
@@ -5,7 +6,7 @@ export * from './has-having-conditions';
 export * from './has-joins';
 export * from './has-limit';
 export * from './has-offset';
+export * from './has-order-by-fields';
 export * from './has-select-fields';
 export * from './has-table';
-export * from './has-alias';
 export * from './has-where-conditions';
