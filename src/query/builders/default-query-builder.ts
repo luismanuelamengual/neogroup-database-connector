@@ -68,7 +68,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
   }
 
   protected buildSelectQuery(query: SelectQuery, statement: Statement) {
-    statement.sql = DefaultQueryBuilder.SELECT;
+    statement.sql += DefaultQueryBuilder.SELECT;
     if (query.isDistinct()) {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += DefaultQueryBuilder.DISTINCT;
@@ -422,7 +422,9 @@ export class DefaultQueryBuilder extends QueryBuilder {
     if (Array.isArray(value)) {
       this.buildArrayValue(value, statement);
     } else if (value instanceof SelectQuery) {
+      statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
       this.buildSelectQuery(value, statement);
+      statement.sql += DefaultQueryBuilder.PARENTHESIS_END;
     } else if (typeof value === 'object') {
       this.buildField(value, statement);
     } else {
