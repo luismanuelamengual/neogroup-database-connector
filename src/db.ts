@@ -1,6 +1,7 @@
 import { DataConnection } from './data-connection';
 import { DataSource } from './data-source';
 import { DataTable } from './data-table';
+import { ConditionGroup } from './query';
 
 export abstract class DB {
   private static sources = new Map<string, DataSource>();
@@ -27,6 +28,10 @@ export abstract class DB {
 
   public static connection(): Promise<DataConnection> {
     return this.activeSource.getConnection();
+  }
+
+  public static conditionGroup(): ConditionGroup {
+    return new ConditionGroup();
   }
 
   private static get activeSource(): DataSource {

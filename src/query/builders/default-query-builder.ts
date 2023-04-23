@@ -340,7 +340,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
       } else {
         this.buildOperator(operator, statement);
         statement.sql += DefaultQueryBuilder.SPACE;
-        if (value) {
+        if (value != undefined) {
           this.buildValue(value, statement);
         }
       }

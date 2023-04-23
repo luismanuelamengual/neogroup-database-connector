@@ -13,7 +13,16 @@ source.setDebugEnabled(true);
 DB.register(source);
 
 async function executeBasicTest() {
-  const users = await DB.table('users').find();
+  const users = await DB.table('users')
+    .select('username', {name: 'password', table: 'users'})
+    .where('id', '>', 1)
+    .where('password', '<>', 'ramalt')
+    .orWhere(DB.conditionGroup()
+      .with('id', '>', 0)
+      .with('id', '<', 10))
+    .orderBy(['id', 'ASC'], 'username')
+    .limit(10)
+    .find();
   console.log(users);
 }
 
