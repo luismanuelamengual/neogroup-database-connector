@@ -1,46 +1,35 @@
 {
-  "name": "@neogroup/orm",
-  "version": "1.0.0",
-  "description": "ORM for NodeJS",
+  "name": "@neogroup/database-connector",
+  "version": "0.0.1",
+  "description": "Database connector for javascript",
   "main": "index.js",
   "author": "Luis Manuel Amengual",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/luismanuelamengual/node-orm/issues"
+    "url": "https://github.com/luismanuelamengual/neogroup-database-connector/issues"
   },
-  "homepage": "https://github.com/luismanuelamengual/node-orm#readme",
+  "homepage": "https://github.com/luismanuelamengual/neogroup-database-connector#readme",
   "keywords": [
     "database",
-    "ORM"
+    "connector",
+    "javascript"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luismanuelamengual/node-orm.git"
+    "url": "git+https://github.com/luismanuelamengual/neogroup-database-connector.git"
   },
   "scripts": {
     "build": "tsc",
     "test": "ts-node ./test/tests.ts",
     "prepublishOnly": "npm run build"
   },
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "testRegex": "^.+\\.spec\\.ts$"
-  },
   "devDependencies": {
-    "@types/jest": "^26.0.20",
     "@typescript-eslint/eslint-plugin": "^5.47.0",
     "@typescript-eslint/parser": "^5.47.0",
     "dotenv": "^16.0.3",
     "eslint": "8.38.0",
     "eslint-config-next": "13.3.0",
     "eslint-config-prettier": "^8.5.0",
-    "jest": "^26.6.3",
     "pg": "^8.7.1",
     "prettier": "^2.6.2",
     "ts-jest": "^26.4.4",
