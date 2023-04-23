@@ -2,15 +2,17 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
-    "declaration": false,
     "experimentalDecorators": true,
     "lib": ["dom","es2017"],
     "moduleResolution": "node",
     "module": "CommonJS",
+    "declaration": true,
+    "sourceMap": true,
     "target": "es2017",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "incremental": false
   },
   "include": [
     "src"
