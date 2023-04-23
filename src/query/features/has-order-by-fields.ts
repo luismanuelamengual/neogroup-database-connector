@@ -1,6 +1,8 @@
+import { BasicField, RawField } from '../fields';
+
 export type OrderByDirection = 'ASC' | 'DESC';
 
-export type OrderByField = string | [string, OrderByDirection] | {name: string, table?: string, schema?: string, direction?: OrderByDirection};
+export type OrderByField = RawField | [string, OrderByDirection] | BasicField & {direction?: OrderByDirection};
 
 export abstract class HasOrderByFields<R> {
 

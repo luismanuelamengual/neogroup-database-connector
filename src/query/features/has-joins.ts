@@ -1,4 +1,6 @@
-import { ConditionField, ConditionGroup } from '../condition-group';
+import { ConditionGroup } from '../conditions';
+import { Field } from '../fields';
+import { Table } from '../table';
 
 export enum JoinType {
   JOIN,
@@ -9,9 +11,7 @@ export enum JoinType {
   CROSS_JOIN
 }
 
-export type JoinTable = string | { schema?: string, name?: string };
-
-export type Join = { table: JoinTable, type: JoinType, condition: ConditionGroup, alias?: string };
+export type Join = { table: Table, type: JoinType, condition: ConditionGroup, alias?: string };
 
 export abstract class HasJoins<R> {
 
@@ -30,9 +30,9 @@ export abstract class HasJoins<R> {
   }
 
   public join(join: Join): R;
-  public join(type: JoinType, table: JoinTable, sourceField: ConditionField, remoteField: ConditionField): R;
-  public join(type: JoinType, table: JoinTable, sourceField: ConditionField, remoteField: ConditionField, alias: string): R;
-  public join(type: JoinType, table: JoinTable, sourceField?: ConditionField, remoteField?: ConditionField, alias?: string): R
+  public join(type: JoinType, table: Table, sourceField: Field, remoteField: Field): R;
+  public join(type: JoinType, table: Table, sourceField: Field, remoteField: Field, alias: string): R;
+  public join(type: JoinType, table: Table, sourceField?: Field, remoteField?: Field, alias?: string): R
   public join(): R {
     let join: Join;
     if (arguments.length === 1) {
@@ -47,45 +47,45 @@ export abstract class HasJoins<R> {
     return this as unknown as R;
   }
 
-  public innerJoin(table: string, sourceField: ConditionField, remoteField: ConditionField): R;
-  public innerJoin(table: string, sourceField: ConditionField, remoteField: ConditionField, alias: string): R;
-  public innerJoin(table: string, sourceField?: ConditionField, remoteField?: ConditionField, alias?: string): R
+  public innerJoin(table: Table, sourceField: Field, remoteField: Field): R;
+  public innerJoin(table: Table, sourceField: Field, remoteField: Field, alias: string): R;
+  public innerJoin(table: Table, sourceField?: Field, remoteField?: Field, alias?: string): R
   public innerJoin(): R {
     // @ts-ignore
     this.join(JoinType.INNER_JOIN, ...arguments);
     return this as unknown as R;
   }
 
-  public leftJoin(table: string, sourceField: ConditionField, remoteField: ConditionField): R;
-  public leftJoin(table: string, sourceField: ConditionField, remoteField: ConditionField, alias: string): R;
-  public leftJoin(table: string, sourceField?: ConditionField, remoteField?: ConditionField, alias?: string): R
+  public leftJoin(table: Table, sourceField: Field, remoteField: Field): R;
+  public leftJoin(table: Table, sourceField: Field, remoteField: Field, alias: string): R;
+  public leftJoin(table: Table, sourceField?: Field, remoteField?: Field, alias?: string): R
   public leftJoin(): R {
     // @ts-ignore
     this.join(JoinType.LEFT_JOIN, ...arguments);
     return this as unknown as R;
   }
 
-  public rightJoin(table: string, sourceField: ConditionField, remoteField: ConditionField): R;
-  public rightJoin(table: string, sourceField: ConditionField, remoteField: ConditionField, alias: string): R;
-  public rightJoin(table: string, sourceField?: ConditionField, remoteField?: ConditionField, alias?: string): R
+  public rightJoin(table: Table, sourceField: Field, remoteField: Field): R;
+  public rightJoin(table: Table, sourceField: Field, remoteField: Field, alias: string): R;
+  public rightJoin(table: Table, sourceField?: Field, remoteField?: Field, alias?: string): R
   public rightJoin(): R {
     // @ts-ignore
     this.join(JoinType.RIGHT_JOIN, ...arguments);
     return this as unknown as R;
   }
 
-  public outerJoin(table: string, sourceField: ConditionField, remoteField: ConditionField): R;
-  public outerJoin(table: string, sourceField: ConditionField, remoteField: ConditionField, alias: string): R;
-  public outerJoin(table: string, sourceField?: ConditionField, remoteField?: ConditionField, alias?: string): R
+  public outerJoin(table: Table, sourceField: Field, remoteField: Field): R;
+  public outerJoin(table: Table, sourceField: Field, remoteField: Field, alias: string): R;
+  public outerJoin(table: Table, sourceField?: Field, remoteField?: Field, alias?: string): R
   public outerJoin(): R {
     // @ts-ignore
     this.join(JoinType.OUTER_JOIN, ...arguments);
     return this as unknown as R;
   }
 
-  public crossJoin(table: string, sourceField: ConditionField, remoteField: ConditionField): R;
-  public crossJoin(table: string, sourceField: ConditionField, remoteField: ConditionField, alias: string): R;
-  public crossJoin(table: string, sourceField?: ConditionField, remoteField?: ConditionField, alias?: string): R
+  public crossJoin(table: Table, sourceField: Field, remoteField: Field): R;
+  public crossJoin(table: Table, sourceField: Field, remoteField: Field, alias: string): R;
+  public crossJoin(table: Table, sourceField?: Field, remoteField?: Field, alias?: string): R
   public crossJoin(): R {
     // @ts-ignore
     this.join(JoinType.CROSS_JOIN, ...arguments);

@@ -1,4 +1,5 @@
-import { Condition, ConditionField, ConditionGroup, ConditionValue } from '../condition-group';
+import { Condition, ConditionGroup } from '../conditions';
+import { Field } from '../fields';
 
 export abstract class HasWhereConditions<R> {
 
@@ -17,8 +18,8 @@ export abstract class HasWhereConditions<R> {
   }
 
   public where(condition: Condition): R;
-  public where(field: ConditionField, value: ConditionValue): R;
-  public where(field: ConditionField, operator: string, value: ConditionValue): R;
+  public where(field: Field, value: any): R;
+  public where(field: Field, operator: string, value: any): R;
   public where(): R {
     // @ts-ignore
     this.getWhereConditions().with(...arguments);
@@ -26,8 +27,8 @@ export abstract class HasWhereConditions<R> {
   }
 
   public orWhere(condition: Condition): R;
-  public orWhere(field: ConditionField, value: ConditionValue): R;
-  public orWhere(field: ConditionField, operator: string, value: ConditionValue): R;
+  public orWhere(field: Field, value: any): R;
+  public orWhere(field: Field, operator: string, value: any): R;
   public orWhere(): R {
     // @ts-ignore
     this.getWhereConditions().orWith(...arguments);

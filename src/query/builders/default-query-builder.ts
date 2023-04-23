@@ -1,10 +1,12 @@
-import { Condition, ConditionConnector, ConditionField, ConditionGroup } from '../condition-group';
+import { Condition, ConditionConnector, ConditionGroup } from '../conditions';
 import { DeleteQuery } from '../delete-query';
-import { GroupByField, Join, JoinTable, JoinType, OrderByField, SelectField } from '../features';
+import { Join, JoinType, OrderByField, SelectField } from '../features';
+import { Field } from '../fields';
 import { InsertQuery } from '../insert-query';
 import { Query } from '../query';
 import { SelectQuery } from '../select-query';
 import { Statement } from '../statement';
+import { Table } from '../table';
 import { UpdateQuery } from '../update-query';
 import { QueryBuilder } from './query-builder';
 
@@ -89,7 +91,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.FROM;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildTableName(query.getTable(), statement);
+    this.buildTable(query.getTable(), statement);
 
     const tableAlias = query.getAlias();
     if (tableAlias != null) {
@@ -128,7 +130,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
           statement.sql += DefaultQueryBuilder.COMMA;
           statement.sql += DefaultQueryBuilder.SPACE;
         }
-        this.buildGroupByField(field, statement);
+        this.buildField(field, statement);
         isFirst = false;
       }
     }
@@ -179,7 +181,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.INTO;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildTableName(query.getTable(), statement);
+    this.buildTable(query.getTable(), statement);
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
     const fields = query.getFields();
@@ -213,7 +215,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
   protected buildUpdateQuery(query: UpdateQuery, statement: Statement) {
     statement.sql += DefaultQueryBuilder.UPDATE;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildTableName(query.getTable(), statement);
+    this.buildTable(query.getTable(), statement);
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.SET;
     statement.sql += DefaultQueryBuilder.SPACE;
@@ -245,7 +247,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     statement.sql += DefaultQueryBuilder.SPACE;
     statement.sql += DefaultQueryBuilder.FROM;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildTableName(query.getTable(), statement);
+    this.buildTable(query.getTable(), statement);
     const whereConditions = query.getWhereConditions();
     if (whereConditions && whereConditions.getConditions().length > 0) {
       statement.sql += DefaultQueryBuilder.SPACE;
@@ -263,12 +265,8 @@ export class DefaultQueryBuilder extends QueryBuilder {
         statement.sql += field.function.toUpperCase();
         statement.sql += DefaultQueryBuilder.PARENTHESIS_START;
       }
-      if (field.schema) {
-        statement.sql += field.schema;
-        statement.sql += DefaultQueryBuilder.POINT;
-      }
       if (field.table) {
-        statement.sql += field.table;
+        this.buildTable(field.table, statement);
         statement.sql += DefaultQueryBuilder.POINT;
       }
       statement.sql += field.name;
@@ -293,12 +291,8 @@ export class DefaultQueryBuilder extends QueryBuilder {
       statement.sql += DefaultQueryBuilder.SPACE;
       statement.sql += direction;
     } else {
-      if (field.schema) {
-        statement.sql += field.schema;
-        statement.sql += DefaultQueryBuilder.POINT;
-      }
       if (field.table) {
-        statement.sql += field.table;
+        this.buildTable(field.table, statement);
         statement.sql += DefaultQueryBuilder.POINT;
       }
       statement.sql += field.name;
@@ -309,16 +303,12 @@ export class DefaultQueryBuilder extends QueryBuilder {
     }
   }
 
-  protected buildGroupByField(field: GroupByField, statement: Statement) {
+  protected buildField(field: Field, statement: Statement) {
     if (typeof field === 'string' || field instanceof String) {
       statement.sql += field;
     } else {
-      if (field.schema) {
-        statement.sql += field.schema;
-        statement.sql += DefaultQueryBuilder.POINT;
-      }
       if (field.table) {
-        statement.sql += field.table;
+        this.buildTable(field.table, statement);
         statement.sql += DefaultQueryBuilder.POINT;
       }
       statement.sql += field.name;
@@ -336,7 +326,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
       statement.bindings.push(...bindings);
     } else if ('field' in condition) {
       const { field, operator, value } = condition;
-      this.buildConditionField(field, statement);
+      this.buildField(field, statement);
       statement.sql += DefaultQueryBuilder.SPACE;
       if (value === null && (operator === '=' || operator === '!=')) {
         statement.sql += DefaultQueryBuilder.SPACE;
@@ -376,22 +366,6 @@ export class DefaultQueryBuilder extends QueryBuilder {
     }
   }
 
-  protected buildConditionField(field: ConditionField, statement: Statement) {
-    if (typeof field === 'string' || field instanceof String) {
-      statement.sql += field;
-    } else {
-      if (field.schema) {
-        statement.sql += field.schema;
-        statement.sql += DefaultQueryBuilder.POINT;
-      }
-      if (field.table) {
-        statement.sql += field.table;
-        statement.sql += DefaultQueryBuilder.POINT;
-      }
-      statement.sql += field.name;
-    }
-  }
-
   protected buildJoin(join: Join, statement: Statement) {
     const { type, table, condition, alias } = join;
     switch (type) {
@@ -418,7 +392,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     }
     statement.sql += DefaultQueryBuilder.JOIN;
     statement.sql += DefaultQueryBuilder.SPACE;
-    this.buildJoinTable(table, statement);
+    this.buildTable(table, statement);
 
     if (alias) {
       statement.sql += DefaultQueryBuilder.SPACE;
@@ -432,7 +406,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     this.buildConditionGroup(condition, statement);
   }
 
-  protected buildJoinTable(table: JoinTable, statement: Statement) {
+  protected buildTable(table: Table, statement: Statement) {
     if (typeof table === 'string' || table instanceof String) {
       statement.sql += table;
     } else {
@@ -444,17 +418,13 @@ export class DefaultQueryBuilder extends QueryBuilder {
     }
   }
 
-  protected buildTableName(tableName: string, statement: Statement) {
-    statement.sql += tableName;
-  }
-
   protected buildValue(value: any, statement: Statement) {
     if (Array.isArray(value)) {
       this.buildArrayValue(value, statement);
     } else if (value instanceof SelectQuery) {
       this.buildSelectQuery(value, statement);
     } else if (typeof value === 'object') {
-      this.buildConditionField(value, statement);
+      this.buildField(value, statement);
     } else {
       this.buildSingleValue(value, statement);
     }

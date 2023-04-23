@@ -1,4 +1,6 @@
-export type SelectField = string | {name: string, table?: string, schema?: string, function?: string, alias?: string};
+import { BasicField, RawField } from '../fields';
+
+export type SelectField = RawField | BasicField & {function?: string, alias?: string};
 
 export abstract class HasSelectFields<R> {
 

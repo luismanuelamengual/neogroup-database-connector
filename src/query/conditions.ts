@@ -1,10 +1,6 @@
-import { SelectQuery } from './select-query';
+import { Field } from './fields';
 
-export type ConditionField = string | {name: string, table?: string, schema?: string};
-
-export type ConditionValue = string | number | boolean | ConditionField | SelectQuery | Array<string | number | boolean> | null;
-
-export type BasicCondition = { field: ConditionField, operator?: string, value: ConditionValue };
+export type BasicCondition = { field: Field, operator?: string, value: any };
 
 export type RawCondition = string | { sql: string, bindings: Array<any> };
 
@@ -28,8 +24,8 @@ export class ConditionGroup {
   }
 
   public with(condition: Condition): ConditionGroup;
-  public with(field: ConditionField, value: ConditionValue): ConditionGroup;
-  public with(field: ConditionField, operator: string, value: ConditionValue): ConditionGroup;
+  public with(field: Field, value: any): ConditionGroup;
+  public with(field: Field, operator: string, value: any): ConditionGroup;
   public with(): ConditionGroup {
     let condition: Condition;
     switch (arguments.length) {
@@ -52,8 +48,8 @@ export class ConditionGroup {
   }
 
   public orWith(condition: Condition): ConditionGroup;
-  public orWith(field: ConditionField, value: ConditionValue): ConditionGroup;
-  public orWith(field: ConditionField, operator: string, value: ConditionValue): ConditionGroup;
+  public orWith(field: Field, value: any): ConditionGroup;
+  public orWith(field: Field, operator: string, value: any): ConditionGroup;
   public orWith(): ConditionGroup {
     let condition: Condition;
     switch (arguments.length) {

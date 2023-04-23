@@ -1,7 +1,7 @@
 
 export abstract class HasAlias<R> {
 
-  protected _alias: string = '';
+  protected _alias: string;
 
   public setAlias(alias: string): R {
     this._alias = alias;

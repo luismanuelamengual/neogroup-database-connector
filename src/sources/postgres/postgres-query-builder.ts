@@ -4,7 +4,7 @@ export class PostgresQueryBuilder extends DefaultQueryBuilder {
 
   private static readonly CURRENCY = '$';
 
-  protected buildTableName(tableName: string, statement: Statement) {
+  protected buildTable(tableName: string, statement: Statement) {
     statement.sql += (tableName === 'user')? ('"' + tableName + '"') : tableName;
   }
 

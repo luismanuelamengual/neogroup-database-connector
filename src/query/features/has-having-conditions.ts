@@ -1,4 +1,5 @@
-import { Condition, ConditionField, ConditionGroup, ConditionValue } from '../condition-group';
+import { Condition, ConditionGroup } from '../conditions';
+import { Field } from '../fields';
 
 export abstract class HasHavingConditions<R> {
 
@@ -17,8 +18,8 @@ export abstract class HasHavingConditions<R> {
   }
 
   public having(condition: Condition): R;
-  public having(field: ConditionField, value: ConditionValue): R;
-  public having(field: ConditionField, operator: string, value: ConditionValue): R;
+  public having(field: Field, value: any): R;
+  public having(field: Field, operator: string, value: any): R;
   public having(): R {
     // @ts-ignore
     this.getHavingConditions().with(...arguments);
@@ -26,8 +27,8 @@ export abstract class HasHavingConditions<R> {
   }
 
   public orHaving(condition: Condition): R;
-  public orHaving(field: ConditionField, value: ConditionValue): R;
-  public orHaving(field: ConditionField, operator: string, value: ConditionValue): R;
+  public orHaving(field: Field, value: any): R;
+  public orHaving(field: Field, operator: string, value: any): R;
   public orHaving(): R {
     // @ts-ignore
     this.getHavingConditions().orWith(...arguments);

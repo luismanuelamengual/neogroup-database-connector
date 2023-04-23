@@ -1,19 +1,19 @@
-export type GroupByField = string | {name: string, table?: string, schema?: string};
+import { Field } from '../fields';
 
 export abstract class HasGroupByFields<R> {
 
-  protected _groupByFields: Array<GroupByField>;
+  protected _groupByFields: Array<Field>;
 
-  public setGroupByFields(groupByFields: Array<GroupByField>): R {
+  public setGroupByFields(groupByFields: Array<Field>): R {
     this._groupByFields = groupByFields;
     return this as unknown as R;
   }
 
-  public getGroupByFields(): Array<GroupByField> {
+  public getGroupByFields(): Array<Field> {
     return this._groupByFields;
   }
 
-  public groupBy(...fields: Array<GroupByField>): R {
+  public groupBy(...fields: Array<Field>): R {
     if (!this._groupByFields) {
       this._groupByFields = [];
     }
