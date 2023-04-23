@@ -1,8 +1,9 @@
 {
   "name": "@neogroup/database-connector",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Database connector for javascript",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "author": "Luis Manuel Amengual",
   "license": "ISC",
   "bugs": {
