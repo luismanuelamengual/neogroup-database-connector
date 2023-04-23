@@ -2,12 +2,13 @@ import { applyMixins } from '../utilities';
 import { HasAlias, HasDistinct, HasFieldValues, HasGroupByFields, HasHavingConditions, HasJoins, HasLimit, HasOffset, HasSelectFields, HasTable, HasWhereConditions } from './features';
 import { HasOrderByFields } from './features/has-order-by-fields';
 import { Query } from './query';
+import { Table } from './table';
 
 export class SelectQuery extends Query {
 
-  constructor (tableName?: string) {
+  constructor (table?: Table) {
     super();
-    this.setTable(tableName);
+    this.setTable(table);
   }
 }
 

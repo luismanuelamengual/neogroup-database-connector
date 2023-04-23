@@ -1,12 +1,13 @@
 import { applyMixins } from '../utilities';
 import { HasFieldValues, HasTable } from './features';
 import { Query } from './query';
+import { Table } from './table';
 
 export class InsertQuery extends Query {
 
-  constructor (tableName?: string) {
+  constructor (table?: Table) {
     super();
-    this.setTable(tableName);
+    this.setTable(table);
   }
 }
 

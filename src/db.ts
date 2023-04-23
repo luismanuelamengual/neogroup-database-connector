@@ -1,7 +1,7 @@
 import { DataConnection } from './data-connection';
 import { DataSource } from './data-source';
 import { DataTable } from './data-table';
-import { ConditionGroup } from './query';
+import { ConditionGroup, DeleteQuery, InsertQuery, SelectQuery, Table, UpdateQuery } from './query';
 
 export abstract class DB {
   private static sources = new Map<string, DataSource>();
@@ -32,6 +32,22 @@ export abstract class DB {
 
   public static conditionGroup(): ConditionGroup {
     return new ConditionGroup();
+  }
+
+  public static selectQuery(table?: Table): SelectQuery {
+    return new SelectQuery(table);
+  }
+
+  public static updateQuery(table?: Table): UpdateQuery {
+    return new UpdateQuery(table);
+  }
+
+  public static deleteQuery(table?: Table): DeleteQuery {
+    return new DeleteQuery(table);
+  }
+
+  public static insertQuery(table?: Table): InsertQuery {
+    return new InsertQuery(table);
   }
 
   private static get activeSource(): DataSource {
