@@ -13,85 +13,59 @@ export class DataTable {
   }
 
   public async find(): Promise<Array<DataSet>> {
-    const selectQuery = new SelectQuery();
-    selectQuery.setTable(this._table);
-    selectQuery.setDistinct(this._distinct);
-    selectQuery.setLimit(this._limit);
-    selectQuery.setOffset(this._offset);
-    selectQuery.setOrderByFields(this._orderByFields);
-    selectQuery.setGroupByFields(this._groupByFields);
-    selectQuery.setFields(this._fields);
-    selectQuery.setSelectFields(this._selectFields);
-    selectQuery.setAlias(this._alias);
-    selectQuery.setWhereConditions(this._whereConditions);
-    selectQuery.setHavingConditions(this._havingConditions);
-    selectQuery.setJoins(this._joins);
-    const connection = await this.source.getConnection();
-    try {
-      return await connection.query(selectQuery);
-    } finally {
-      await connection.close();
-    }
+    return await this.source.query(this.createSelectQuery());
   }
 
   public async first(): Promise<DataSet | null> {
-    const selectQuery = new SelectQuery();
-    selectQuery.setTable(this._table);
-    selectQuery.setDistinct(this._distinct);
-    selectQuery.setLimit(1);
-    selectQuery.setOffset(this._offset);
-    selectQuery.setOrderByFields(this._orderByFields);
-    selectQuery.setGroupByFields(this._groupByFields);
-    selectQuery.setFields(this._fields);
-    selectQuery.setSelectFields(this._selectFields);
-    selectQuery.setAlias(this._alias);
-    selectQuery.setWhereConditions(this._whereConditions);
-    selectQuery.setHavingConditions(this._havingConditions);
-    selectQuery.setJoins(this._joins);
-    const connection = await this.source.getConnection();
-    try {
-      const records = await connection.query(selectQuery);
-      return records && records.length > 0 ? records[0] : null;
-    } finally {
-      await connection.close();
-    }
+    const records = await this.source.query(this.createSelectQuery().setLimit(1));
+    return records && records.length > 0 ? records[0] : null;
   }
 
   public async insert(): Promise<number> {
-    const insertQuery = new InsertQuery();
-    insertQuery.setTable(this._table);
-    insertQuery.setFields(this._fields);
-    const connection = await this.source.getConnection();
-    try {
-      return await connection.execute(insertQuery);
-    } finally {
-      await connection.close();
-    }
+    return await this.source.execute(this.createInsertQuery());
   }
 
   public async update(): Promise<number> {
-    const updateQuery = new UpdateQuery();
-    updateQuery.setTable(this._table);
-    updateQuery.setFields(this._fields);
-    updateQuery.setWhereConditions(this._whereConditions);
-    const connection = await this.source.getConnection();
-    try {
-      return await connection.execute(updateQuery);
-    } finally {
-      await connection.close();
-    }
+    return await this.source.execute(this.createUpdateQuery());
   }
 
   public async delete(): Promise<number> {
-    const deleteQuery = new DeleteQuery();
-    deleteQuery.setTable(this._table);
-    deleteQuery.setWhereConditions(this._whereConditions);
-    const connection = await this.source.getConnection();
-    try {
-      return await connection.execute(deleteQuery);
-    } finally {
-      await connection.close();
-    }
+    return await this.source.execute(this.createDeleteQuery());
+  }
+
+  private createSelectQuery(): SelectQuery {
+    return new SelectQuery()
+      .setTable(this._table)
+      .setDistinct(this._distinct)
+      .setLimit(this._limit)
+      .setOffset(this._offset)
+      .setOrderByFields(this._orderByFields)
+      .setGroupByFields(this._groupByFields)
+      .setFields(this._fields)
+      .setSelectFields(this._selectFields)
+      .setAlias(this._alias)
+      .setWhereConditions(this._whereConditions)
+      .setHavingConditions(this._havingConditions)
+      .setJoins(this._joins);
+  }
+
+  private createInsertQuery(): InsertQuery {
+    return new InsertQuery()
+      .setTable(this._table)
+      .setFields(this._fields);
+  }
+
+  private createUpdateQuery(): UpdateQuery {
+    return new UpdateQuery()
+      .setTable(this._table)
+      .setFields(this._fields)
+      .setWhereConditions(this._whereConditions);
+  }
+
+  private createDeleteQuery(): DeleteQuery {
+    return new DeleteQuery()
+      .setTable(this._table)
+      .setWhereConditions(this._whereConditions);
   }
 }
 

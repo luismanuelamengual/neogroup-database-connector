@@ -6,8 +6,9 @@ export abstract class HasSelectFields<R> {
 
   protected _selectFields: Array<SelectField>;
 
-  public setSelectFields(selectFields: Array<SelectField>) {
+  public setSelectFields(selectFields: Array<SelectField>): R {
     this._selectFields = selectFields;
+    return this as unknown as R;
   }
 
   public getSelectFields(): Array<SelectField> {

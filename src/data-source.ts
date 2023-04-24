@@ -1,7 +1,8 @@
 import { Connection } from './connection';
 import { DataConnection } from './data-connection';
+import { DataSet } from './data-set';
 import { DataTable } from './data-table';
-import { DefaultQueryBuilder, QueryBuilder } from './query';
+import { DefaultQueryBuilder, Query, QueryBuilder } from './query';
 
 export abstract class DataSource {
 
@@ -38,6 +39,30 @@ export abstract class DataSource {
     connection.setDebugEnabled(this.debug);
     connection.setReadonly(this.readonly);
     return connection;
+  }
+
+  public query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>>;
+  public query(query: Query): Promise<Array<DataSet>>;
+  public async query(): Promise<Array<DataSet>> {
+    const connection = await this.getConnection();
+    try {
+      // @ts-ignore
+      return await connection.query(...arguments);
+    } finally {
+      await connection.close();
+    }
+  }
+
+  public execute(sql: string, bindings?: Array<any>): Promise<number>;
+  public execute(query: Query): Promise<number>;
+  public async execute(): Promise<number> {
+    const connection = await this.getConnection();
+    try {
+      // @ts-ignore
+      return await connection.execute(...arguments);
+    } finally {
+      await connection.close();
+    }
   }
 
   protected abstract requestConnection(): Promise<Connection>;
