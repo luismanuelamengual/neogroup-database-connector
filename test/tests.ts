@@ -1,4 +1,4 @@
-import { DB, PostgresDataSource } from '../src';
+import { DB, OrderByDirection, PostgresDataSource } from '../src';
 
 // Add support for "dotenv"
 require('dotenv').config();
@@ -23,7 +23,8 @@ async function executeBasicTest() {
     .orWhere(DB.conditionGroup()
       .with('id', '>', 0)
       .with('id', '<', 10))
-    .orderBy(['id', 'ASC'], 'username')
+    .orderBy('id', OrderByDirection.DESC)
+    .orderBy('username')
     .limit(10)
     .find();
   console.log(users);
