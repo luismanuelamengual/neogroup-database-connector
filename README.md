@@ -6,7 +6,7 @@
 
 # Database Connector
 
-This package is a lightweight and user-friendly database connector that allows developers to easily interact with any databases. It has been designed with simplicity and ease-of-use in mind, making it accessible even to those who are new to database programming.
+This package is a lightweight and user-friendly database connector that allows developers to easily interact with any database. It has been designed with simplicity and ease-of-use in mind, making it accessible even to those who are new to database programming.
 
 The package comes with clear and comprehensive documentation, making it easy to get started and quickly learn the basics of working databases. It also provides a range of useful features and functionalities, such as connection pooling, transaction management, and query building, which help to streamline the development process and make it more efficient.
 
@@ -29,6 +29,8 @@ source.setPassword(/*database password*/);
 DB.register(source);
 ```
 
+Note: If the PostgresDataSource is used, its necesary to install the underlying database library "pg" for this to work
+
 After the registration, its possible to execute queries in the database in the following way
 
 ```typescript
@@ -40,7 +42,6 @@ This will execute the following SQL
 ```sql
 SELECT * FROM users
 ```
-
 
 ## Contact
 
