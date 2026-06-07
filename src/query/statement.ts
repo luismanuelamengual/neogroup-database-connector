@@ -1,4 +1,4 @@
 export interface Statement {
-  sql: string;
+  sql: string
   bindings: Array<any>
 }

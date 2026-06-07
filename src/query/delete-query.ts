@@ -1,20 +1,17 @@
-import { applyMixins } from '../utilities';
-import { HasTable, HasWhereConditions } from './features';
-import { Query } from './query';
-import { Table } from './table';
+import { applyMixins } from '../utilities'
+import { HasTable, HasWhereConditions } from './features'
+import { Query } from './query'
+import { Table } from './table'
 
 export class DeleteQuery extends Query {
+  constructor(table?: Table) {
+    super()
 
-  constructor (table?: Table) {
-    super();
-    this.setTable(table);
+    if (table) {
+      this.setTable(table)
+    }
   }
 }
 
-export interface DeleteQuery extends
-  HasTable<DeleteQuery>,
-  HasWhereConditions<DeleteQuery> {}
-applyMixins(DeleteQuery, [
-  HasTable,
-  HasWhereConditions
-]);
+export interface DeleteQuery extends HasTable<DeleteQuery>, HasWhereConditions<DeleteQuery> {}
+applyMixins(DeleteQuery, [HasTable, HasWhereConditions])

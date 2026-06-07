@@ -1,72 +1,73 @@
-import { Connection } from '../../connection';
-import { DataSource } from '../../data-source';
-import { PostgresConnection } from './postgres-connection';
-import { PostgresQueryBuilder } from './postgres-query-builder';
+import { Connection } from '../../connection'
+import { DataSource } from '../../data-source'
+import { PostgresConnection } from './postgres-connection'
+import { PostgresQueryBuilder } from './postgres-query-builder'
 
 export class PostgresDataSource extends DataSource {
-
-  private lib: any;
-  private pool: any;
-  private host: string;
-  private port: number;
-  private databaseName: string;
-  private username: string;
-  private password: string;
+  private lib: any
+  private pool: any
+  private host: string
+  private port: number
+  private databaseName: string
+  private username: string
+  private password: string
 
   constructor() {
-    super(new PostgresQueryBuilder());
+    super(new PostgresQueryBuilder())
+
     try {
-      this.lib = require('pg');
+      this.lib = require('pg')
     } catch (e) {
-      throw new Error('PostgreSQL module not found. Please install it via "npm install -S pg"');
+      throw new Error('PostgreSQL module not found. Please install it via "npm install -S pg"')
     }
-    this.port = 5432;
+
+    this.port = 5432
   }
 
   public setHost(host: string) {
-    this.host = host;
+    this.host = host
   }
 
   public getHost(): string {
-    return this.host;
+    return this.host
   }
 
   public setPort(port: number) {
-    this.port = port;
+    this.port = port
   }
 
   public getPort(): number {
-    return this.port;
+    return this.port
   }
 
   public setDatabaseName(databaseName: string) {
-    this.databaseName = databaseName;
+    this.databaseName = databaseName
   }
 
   public getDatabaseName(): string {
-    return this.databaseName;
+    return this.databaseName
   }
 
   public setUsername(username: string) {
-    this.username = username;
+    this.username = username
   }
 
   public getUsername(): string {
-    return this.username;
+    return this.username
   }
 
   public setPassword(password: string) {
-    this.password = password;
+    this.password = password
   }
 
   public getPassword(): string {
-    return this.password;
+    return this.password
   }
 
   public async close(): Promise<void> {
     if (this.pool) {
-      await this.pool.end();
-      this.pool = null;
+      await this.pool.end()
+      this.pool = null
     }
   }
 
@@ -78,9 +79,11 @@ export class PostgresDataSource extends DataSource {
         database: this.getDatabaseName(),
         user: this.getUsername(),
         password: this.getPassword()
-      };
-      this.pool = new this.lib.Pool(config);
+      }
+
+      this.pool = new this.lib.Pool(config)
     }
-    return new PostgresConnection(await this.pool.connect());
+
+    return new PostgresConnection(await this.pool.connect())
   }
 }
