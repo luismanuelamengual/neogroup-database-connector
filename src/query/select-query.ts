@@ -10,6 +10,7 @@ import {
   HasOffset,
   HasSelectFields,
   HasTable,
+  HasUnions,
   HasWhereConditions
 } from './features'
 import { HasOrderByFields } from './features/has-order-by-fields'
@@ -38,7 +39,8 @@ export interface SelectQuery
     HasTable<SelectQuery>,
     HasAlias<SelectQuery>,
     HasWhereConditions<SelectQuery>,
-    HasJoins<SelectQuery> {}
+    HasJoins<SelectQuery>,
+    HasUnions<SelectQuery> {}
 applyMixins(SelectQuery, [
   HasDistinct,
   HasLimit,
@@ -51,5 +53,6 @@ applyMixins(SelectQuery, [
   HasTable,
   HasAlias,
   HasWhereConditions,
-  HasJoins
+  HasJoins,
+  HasUnions
 ])

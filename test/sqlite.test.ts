@@ -220,6 +220,93 @@ describe('SQLite — CRUD completo', () => {
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
       })
+
+      it('filtra con BETWEEN (rango inclusivo)', async () => {
+        // Bob(25), Alice(30) están en [25, 30]; Charlie(35) queda fuera
+        const users = await source.table('users').where('age', 'BETWEEN', [25, 30]).orderBy('age').find()
+
+        expect(users).toHaveLength(2)
+        expect(users[0].name).toBe('Bob')
+        expect(users[1].name).toBe('Alice')
+      })
+
+      it('filtra con NOT BETWEEN', async () => {
+        // Solo Charlie(35) queda fuera del rango [25, 30]
+        const users = await source.table('users').where('age', 'NOT BETWEEN', [25, 30]).find()
+
+        expect(users).toHaveLength(1)
+        expect(users[0].name).toBe('Charlie')
+      })
+
+      it('filtra con LIKE', async () => {
+        const users = await source.table('users').where('email', 'LIKE', '%example.com').find()
+
+        expect(users).toHaveLength(3)
+      })
+
+      it('filtra con NOT LIKE', async () => {
+        const users = await source.table('users').where('name', 'NOT LIKE', 'A%').find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
+      })
+
+      it('filtra con NOT IN', async () => {
+        const users = await source.table('users').where('age', 'NOT IN', [25, 35]).find()
+
+        expect(users).toHaveLength(1)
+        expect(users[0].name).toBe('Alice')
+      })
+    })
+
+    // ── UNION ────────────────────────────────────────────────────────────────
+
+    describe('UNION / UNION ALL', () => {
+      it('UNION combina dos SELECT eliminando duplicados', async () => {
+        const { DB } = await import('../src')
+
+        // active=1 → Alice, Bob | age > 28 → Alice, Charlie
+        // UNION: Alice, Bob, Charlie (Alice deduplicada)
+        const query = DB.selectQuery('users')
+          .select('name')
+          .where('active', 1)
+          .union(DB.selectQuery('users').select('name').where('age', '>', 28))
+
+        const rows = await source.query(query)
+
+        expect(rows).toHaveLength(3)
+        expect(rows.map((r: any) => r.name).sort()).toEqual(['Alice', 'Bob', 'Charlie'])
+      })
+
+      it('UNION ALL combina dos SELECT conservando duplicados', async () => {
+        const { DB } = await import('../src')
+
+        // active=1 → Alice, Bob | age > 28 → Alice, Charlie
+        // UNION ALL: Alice, Bob, Alice, Charlie (Alice aparece dos veces)
+        const query = DB.selectQuery('users')
+          .select('name')
+          .where('active', 1)
+          .unionAll(DB.selectQuery('users').select('name').where('age', '>', 28))
+
+        const rows = await source.query(query)
+
+        expect(rows).toHaveLength(4)
+        expect(rows.filter((r: any) => r.name === 'Alice')).toHaveLength(2)
+      })
+
+      it('UNION de múltiples queries', async () => {
+        const { DB } = await import('../src')
+
+        const query = DB.selectQuery('users')
+          .select('name')
+          .where('name', 'Alice')
+          .union(DB.selectQuery('users').select('name').where('name', 'Bob'))
+          .union(DB.selectQuery('users').select('name').where('name', 'Charlie'))
+
+        const rows = await source.query(query)
+
+        expect(rows).toHaveLength(3)
+      })
     })
 
     // ── ORDER BY ─────────────────────────────────────────────────────────────

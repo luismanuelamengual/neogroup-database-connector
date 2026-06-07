@@ -51,6 +51,8 @@ export class DefaultQueryBuilder extends QueryBuilder {
   protected static readonly RIGHT = 'RIGHT'
   protected static readonly CROSS = 'CROSS'
   protected static readonly WILDCARD = '?'
+  protected static readonly UNION = 'UNION'
+  protected static readonly BETWEEN = 'BETWEEN'
 
   public buildQuery(query: Query): Statement {
     const statement = { sql: '', bindings: [] }
@@ -179,6 +181,19 @@ export class DefaultQueryBuilder extends QueryBuilder {
     }
 
     this.buildLimitOffset(query, statement)
+
+    for (const { query: unionQuery, all } of query.getUnions()) {
+      statement.sql += DefaultQueryBuilder.SPACE
+      statement.sql += DefaultQueryBuilder.UNION
+
+      if (all) {
+        statement.sql += DefaultQueryBuilder.SPACE
+        statement.sql += 'ALL'
+      }
+
+      statement.sql += DefaultQueryBuilder.SPACE
+      this.buildSelectQuery(unionQuery, statement)
+    }
   }
 
   protected buildLimitOffset(query: SelectQuery, statement: Statement) {
@@ -383,6 +398,14 @@ export class DefaultQueryBuilder extends QueryBuilder {
         }
 
         statement.sql += DefaultQueryBuilder.NULL
+      } else if (operator && /^(NOT\s+)?BETWEEN$/i.test(operator) && Array.isArray(value) && value.length === 2) {
+        this.buildOperator(operator, statement)
+        statement.sql += DefaultQueryBuilder.SPACE
+        this.buildSingleValue(value[0], statement)
+        statement.sql += DefaultQueryBuilder.SPACE
+        statement.sql += DefaultQueryBuilder.AND
+        statement.sql += DefaultQueryBuilder.SPACE
+        this.buildSingleValue(value[1], statement)
       } else if (operator) {
         this.buildOperator(operator, statement)
         statement.sql += DefaultQueryBuilder.SPACE
