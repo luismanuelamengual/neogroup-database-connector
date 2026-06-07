@@ -39,11 +39,19 @@ export class DataTable {
     return records && records.length > 0 ? records[0] : null
   }
 
-  public async insert(): Promise<number> {
+  public async insert(fields?: DataSet): Promise<number> {
+    if (fields) {
+      this.setFields(fields)
+    }
+
     return await this.source.execute(this.createInsertQuery())
   }
 
-  public async update(): Promise<number> {
+  public async update(fields?: DataSet): Promise<number> {
+    if (fields) {
+      this.setFields(fields)
+    }
+
     return await this.source.execute(this.createUpdateQuery())
   }
 

@@ -222,13 +222,24 @@ Also available as `orWhereNull` / `orWhereNotNull`.
 
 **Grouped conditions (parentheses):**
 
-Pass a callback to `where()` to create a parenthesized group. The callback receives a `ConditionGroup` with the same `where()` / `orWhere()` API:
+Pass a callback to `where()` to create a parenthesized group. Inside the callback the full `where*` / `orWhere*` API is available:
 
 ```typescript
 // WHERE (name = 'Alice' OR name = 'Bob') AND active = 1
 await DB.table('users')
   .where((group) => group.where('name', 'Alice').orWhere('name', 'Bob'))
   .where('active', 1)
+  .find()
+
+// WHERE (age IN (25, 30)) AND active = 1
+await DB.table('users')
+  .where((q) => q.whereIn('age', [25, 30]))
+  .where('active', 1)
+  .find()
+
+// WHERE (age BETWEEN 18 AND 40 OR nickname IS NULL)
+await DB.table('users')
+  .where((q) => q.whereBetween('age', [18, 40]).orWhereNull('nickname'))
   .find()
 ```
 
@@ -246,6 +257,29 @@ await DB.table('users')
 ```
 
 `orWhere()` also accepts a callback, producing an OR-connected group.
+
+**Column comparisons — `whereColumn` / `orWhereColumn`:**
+
+Compare two columns against each other instead of against a scalar value:
+
+```typescript
+// WHERE updated_at > created_at
+await DB.table('users').whereColumn('updated_at', '>', 'created_at').find()
+
+// WHERE col_a = col_b  (operator defaults to =)
+await DB.table('items').whereColumn('col_a', 'col_b').find()
+
+// OR variant
+await DB.table('items').whereColumn('a', 'b').orWhereColumn('a', '>', 'b').find()
+```
+
+`whereColumn` / `orWhereColumn` are also available inside grouped-condition callbacks:
+
+```typescript
+await DB.table('items')
+  .where((q) => q.whereColumn('a', 'b').orWhereColumn('a', '>', 'b'))
+  .find()
+```
 
 ---
 

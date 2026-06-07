@@ -2,6 +2,8 @@ import { Field } from './fields'
 
 export type BasicCondition = { field: Field; operator?: string; value: any }
 
+export type ColumnCondition = { field: Field; operator: string; column: Field }
+
 export type RawCondition = string | { sql: string; bindings: Array<any> }
 
 export enum ConditionConnector {
@@ -9,7 +11,12 @@ export enum ConditionConnector {
   OR
 }
 
-export type Condition = RawCondition | BasicCondition | ConditionGroup | ((group: ConditionGroup) => void)
+export type Condition =
+  | RawCondition
+  | BasicCondition
+  | ColumnCondition
+  | ConditionGroup
+  | ((group: ConditionGroup) => void)
 
 export type ConnectedCondition = { condition: Condition; connector: ConditionConnector }
 
@@ -106,6 +113,96 @@ export class ConditionGroup {
     }
 
     this.conditions.push({ condition, connector: ConditionConnector.OR })
+
+    return this
+  }
+
+  // ── WHERE convenience methods ─────────────────────────────────────────────
+
+  public whereIn(field: Field, values: Array<any>): ConditionGroup {
+    return this.where(field, 'IN', values)
+  }
+
+  public whereNotIn(field: Field, values: Array<any>): ConditionGroup {
+    return this.where(field, 'NOT IN', values)
+  }
+
+  public whereBetween(field: Field, range: [any, any]): ConditionGroup {
+    return this.where(field, 'BETWEEN', range)
+  }
+
+  public whereNotBetween(field: Field, range: [any, any]): ConditionGroup {
+    return this.where(field, 'NOT BETWEEN', range)
+  }
+
+  public whereNull(field: Field): ConditionGroup {
+    return this.where(field, null)
+  }
+
+  public whereNotNull(field: Field): ConditionGroup {
+    return this.where(field, '<>', null)
+  }
+
+  public whereLike(field: Field, pattern: string): ConditionGroup {
+    return this.where(field, 'LIKE', pattern)
+  }
+
+  public whereNotLike(field: Field, pattern: string): ConditionGroup {
+    return this.where(field, 'NOT LIKE', pattern)
+  }
+
+  public whereColumn(field: Field, column: Field): ConditionGroup
+  public whereColumn(field: Field, operator: string, column: Field): ConditionGroup
+  public whereColumn(field: Field, operatorOrColumn: string | Field, column?: Field): ConditionGroup {
+    const operator = column !== undefined ? (operatorOrColumn as string) : '='
+    const col = column !== undefined ? column : (operatorOrColumn as Field)
+
+    this.conditions.push({ condition: { field, operator, column: col }, connector: ConditionConnector.AND })
+
+    return this
+  }
+
+  // ── OR WHERE convenience methods ──────────────────────────────────────────
+
+  public orWhereIn(field: Field, values: Array<any>): ConditionGroup {
+    return this.orWhere(field, 'IN', values)
+  }
+
+  public orWhereNotIn(field: Field, values: Array<any>): ConditionGroup {
+    return this.orWhere(field, 'NOT IN', values)
+  }
+
+  public orWhereBetween(field: Field, range: [any, any]): ConditionGroup {
+    return this.orWhere(field, 'BETWEEN', range)
+  }
+
+  public orWhereNotBetween(field: Field, range: [any, any]): ConditionGroup {
+    return this.orWhere(field, 'NOT BETWEEN', range)
+  }
+
+  public orWhereNull(field: Field): ConditionGroup {
+    return this.orWhere(field, null)
+  }
+
+  public orWhereNotNull(field: Field): ConditionGroup {
+    return this.orWhere(field, '<>', null)
+  }
+
+  public orWhereLike(field: Field, pattern: string): ConditionGroup {
+    return this.orWhere(field, 'LIKE', pattern)
+  }
+
+  public orWhereNotLike(field: Field, pattern: string): ConditionGroup {
+    return this.orWhere(field, 'NOT LIKE', pattern)
+  }
+
+  public orWhereColumn(field: Field, column: Field): ConditionGroup
+  public orWhereColumn(field: Field, operator: string, column: Field): ConditionGroup
+  public orWhereColumn(field: Field, operatorOrColumn: string | Field, column?: Field): ConditionGroup {
+    const operator = column !== undefined ? (operatorOrColumn as string) : '='
+    const col = column !== undefined ? column : (operatorOrColumn as Field)
+
+    this.conditions.push({ condition: { field, operator, column: col }, connector: ConditionConnector.OR })
 
     return this
   }

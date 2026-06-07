@@ -1,20 +1,6 @@
 import { ConditionGroup } from '../conditions'
-import { BasicField, Field } from '../fields'
+import { Field, toField } from '../fields'
 import { Table } from '../table'
-
-/** Converts a 'table.field' string into a BasicField object so engine-specific
- *  quoting is applied correctly by the query builder. */
-function toField(f: Field): BasicField {
-  if (typeof f !== 'string') {
-    return f as BasicField
-  }
-
-  const dot = (f as string).indexOf('.')
-
-  return dot !== -1
-    ? { table: (f as string).substring(0, dot), name: (f as string).substring(dot + 1) }
-    : { name: f as string }
-}
 
 export enum JoinType {
   JOIN,

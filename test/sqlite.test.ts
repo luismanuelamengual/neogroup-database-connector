@@ -98,6 +98,19 @@ describe('SQLite — CRUD completo', () => {
 
       expect(users).toHaveLength(3)
     })
+
+    it('insert acepta un objeto de fields como argumento', async () => {
+      const changes = await source
+        .table('users')
+        .insert({ name: 'Dave', email: 'dave@example.com', age: 28 })
+
+      expect(changes).toBe(1)
+
+      const user = await source.table('users').where('name', 'Dave').first()
+
+      expect(user).not.toBeNull()
+      expect(user!.age).toBe(28)
+    })
   })
 
   // ─── SELECT ──────────────────────────────────────────────────────────────
@@ -744,6 +757,139 @@ describe('SQLite — CRUD completo', () => {
     })
   })
 
+  // ─── GROUPED CONDITION CALLBACKS ─────────────────────────────────────────
+
+  describe('Grouped condition callbacks con métodos de conveniencia', () => {
+    beforeEach(async () => {
+      await seedUsers()
+    })
+
+    it('whereIn dentro de un callback de grupo', async () => {
+      const users = await source
+        .table('users')
+        .where((q) => q.whereIn('age', [25, 35]))
+        .find()
+
+      expect(users).toHaveLength(2)
+      expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
+    })
+
+    it('whereBetween dentro de un callback de grupo', async () => {
+      const users = await source
+        .table('users')
+        .where((q) => q.whereBetween('age', [25, 30]))
+        .find()
+
+      expect(users).toHaveLength(2)
+      expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
+    })
+
+    it('whereNull dentro de un callback de grupo', async () => {
+      await source.table('users').where('name', 'Alice').set('nickname', 'Ali').update()
+      const users = await source
+        .table('users')
+        .where((q) => q.whereNull('nickname'))
+        .find()
+
+      expect(users).toHaveLength(2)
+      expect(users.find((u: any) => u.name === 'Alice')).toBeUndefined()
+    })
+
+    it('whereLike dentro de un callback de grupo', async () => {
+      const users = await source
+        .table('users')
+        .where((q) => q.whereLike('email', '%@example.com'))
+        .find()
+
+      expect(users).toHaveLength(3)
+    })
+
+    it('combina whereIn y orWhere dentro del mismo grupo', async () => {
+      // (age IN (25, 30)) OR name = 'Charlie'
+      const users = await source
+        .table('users')
+        .where((q) => q.whereIn('age', [25, 30]).orWhere('name', 'Charlie'))
+        .find()
+
+      expect(users).toHaveLength(3)
+    })
+
+    it('callbacks anidados con whereBetween y whereNull', async () => {
+      // (age BETWEEN 25 AND 30 OR nickname IS NULL) AND active = 1
+      const users = await source
+        .table('users')
+        .where((q) => q.whereBetween('age', [25, 30]).orWhereNull('nickname'))
+        .where('active', 1)
+        .find()
+
+      // Alice (age=30, active=1) y Bob (age=25, active=1) — Charlie is inactive
+      expect(users).toHaveLength(2)
+      expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
+    })
+  })
+
+  // ─── WHERE COLUMN ─────────────────────────────────────────────────────────
+
+  describe('whereColumn / orWhereColumn', () => {
+    beforeEach(async () => {
+      // Seed orders with varying amounts; use amount and user_id to test column comparison
+      await seedUsers()
+      await seedOrders()
+    })
+
+    it('whereColumn compara dos columnas con = implícito', async () => {
+      // user_id = id is always true for every row; use a self-join scenario via raw table
+      // Simpler: create a helper table where col_a = col_b for some rows
+      await source.execute(`
+        CREATE TABLE IF NOT EXISTS col_test (
+          id    INTEGER PRIMARY KEY AUTOINCREMENT,
+          col_a INTEGER NOT NULL,
+          col_b INTEGER NOT NULL
+        )
+      `)
+      await source.execute('DELETE FROM col_test')
+      await source.execute("INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (2, 3), (4, 4)")
+
+      const rows = await source.table('col_test').whereColumn('col_a', 'col_b').find()
+
+      expect(rows).toHaveLength(2)
+      expect(rows.every((r: any) => r.col_a === r.col_b)).toBe(true)
+    })
+
+    it('whereColumn compara dos columnas con operador explícito >', async () => {
+      await source.execute('DELETE FROM col_test')
+      await source.execute("INSERT INTO col_test (col_a, col_b) VALUES (5, 3), (1, 2), (7, 7)")
+
+      const rows = await source.table('col_test').whereColumn('col_a', '>', 'col_b').find()
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0].col_a).toBe(5)
+    })
+
+    it('orWhereColumn agrega condición OR de comparación de columnas', async () => {
+      await source.execute('DELETE FROM col_test')
+      await source.execute("INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (5, 3), (2, 2)")
+
+      // col_a = col_b OR col_a > col_b
+      const rows = await source.table('col_test').whereColumn('col_a', 'col_b').orWhereColumn('col_a', '>', 'col_b').find()
+
+      expect(rows).toHaveLength(3)
+    })
+
+    it('whereColumn dentro de un callback de grupo', async () => {
+      await source.execute('DELETE FROM col_test')
+      await source.execute("INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (5, 3), (2, 2), (9, 1)")
+
+      // (col_a = col_b OR col_a > col_b) AND col_b >= 1
+      const rows = await source
+        .table('col_test')
+        .where((q) => q.whereColumn('col_a', 'col_b').orWhereColumn('col_a', '>', 'col_b'))
+        .find()
+
+      expect(rows).toHaveLength(4)
+    })
+  })
+
   // ─── UPDATE ──────────────────────────────────────────────────────────────
 
   describe('UPDATE', () => {
@@ -778,6 +924,20 @@ describe('SQLite — CRUD completo', () => {
       const activeUsers = await source.table('users').where('active', 1).find()
 
       expect(activeUsers).toHaveLength(0)
+    })
+
+    it('update acepta un objeto de fields como argumento', async () => {
+      const changes = await source
+        .table('users')
+        .where('name', 'Alice')
+        .update({ age: 99, active: 0 })
+
+      expect(changes).toBe(1)
+
+      const user = await source.table('users').where('name', 'Alice').first()
+
+      expect(user!.age).toBe(99)
+      expect(user!.active).toBe(0)
     })
   })
 

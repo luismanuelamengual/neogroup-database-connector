@@ -1,4 +1,4 @@
-import { Condition, ConditionGroup } from '../conditions'
+import { Condition, ConditionConnector, ConditionGroup } from '../conditions'
 import { Field } from '../fields'
 
 export abstract class HasWhereConditions<R> {
@@ -106,5 +106,33 @@ export abstract class HasWhereConditions<R> {
 
   public orWhereNotLike(field: Field, pattern: string): R {
     return this.orWhere(field, 'NOT LIKE', pattern)
+  }
+
+  // ── WHERE COLUMN ──────────────────────────────────────────────────────────
+
+  public whereColumn(field: Field, column: Field): R
+  public whereColumn(field: Field, operator: string, column: Field): R
+  public whereColumn(field: Field, operatorOrColumn: string | Field, column?: Field): R {
+    const operator = column !== undefined ? (operatorOrColumn as string) : '='
+    const col = column !== undefined ? column : (operatorOrColumn as Field)
+
+    this.getWhereConditions()
+      .getConditions()
+      .push({ condition: { field, operator, column: col }, connector: ConditionConnector.AND })
+
+    return this as unknown as R
+  }
+
+  public orWhereColumn(field: Field, column: Field): R
+  public orWhereColumn(field: Field, operator: string, column: Field): R
+  public orWhereColumn(field: Field, operatorOrColumn: string | Field, column?: Field): R {
+    const operator = column !== undefined ? (operatorOrColumn as string) : '='
+    const col = column !== undefined ? column : (operatorOrColumn as Field)
+
+    this.getWhereConditions()
+      .getConditions()
+      .push({ condition: { field, operator, column: col }, connector: ConditionConnector.OR })
+
+    return this as unknown as R
   }
 }

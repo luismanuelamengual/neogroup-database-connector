@@ -1,4 +1,4 @@
-import { Condition, ConditionConnector, ConditionGroup } from '../conditions'
+import { ColumnCondition, Condition, ConditionConnector, ConditionGroup } from '../conditions'
 import { DeleteQuery } from '../delete-query'
 import { Join, JoinType, OrderByField, SelectField } from '../features'
 import { Field } from '../fields'
@@ -435,6 +435,14 @@ export class DefaultQueryBuilder extends QueryBuilder {
 
       statement.sql = sql
       statement.bindings.push(...bindings)
+    } else if ('column' in condition) {
+      const { field, operator, column } = condition as ColumnCondition
+
+      this.buildField(field, statement)
+      statement.sql += DefaultQueryBuilder.SPACE
+      this.buildOperator(operator, statement)
+      statement.sql += DefaultQueryBuilder.SPACE
+      this.buildField(column, statement)
     } else if ('field' in condition) {
       const { field, operator, value } = condition
 
