@@ -9,3 +9,5 @@ export * from './query'
 export * from './sources/postgres'
 //Sqlite
 export * from './sources/sqlite'
+//MySQL
+export * from './sources/mysql'

@@ -210,7 +210,6 @@ describe('SQLite — CRUD completo', () => {
 
       it('filtra con grupo de condiciones (paréntesis)', async () => {
         const { DB } = await import('../src')
-
         // (name = 'Alice' OR name = 'Bob') AND active = 1
         const users = await source
           .table('users')
@@ -335,7 +334,7 @@ describe('SQLite — CRUD completo', () => {
           .find()
 
         expect(groups).toHaveLength(2)
-        expect(groups[0].avg_age).toBe(35)   // Charlie
+        expect(groups[0].avg_age).toBe(35) // Charlie
         expect(groups[1].avg_age).toBe(27.5) // (30 + 25) / 2
       })
     })
@@ -429,7 +428,10 @@ describe('SQLite — CRUD completo', () => {
       it('INNER JOIN con GROUP BY: total de órdenes por usuario', async () => {
         const rows = await source
           .table('users')
-          .select({ name: 'name', table: 'users' }, { name: 'id', table: 'orders', function: 'count', alias: 'order_count' })
+          .select(
+            { name: 'name', table: 'users' },
+            { name: 'id', table: 'orders', function: 'count', alias: 'order_count' }
+          )
           .innerJoin('orders', { name: 'id', table: 'users' }, { name: 'user_id', table: 'orders' })
           .groupBy({ name: 'user_id', table: 'orders' })
           .orderBy({ name: 'name', table: 'users' })
