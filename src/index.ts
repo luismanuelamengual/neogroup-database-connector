@@ -7,3 +7,5 @@ export * from './db'
 export * from './query'
 //Postgres
 export * from './sources/postgres'
+//Sqlite
+export * from './sources/sqlite'

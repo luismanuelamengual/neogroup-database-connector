@@ -12,7 +12,7 @@
     "target": "es2017",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "rootDir": "./src",
     "outDir": "./dist",
     "incremental": false

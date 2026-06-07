@@ -178,18 +178,22 @@ export class DefaultQueryBuilder extends QueryBuilder {
       }
     }
 
-    if (query.getOffset() >= 0) {
-      statement.sql += DefaultQueryBuilder.SPACE
-      statement.sql += DefaultQueryBuilder.OFFSET
-      statement.sql += DefaultQueryBuilder.SPACE
-      statement.sql += query.getOffset()
-    }
+    this.buildLimitOffset(query, statement)
+  }
 
+  protected buildLimitOffset(query: SelectQuery, statement: Statement) {
     if (query.getLimit() >= 0) {
       statement.sql += DefaultQueryBuilder.SPACE
       statement.sql += DefaultQueryBuilder.LIMIT
       statement.sql += DefaultQueryBuilder.SPACE
       statement.sql += query.getLimit()
+    }
+
+    if (query.getOffset() >= 0) {
+      statement.sql += DefaultQueryBuilder.SPACE
+      statement.sql += DefaultQueryBuilder.OFFSET
+      statement.sql += DefaultQueryBuilder.SPACE
+      statement.sql += query.getOffset()
     }
   }
 

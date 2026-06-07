@@ -11,7 +11,7 @@ export abstract class HasDistinct<R> {
     return this._distinct
   }
 
-  public distinct(distinct: boolean): R {
+  public distinct(distinct: boolean = true): R {
     return this.setDistinct(distinct)
   }
 }
