@@ -21,7 +21,11 @@ export class PostgresDataSource extends DataSource {
       throw new Error('PostgreSQL module not found. Please install it via "npm install -S pg"')
     }
 
+    this.host = ''
     this.port = 5432
+    this.databaseName = ''
+    this.username = ''
+    this.password = ''
   }
 
   public setHost(host: string) {

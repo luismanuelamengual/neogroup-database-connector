@@ -1,16 +1,19 @@
 {
   "compilerOptions": {
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "experimentalDecorators": true,
     "lib": ["dom","es2017"],
-    "moduleResolution": "node",
-    "module": "CommonJS",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
     "declaration": true,
     "sourceMap": true,
     "target": "es2017",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "types": ["node"],
+    "rootDir": "./src",
     "outDir": "./dist",
     "incremental": false
   },
