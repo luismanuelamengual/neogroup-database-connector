@@ -1,6 +1,6 @@
 {
   "name": "@neogroup/database-connector",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Database connector for javascript",
   "main": "dist/index.js",
   "module": "dist/index.js",
