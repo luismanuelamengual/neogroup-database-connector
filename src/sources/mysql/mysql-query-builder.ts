@@ -1,5 +1,4 @@
 import { DefaultQueryBuilder } from '../../query/builders/default-query-builder'
-import { Field } from '../../query/fields'
 import { Statement } from '../../query/statement'
 import { Table } from '../../query/table'
 
@@ -7,7 +6,9 @@ export class MysqlQueryBuilder extends DefaultQueryBuilder {
   private static readonly BACKTICK = '`'
 
   // MySQL usa backticks para escapar identifiers (tablas, campos)
-  // evitando colisiones con palabras reservadas
+  // evitando colisiones con palabras reservadas.
+  // buildTable y buildFieldName son suficientes — buildRawFieldString los invoca
+  // automáticamente al parsear notaciones 'tabla.campo' y 'FUNC(tabla.campo)'.
 
   protected buildTable(table: Table, statement: Statement) {
     if (typeof table === 'string' || table instanceof String) {
@@ -22,17 +23,7 @@ export class MysqlQueryBuilder extends DefaultQueryBuilder {
     }
   }
 
-  protected buildField(field: Field, statement: Statement) {
-    if (typeof field === 'string' || field instanceof String) {
-      // Campo raw (e.g. 'COUNT(id)', 'users.id') — no se envuelve en backticks
-      statement.sql += field
-    } else {
-      if (field.table) {
-        this.buildTable(field.table, statement)
-        statement.sql += DefaultQueryBuilder.POINT
-      }
-
-      statement.sql += MysqlQueryBuilder.BACKTICK + field.name + MysqlQueryBuilder.BACKTICK
-    }
+  protected buildFieldName(name: string, statement: Statement) {
+    statement.sql += MysqlQueryBuilder.BACKTICK + name + MysqlQueryBuilder.BACKTICK
   }
 }

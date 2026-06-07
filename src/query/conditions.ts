@@ -9,7 +9,7 @@ export enum ConditionConnector {
   OR
 }
 
-export type Condition = RawCondition | BasicCondition | ConditionGroup
+export type Condition = RawCondition | BasicCondition | ConditionGroup | ((group: ConditionGroup) => void)
 
 export type ConnectedCondition = { condition: Condition; connector: ConditionConnector }
 
@@ -26,33 +26,40 @@ export class ConditionGroup {
     return this.conditions
   }
 
-  public with(condition: Condition): ConditionGroup
-  public with(field: Field, value: any): ConditionGroup
-  public with(field: Field, operator: string, value: any): ConditionGroup
-  public with(): ConditionGroup {
+  public where(callback: (group: ConditionGroup) => void): ConditionGroup
+  public where(condition: Condition): ConditionGroup
+  public where(field: Field, value: any): ConditionGroup
+  public where(field: Field, operator: string, value: any): ConditionGroup
+  public where(): ConditionGroup {
     let condition: Condition
 
-    switch (arguments.length) {
-      case 1:
-        condition = arguments[0]
-        break
+    if (arguments.length === 1 && typeof arguments[0] === 'function') {
+      const group = new ConditionGroup()
 
-      case 2: {
-        const [field, value] = arguments
+      arguments[0](group)
+      condition = group
+    } else {
+      switch (arguments.length) {
+        case 1:
+          condition = arguments[0]
+          break
 
-        condition = { field, operator: '=', value }
-        break
-      }
+        case 2: {
+          const [field, value] = arguments
 
-      case 3: {
-        const [field, operator, value] = arguments
+          condition = { field, operator: '=', value }
+          break
+        }
 
-        condition = { field, operator, value }
-        break
-      }
+        case 3: {
+          const [field, operator, value] = arguments
 
-      default: {
-        throw new Error('Wrong number of arguments for "with"')
+          condition = { field, operator, value }
+          break
+        }
+
+        default:
+          throw new Error('Wrong number of arguments for "where"')
       }
     }
 
@@ -61,33 +68,40 @@ export class ConditionGroup {
     return this
   }
 
-  public orWith(condition: Condition): ConditionGroup
-  public orWith(field: Field, value: any): ConditionGroup
-  public orWith(field: Field, operator: string, value: any): ConditionGroup
-  public orWith(): ConditionGroup {
+  public orWhere(callback: (group: ConditionGroup) => void): ConditionGroup
+  public orWhere(condition: Condition): ConditionGroup
+  public orWhere(field: Field, value: any): ConditionGroup
+  public orWhere(field: Field, operator: string, value: any): ConditionGroup
+  public orWhere(): ConditionGroup {
     let condition: Condition
 
-    switch (arguments.length) {
-      case 1:
-        condition = arguments[0]
-        break
+    if (arguments.length === 1 && typeof arguments[0] === 'function') {
+      const group = new ConditionGroup()
 
-      case 2: {
-        const [field, value] = arguments
+      arguments[0](group)
+      condition = group
+    } else {
+      switch (arguments.length) {
+        case 1:
+          condition = arguments[0]
+          break
 
-        condition = { field, operator: '=', value }
-        break
-      }
+        case 2: {
+          const [field, value] = arguments
 
-      case 3: {
-        const [field, operator, value] = arguments
+          condition = { field, operator: '=', value }
+          break
+        }
 
-        condition = { field, operator, value }
-        break
-      }
+        case 3: {
+          const [field, operator, value] = arguments
 
-      default: {
-        throw new Error('Wrong number of arguments for "orWith"')
+          condition = { field, operator, value }
+          break
+        }
+
+        default:
+          throw new Error('Wrong number of arguments for "orWhere"')
       }
     }
 

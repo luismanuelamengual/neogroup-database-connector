@@ -12,6 +12,7 @@ import {
   HasOffset,
   HasSelectFields,
   HasTable,
+  HasWhen,
   HasWhereConditions,
   InsertQuery,
   SelectQuery,
@@ -91,7 +92,8 @@ export interface DataTable
     HasAlias<DataTable>,
     HasWhereConditions<DataTable>,
     HasHavingConditions<DataTable>,
-    HasJoins<DataTable> {}
+    HasJoins<DataTable>,
+    HasWhen<DataTable> {}
 applyMixins(DataTable, [
   HasDistinct,
   HasLimit,
@@ -104,5 +106,6 @@ applyMixins(DataTable, [
   HasAlias,
   HasWhereConditions,
   HasHavingConditions,
-  HasJoins
+  HasJoins,
+  HasWhen
 ])

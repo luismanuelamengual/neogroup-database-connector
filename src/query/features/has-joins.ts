@@ -1,6 +1,20 @@
 import { ConditionGroup } from '../conditions'
-import { Field } from '../fields'
+import { BasicField, Field } from '../fields'
 import { Table } from '../table'
+
+/** Converts a 'table.field' string into a BasicField object so engine-specific
+ *  quoting is applied correctly by the query builder. */
+function toField(f: Field): BasicField {
+  if (typeof f !== 'string') {
+    return f as BasicField
+  }
+
+  const dot = (f as string).indexOf('.')
+
+  return dot !== -1
+    ? { table: (f as string).substring(0, dot), name: (f as string).substring(dot + 1) }
+    : { name: f as string }
+}
 
 export enum JoinType {
   JOIN,
@@ -24,7 +38,7 @@ export abstract class HasJoins<R> {
     return this._joins
   }
 
-  public setJoins(joins: Array<Join>): R {
+  public setJoins(joins: Array<Join> | undefined): R {
     this._joins = joins
 
     return this as unknown as R
@@ -43,7 +57,7 @@ export abstract class HasJoins<R> {
       const [type, table, sourceField, remoteField, alias] = arguments
       const condition = new ConditionGroup()
 
-      condition.with(sourceField, typeof remoteField === 'object' ? remoteField : { name: remoteField })
+      condition.where(toField(sourceField), toField(remoteField))
       join = { type, table, condition, alias }
     }
 

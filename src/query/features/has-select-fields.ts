@@ -5,7 +5,7 @@ export type SelectField = RawField | (BasicField & { function?: string; alias?: 
 export abstract class HasSelectFields<R> {
   protected _selectFields?: Array<SelectField>
 
-  public setSelectFields(selectFields: Array<SelectField>): R {
+  public setSelectFields(selectFields: Array<SelectField> | undefined): R {
     this._selectFields = selectFields
 
     return this as unknown as R

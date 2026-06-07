@@ -4,7 +4,7 @@ import { Field } from '../fields'
 export abstract class HasHavingConditions<R> {
   protected _havingConditions?: ConditionGroup
 
-  public setHavingConditions(conditions: ConditionGroup): R {
+  public setHavingConditions(conditions: ConditionGroup | undefined): R {
     this._havingConditions = conditions
 
     return this as unknown as R
@@ -23,7 +23,7 @@ export abstract class HasHavingConditions<R> {
   public having(field: Field, operator: string, value: any): R
   public having(): R {
     // @ts-ignore
-    this.getHavingConditions().with(...arguments)
+    this.getHavingConditions().where(...arguments)
 
     return this as unknown as R
   }
@@ -33,7 +33,7 @@ export abstract class HasHavingConditions<R> {
   public orHaving(field: Field, operator: string, value: any): R
   public orHaving(): R {
     // @ts-ignore
-    this.getHavingConditions().orWith(...arguments)
+    this.getHavingConditions().orWhere(...arguments)
 
     return this as unknown as R
   }

@@ -10,7 +10,7 @@ export type OrderByField = RawField | (BasicField & { direction?: OrderByDirecti
 export abstract class HasOrderByFields<R> {
   protected _orderByFields?: Array<OrderByField>
 
-  public setOrderByFields(orderByFields: Array<OrderByField>): R {
+  public setOrderByFields(orderByFields: Array<OrderByField> | undefined): R {
     this._orderByFields = orderByFields
 
     return this as unknown as R

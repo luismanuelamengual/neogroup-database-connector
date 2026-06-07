@@ -11,11 +11,12 @@ describe('SQLite — CRUD completo', () => {
 
     await source.execute(`
       CREATE TABLE users (
-        id      INTEGER PRIMARY KEY AUTOINCREMENT,
-        name    TEXT    NOT NULL,
-        email   TEXT    NOT NULL,
-        age     INTEGER NOT NULL,
-        active  INTEGER NOT NULL DEFAULT 1
+        id       INTEGER PRIMARY KEY AUTOINCREMENT,
+        name     TEXT    NOT NULL,
+        email    TEXT    NOT NULL,
+        age      INTEGER NOT NULL,
+        active   INTEGER NOT NULL DEFAULT 1,
+        nickname TEXT
       )
     `)
 
@@ -208,17 +209,58 @@ describe('SQLite — CRUD completo', () => {
         expect(users).toHaveLength(0)
       })
 
-      it('filtra con grupo de condiciones (paréntesis)', async () => {
+      it('filtra con grupo de condiciones (paréntesis) usando ConditionGroup', async () => {
         const { DB } = await import('../src')
         // (name = 'Alice' OR name = 'Bob') AND active = 1
         const users = await source
           .table('users')
-          .where(DB.conditionGroup().with('name', 'Alice').orWith('name', 'Bob'))
+          .where(DB.conditionGroup().where('name', 'Alice').orWhere('name', 'Bob'))
           .where('active', 1)
           .find()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
+      })
+
+      it('filtra con grupo de condiciones usando callback', async () => {
+        // (name = 'Alice' OR name = 'Bob') AND active = 1
+        const users = await source
+          .table('users')
+          .where((group) => group.where('name', 'Alice').orWhere('name', 'Bob'))
+          .where('active', 1)
+          .find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
+      })
+
+      it('filtra con callbacks anidados (grupos dentro de grupos)', async () => {
+        // (active = 1 AND (age < 28 OR age > 33))
+        // → activos fuera del rango [28, 33]: solo Bob(25, activo)
+        const users = await source
+          .table('users')
+          .where((group) =>
+            group
+              .where('active', 1)
+              .where((inner) => inner.where('age', '<', 28).orWhere('age', '>', 33))
+          )
+          .find()
+
+        expect(users).toHaveLength(1)
+        expect(users[0].name).toBe('Bob')
+      })
+
+      it('filtra con orWhere recibiendo callback', async () => {
+        // name = 'Charlie' OR (active = 1 AND age < 28)
+        // → Charlie(35, inactivo) OR Bob(25, activo) → [Charlie, Bob]
+        const users = await source
+          .table('users')
+          .where('name', 'Charlie')
+          .orWhere((group) => group.where('active', 1).where('age', '<', 28))
+          .find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
       })
 
       it('filtra con BETWEEN (rango inclusivo)', async () => {
@@ -251,11 +293,143 @@ describe('SQLite — CRUD completo', () => {
         expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
       })
 
+      // whereLike / whereNotLike
+      it('whereLike filtra con patrón LIKE', async () => {
+        const users = await source.table('users').whereLike('email', '%example.com').find()
+
+        expect(users).toHaveLength(3)
+      })
+
+      it('whereNotLike excluye registros que coinciden con el patrón', async () => {
+        const users = await source.table('users').whereNotLike('name', 'A%').find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
+      })
+
+      it('orWhereLike combina con OR', async () => {
+        // name = 'Charlie' OR email LIKE 'alice%'  → Charlie + Alice
+        const users = await source.table('users').where('name', 'Charlie').orWhereLike('email', 'alice%').find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Charlie'])
+      })
+
+      it('orWhereNotLike combina con OR', async () => {
+        // active = 0 OR name NOT LIKE 'A%'  → Charlie (inactivo y no empieza con A) + Bob
+        const users = await source.table('users').where('active', 0).orWhereNotLike('name', 'A%').find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
+      })
+
       it('filtra con NOT IN', async () => {
         const users = await source.table('users').where('age', 'NOT IN', [25, 35]).find()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Alice')
+      })
+
+      // whereIn / whereNotIn
+      it('whereIn retorna solo los registros cuyo campo está en la lista', async () => {
+        const users = await source.table('users').whereIn('name', ['Alice', 'Bob']).find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
+      })
+
+      it('whereNotIn excluye los registros cuyo campo está en la lista', async () => {
+        const users = await source.table('users').whereNotIn('name', ['Alice', 'Bob']).find()
+
+        expect(users).toHaveLength(1)
+        expect(users[0].name).toBe('Charlie')
+      })
+
+      it('orWhereIn combina con OR', async () => {
+        // name = 'Charlie' OR age IN (25, 30)  → los tres
+        const users = await source.table('users').where('name', 'Charlie').orWhereIn('age', [25, 30]).find()
+
+        expect(users).toHaveLength(3)
+      })
+
+      it('orWhereNotIn combina con OR', async () => {
+        // active = 0 OR age NOT IN (25, 30)  → Charlie (inactivo y 35)
+        const users = await source.table('users').where('active', 0).orWhereNotIn('age', [25, 30]).find()
+
+        expect(users).toHaveLength(1)
+        expect(users[0].name).toBe('Charlie')
+      })
+
+      // whereBetween / whereNotBetween
+      it('whereBetween retorna registros dentro del rango', async () => {
+        const users = await source.table('users').whereBetween('age', [25, 30]).orderBy('age').find()
+
+        expect(users).toHaveLength(2)
+        expect(users[0].name).toBe('Bob')
+        expect(users[1].name).toBe('Alice')
+      })
+
+      it('whereNotBetween retorna registros fuera del rango', async () => {
+        const users = await source.table('users').whereNotBetween('age', [25, 30]).find()
+
+        expect(users).toHaveLength(1)
+        expect(users[0].name).toBe('Charlie')
+      })
+
+      it('orWhereBetween combina con OR', async () => {
+        // name = 'Charlie' OR age BETWEEN 25 AND 26  → Charlie + Bob
+        const users = await source.table('users').where('name', 'Charlie').orWhereBetween('age', [25, 26]).find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
+      })
+
+      it('orWhereNotBetween combina con OR', async () => {
+        // active = 1 OR age NOT BETWEEN 25 AND 34  → Alice + Bob (activos) + Charlie (35)
+        const users = await source.table('users').where('active', 1).orWhereNotBetween('age', [25, 34]).find()
+
+        expect(users).toHaveLength(3)
+      })
+
+      // whereNull / whereNotNull
+      // La columna `nickname` es nullable; los usuarios seed tienen nickname = NULL.
+      // Sólo los que se insertan en cada test con nickname explícito son NOT NULL.
+      it('whereNull retorna registros con campo NULL', async () => {
+        // Alice, Bob y Charlie tienen nickname NULL; Dave tiene nickname asignado
+        await source.table('users').set('name', 'Dave').set('email', 'dave@example.com').set('age', 28).set('nickname', 'dv').insert()
+
+        const users = await source.table('users').whereNull('nickname').find()
+
+        expect(users).toHaveLength(3)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob', 'Charlie'])
+      })
+
+      it('whereNotNull retorna registros donde el campo NO es NULL', async () => {
+        await source.table('users').set('name', 'Dave').set('email', 'dave@example.com').set('age', 28).set('nickname', 'dv').insert()
+
+        const users = await source.table('users').whereNotNull('nickname').find()
+
+        expect(users).toHaveLength(1)
+        expect(users[0].name).toBe('Dave')
+      })
+
+      it('orWhereNull combina con OR', async () => {
+        await source.table('users').set('name', 'Dave').set('email', 'dave@example.com').set('age', 28).set('nickname', 'dv').insert()
+
+        // name = 'Dave' OR nickname IS NULL → Dave + Alice + Bob + Charlie
+        const users = await source.table('users').where('name', 'Dave').orWhereNull('nickname').find()
+
+        expect(users).toHaveLength(4)
+      })
+
+      it('orWhereNotNull combina con OR', async () => {
+        await source.table('users').set('name', 'Dave').set('email', 'dave@example.com').set('age', 28).set('nickname', 'dv').insert()
+
+        // active = 0 OR nickname IS NOT NULL → Charlie (inactivo) + Dave (nickname asignado)
+        const users = await source.table('users').where('active', 0).orWhereNotNull('nickname').find()
+
+        expect(users).toHaveLength(2)
+        expect(users.map((u: any) => u.name).sort()).toEqual(['Charlie', 'Dave'])
       })
     })
 
@@ -264,14 +438,12 @@ describe('SQLite — CRUD completo', () => {
     describe('UNION / UNION ALL', () => {
       it('UNION combina dos SELECT eliminando duplicados', async () => {
         const { DB } = await import('../src')
-
         // active=1 → Alice, Bob | age > 28 → Alice, Charlie
         // UNION: Alice, Bob, Charlie (Alice deduplicada)
         const query = DB.selectQuery('users')
           .select('name')
           .where('active', 1)
           .union(DB.selectQuery('users').select('name').where('age', '>', 28))
-
         const rows = await source.query(query)
 
         expect(rows).toHaveLength(3)
@@ -280,14 +452,12 @@ describe('SQLite — CRUD completo', () => {
 
       it('UNION ALL combina dos SELECT conservando duplicados', async () => {
         const { DB } = await import('../src')
-
         // active=1 → Alice, Bob | age > 28 → Alice, Charlie
         // UNION ALL: Alice, Bob, Alice, Charlie (Alice aparece dos veces)
         const query = DB.selectQuery('users')
           .select('name')
           .where('active', 1)
           .unionAll(DB.selectQuery('users').select('name').where('age', '>', 28))
-
         const rows = await source.query(query)
 
         expect(rows).toHaveLength(4)
@@ -296,13 +466,11 @@ describe('SQLite — CRUD completo', () => {
 
       it('UNION de múltiples queries', async () => {
         const { DB } = await import('../src')
-
         const query = DB.selectQuery('users')
           .select('name')
           .where('name', 'Alice')
           .union(DB.selectQuery('users').select('name').where('name', 'Bob'))
           .union(DB.selectQuery('users').select('name').where('name', 'Charlie'))
-
         const rows = await source.query(query)
 
         expect(rows).toHaveLength(3)
@@ -529,6 +697,49 @@ describe('SQLite — CRUD completo', () => {
         expect(rows[0].order_count).toBe(2)
         expect(rows[1].name).toBe('Bob')
         expect(rows[1].order_count).toBe(1)
+      })
+
+      // ── notación string 'tabla.campo' ────────────────────────────────────────
+
+      it('INNER JOIN con notación string (tabla.campo)', async () => {
+        const rows = await source
+          .table('users')
+          .select('users.name', 'orders.product')
+          .innerJoin('orders', 'users.id', 'orders.user_id')
+          .orderBy('users.name')
+          .find()
+
+        expect(rows).toHaveLength(3)
+        expect(rows.map((r: any) => r.name).sort()).toEqual(['Alice', 'Alice', 'Bob'])
+      })
+
+      it('LEFT JOIN con notación string y WHERE', async () => {
+        const rows = await source
+          .table('users')
+          .select('users.name', 'orders.amount')
+          .leftJoin('orders', 'users.id', 'orders.user_id')
+          .where('orders.amount', '>', 10)
+          .find()
+
+        expect(rows).toHaveLength(1)
+        expect(rows[0].name).toBe('Alice')
+      })
+
+      it('buildRawFieldString — función aplicada a campo calificado', async () => {
+        // COUNT(orders.id) en notación string
+        const rows = await source
+          .table('users')
+          .select('users.name', 'COUNT(orders.id) AS order_count')
+          .innerJoin('orders', 'users.id', 'orders.user_id')
+          .groupBy('users.id')
+          .orderBy('users.name')
+          .find()
+
+        expect(rows).toHaveLength(2)
+        expect(rows[0].name).toBe('Alice')
+        expect(Number(rows[0].order_count)).toBe(2)
+        expect(rows[1].name).toBe('Bob')
+        expect(Number(rows[1].order_count)).toBe(1)
       })
     })
   })

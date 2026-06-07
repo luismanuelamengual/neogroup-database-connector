@@ -3,7 +3,7 @@ import { DataSet } from '../../data-set'
 export abstract class HasFieldValues<R> {
   protected _fields?: DataSet
 
-  public setFields(fields: DataSet): R {
+  public setFields(fields: DataSet | undefined): R {
     this._fields = fields
 
     return this as unknown as R
