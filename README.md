@@ -33,6 +33,8 @@ A lightweight, fluent TypeScript library for interacting with relational databas
   - [UNION / UNION ALL](#union--union-all)
   - [Subqueries](#subqueries)
 - [Connections & transactions](#connections--transactions)
+  - [Explicit connection](#explicit-connection)
+  - [DB shorthand methods](#db-shorthand-methods)
 - [Debug mode](#debug-mode)
 - [Extending the library](#extending-the-library)
 - [Contact](#contact)
@@ -112,11 +114,18 @@ You can register multiple sources and switch between them by name:
 DB.register('primary', primarySource)
 DB.register('reporting', reportingSource)
 
-// Use a specific source
+// Use a specific source explicitly
 const rows = await DB.source('reporting').table('analytics').find()
 ```
 
-When no name is given, the first registered source is the default and `DB.table(...)` targets it automatically.
+The first registered source becomes the **active source** automatically. `DB.table(...)`, `DB.query(...)`, `DB.execute(...)` and the transaction helpers all target it. You can change it at any time with `setActiveSource()`:
+
+```typescript
+DB.setActiveSource('reporting')
+
+// Now all DB.* calls target reportingSource
+const rows = await DB.table('analytics').find()
+```
 
 ---
 
@@ -442,22 +451,31 @@ await DB.table('users').alias('u').find()
 **INSERT:**
 
 ```typescript
-// INSERT INTO users (name, email, age) VALUES ('Alice', 'alice@example.com', 30)
+// Using set() — chainable
 const rowsAffected = await DB.table('users')
   .set('name', 'Alice')
   .set('email', 'alice@example.com')
   .set('age', 30)
   .insert()
+
+// Passing a fields object directly (Laravel-style)
+const rowsAffected = await DB.table('users')
+  .insert({ name: 'Alice', email: 'alice@example.com', age: 30 })
 ```
 
 **UPDATE:**
 
 ```typescript
-// UPDATE users SET active = 0 WHERE id = 7
+// Using set() — chainable
 const rowsAffected = await DB.table('users')
   .where('id', 7)
   .set('active', 0)
   .update()
+
+// Passing a fields object directly
+const rowsAffected = await DB.table('users')
+  .where('id', 7)
+  .update({ active: 0, name: 'Bob' })
 ```
 
 **DELETE:**
@@ -473,20 +491,26 @@ const rowsAffected = await DB.table('users').where('active', 0).delete()
 
 ## Raw queries
 
-When you need full control over the SQL string:
+When you need full control over the SQL string, use `DB.query()` and `DB.execute()` directly on the active source:
 
 ```typescript
 // Raw SELECT
-const rows = await DB.source('primary').query(
+const rows = await DB.query(
   'SELECT * FROM users WHERE age > ? AND active = ?',
   [18, 1]
 )
 
 // Raw execute (INSERT / UPDATE / DELETE / DDL)
-const affected = await DB.source('primary').execute(
+const affected = await DB.execute(
   'UPDATE users SET active = ? WHERE last_login < ?',
   [0, '2023-01-01']
 )
+```
+
+To target a specific source, use `DB.source()`:
+
+```typescript
+const rows = await DB.source('reporting').query('SELECT * FROM analytics')
 ```
 
 ---
@@ -548,10 +572,12 @@ const orders = await DB.source('primary').query(
 
 ## Connections & transactions
 
-Obtain an explicit connection for multi-step operations or transactions:
+### Explicit connection
+
+Obtain a connection explicitly when you need full control over its lifecycle:
 
 ```typescript
-const conn = await DB.source('primary').getConnection()
+const conn = await DB.connection()
 
 try {
   await conn.beginTransaction()
@@ -567,10 +593,10 @@ try {
 }
 ```
 
-The helper `executeTransaction()` handles begin/commit/rollback automatically:
+`executeTransaction()` on a connection handles begin/commit/rollback automatically:
 
 ```typescript
-const conn = await DB.source('primary').getConnection()
+const conn = await DB.connection()
 
 await conn.executeTransaction(async (tx) => {
   await tx.execute('INSERT INTO logs (event) VALUES (?)', ['login'])
@@ -579,6 +605,31 @@ await conn.executeTransaction(async (tx) => {
 })
 
 await conn.close()
+```
+
+### DB shorthand methods
+
+`DB` exposes convenience wrappers that delegate directly to the active source's connection, so you don't need to manage a connection object for simple cases:
+
+```typescript
+// One-shot query / execute
+const rows    = await DB.query('SELECT * FROM users WHERE active = ?', [1])
+const affected = await DB.execute('DELETE FROM logs WHERE created_at < ?', ['2024-01-01'])
+
+// Auto-managed transaction (recommended)
+await DB.executeTransaction(async (tx) => {
+  await tx.execute('INSERT INTO logs (event) VALUES (?)', ['login'])
+  await tx.execute('UPDATE users SET last_login = NOW() WHERE id = ?', [userId])
+})
+
+// Manual transaction control
+await DB.beginTransaction()
+try {
+  await DB.execute('INSERT INTO ...')
+  await DB.commitTransaction()
+} catch (err) {
+  await DB.rollbackTransaction()
+}
 ```
 
 ---
