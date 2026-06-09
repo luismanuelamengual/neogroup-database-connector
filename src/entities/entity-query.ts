@@ -5,7 +5,7 @@ import { JoinType } from '../query/features/has-joins'
 import { OrderByDirection } from '../query/features/has-order-by-fields'
 import { Relationship } from './relationship'
 
-type ResourceClass<T> = (new () => T) & {
+type EntityClass<T> = (new () => T) & {
   table: string
   primaryKey: string
   relationships: Record<string, Relationship>
@@ -13,16 +13,16 @@ type ResourceClass<T> = (new () => T) & {
 }
 
 /**
- * Chainable query builder for Resources. Wraps DataTable and hydrates rows
- * into typed Resource instances when a terminal method is called.
+ * Chainable query builder for Entities. Wraps DataTable and hydrates rows
+ * into typed Entity instances when a terminal method is called.
  */
-export class ResourceQuery<T> {
-  private _resourceClass: ResourceClass<T>
+export class EntityQuery<T> {
+  private _entityClass: EntityClass<T>
   private _table: DataTable
   private _withs: string[] = []
 
-  constructor(resourceClass: ResourceClass<T>, table: DataTable) {
-    this._resourceClass = resourceClass
+  constructor(entityClass: EntityClass<T>, table: DataTable) {
+    this._entityClass = entityClass
     this._table = table
   }
 
@@ -51,10 +51,10 @@ export class ResourceQuery<T> {
   }
 
   private _applyJoin(joinType: JoinType, relationName: string): this {
-    const rel = this._resourceClass.relationships[relationName]
+    const rel = this._entityClass.relationships[relationName]
 
     if (!rel) {
-      throw new Error(`Relationship "${relationName}" is not defined on ${this._resourceClass.name}`)
+      throw new Error(`Relationship "${relationName}" is not defined on ${this._entityClass.name}`)
     }
 
     const RelatedClass = rel.related()
@@ -62,13 +62,13 @@ export class ResourceQuery<T> {
 
     if (rel.type === 'hasOne' || rel.type === 'hasMany') {
       // local table.localKey = related table.foreignKey
-      const sourceField = `${this._resourceClass.table}.${rel.localKey}`
+      const sourceField = `${this._entityClass.table}.${rel.localKey}`
       const remoteField = `${relatedTable}.${rel.foreignKey}`
 
       this._table.join(joinType, relatedTable, sourceField, remoteField)
     } else if (rel.type === 'belongsTo') {
       // local table.foreignKey = related table.localKey
-      const sourceField = `${this._resourceClass.table}.${rel.foreignKey}`
+      const sourceField = `${this._entityClass.table}.${rel.foreignKey}`
       const remoteField = `${relatedTable}.${rel.localKey}`
 
       this._table.join(joinType, relatedTable, sourceField, remoteField)
@@ -80,7 +80,7 @@ export class ResourceQuery<T> {
       this._table.join(
         joinType,
         throughTable,
-        `${this._resourceClass.table}.${rel.localKey}`,
+        `${this._entityClass.table}.${rel.localKey}`,
         `${throughTable}.${rel.throughForeignKey}`
       )
       this._table.join(
@@ -98,13 +98,13 @@ export class ResourceQuery<T> {
 
   public async get(): Promise<T[]> {
     const rows = await this._table.get()
-    const resources = rows.map((row) => this._resourceClass.fromRow(row))
+    const entities = rows.map((row) => this._entityClass.fromRow(row))
 
     if (this._withs.length > 0) {
-      await this._loadRelations(resources as any[], this._withs, this._resourceClass)
+      await this._loadRelations(entities as any[], this._withs, this._entityClass)
     }
 
-    return resources
+    return entities
   }
 
   public async first(): Promise<T | null> {
@@ -114,34 +114,34 @@ export class ResourceQuery<T> {
       return null
     }
 
-    const resource = this._resourceClass.fromRow(row)
+    const entity = this._entityClass.fromRow(row)
 
     if (this._withs.length > 0) {
-      await this._loadRelations([resource as any], this._withs, this._resourceClass)
+      await this._loadRelations([entity as any], this._withs, this._entityClass)
     }
 
-    return resource
+    return entity
   }
 
   public async find(id: any): Promise<T | null> {
-    const row = await this._table.where(this._resourceClass.primaryKey, id).first()
+    const row = await this._table.where(this._entityClass.primaryKey, id).first()
 
     if (!row) {
       return null
     }
 
-    const resource = this._resourceClass.fromRow(row)
+    const entity = this._entityClass.fromRow(row)
 
     if (this._withs.length > 0) {
-      await this._loadRelations([resource as any], this._withs, this._resourceClass)
+      await this._loadRelations([entity as any], this._withs, this._entityClass)
     }
 
-    return resource
+    return entity
   }
 
   // ── Eager-load implementation ────────────────────────────────────────────────
 
-  private async _loadRelations(resources: any[], relations: string[], ParentClass: ResourceClass<any>): Promise<void> {
+  private async _loadRelations(entities: any[], relations: string[], ParentClass: EntityClass<any>): Promise<void> {
     // Group by top-level relation name; accumulate nested paths
     const groups = new Map<string, string[]>()
 
@@ -170,7 +170,7 @@ export class ResourceQuery<T> {
       let relatedItems: any[] = []
 
       if (rel.type === 'hasOne' || rel.type === 'hasMany') {
-        const keys = [...new Set(resources.map((r) => r[rel.localKey]).filter((v) => v != null))]
+        const keys = [...new Set(entities.map((r) => r[rel.localKey]).filter((v) => v != null))]
 
         if (keys.length === 0) {
           continue
@@ -191,13 +191,13 @@ export class ResourceQuery<T> {
           lookup.get(k)!.push(item)
         })
 
-        resources.forEach((r) => {
+        entities.forEach((r) => {
           const matched = lookup.get(r[rel.localKey]) ?? []
 
           r[head] = rel.type === 'hasOne' ? matched[0] ?? null : matched
         })
       } else if (rel.type === 'belongsTo') {
-        const keys = [...new Set(resources.map((r) => r[rel.foreignKey]).filter((v) => v != null))]
+        const keys = [...new Set(entities.map((r) => r[rel.foreignKey]).filter((v) => v != null))]
 
         if (keys.length === 0) {
           continue
@@ -210,12 +210,12 @@ export class ResourceQuery<T> {
 
         relatedItems.forEach((item: any) => lookup.set(item[rel.localKey], item))
 
-        resources.forEach((r) => {
+        entities.forEach((r) => {
           r[head] = lookup.get(r[rel.foreignKey]) ?? null
         })
       } else if (rel.type === 'hasOneThrough' || rel.type === 'hasManyThrough') {
         const ThroughClass = rel.through!()
-        const localKeys = [...new Set(resources.map((r) => r[rel.localKey]).filter((v) => v != null))]
+        const localKeys = [...new Set(entities.map((r) => r[rel.localKey]).filter((v) => v != null))]
 
         if (localKeys.length === 0) {
           continue
@@ -259,7 +259,7 @@ export class ResourceQuery<T> {
           relatedByThrough.get(k)!.push(item)
         })
 
-        resources.forEach((r) => {
+        entities.forEach((r) => {
           const throughs = throughByParent.get(r[rel.localKey]) ?? []
           const matched: any[] = []
 
@@ -280,7 +280,7 @@ export class ResourceQuery<T> {
   }
 
   // ── DataTable method proxies ─────────────────────────────────────────────────
-  // (returning `this` so the query stays ResourceQuery-typed)
+  // (returning `this` so the query stays EntityQuery-typed)
 
   public where(callback: (group: ConditionGroup) => void): this
   public where(condition: Condition): this

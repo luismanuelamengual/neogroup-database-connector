@@ -5,8 +5,8 @@ export * from './data-table'
 export * from './db'
 //Queries
 export * from './query'
-//Resources
-export * from './resources'
+//Entities
+export * from './entities'
 //Postgres
 export * from './sources/postgres'
 //Sqlite
