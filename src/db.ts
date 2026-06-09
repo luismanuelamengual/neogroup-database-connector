@@ -4,37 +4,65 @@ import { DataSource } from './data-source'
 import { DataTable } from './data-table'
 import { ConditionGroup, DeleteQuery, InsertQuery, Query, SelectQuery, Table, UpdateQuery } from './query'
 
+// ── Global state — survives Next.js hot reloads ───────────────────────────────
+
+interface DbState {
+  sources: Map<string, DataSource>
+  activeSourceName?: string
+}
+
+function getGlobalState(): DbState {
+  const g = globalThis as any
+
+  if (!g.__neorm) {
+    g.__neorm = { sources: new Map<string, DataSource>() }
+  }
+
+  return g.__neorm as DbState
+}
+
+// ── DB ────────────────────────────────────────────────────────────────────────
+
 export abstract class DB {
-  private static sources = new Map<string, DataSource>()
-  private static activeSourceName?: string
+  private static get _sources(): Map<string, DataSource> {
+    return getGlobalState().sources
+  }
+
+  private static get _activeSourceName(): string | undefined {
+    return getGlobalState().activeSourceName
+  }
+
+  private static set _activeSourceName(value: string | undefined) {
+    getGlobalState().activeSourceName = value
+  }
 
   // ── Registration ────────────────────────────────────────────────────────────
 
   public static register(source: DataSource): void
   public static register(sourceName: string, source: DataSource): void
   public static register(sourceOrName: DataSource | string, source?: DataSource): void {
-    const sourceName = source ? (sourceOrName as string) : 'source' + (this.sources.size + 1)
+    const sourceName = source ? (sourceOrName as string) : 'source' + (this._sources.size + 1)
     const sourceToRegister = source ?? (sourceOrName as DataSource)
 
-    this.sources.set(sourceName, sourceToRegister)
+    this._sources.set(sourceName, sourceToRegister)
 
-    if (!this.activeSourceName) {
-      this.activeSourceName = sourceName
+    if (!this._activeSourceName) {
+      this._activeSourceName = sourceName
     }
   }
 
   public static setActiveSource(sourceName: string): void {
-    if (!this.sources.has(sourceName)) {
+    if (!this._sources.has(sourceName)) {
       throw new Error(`No DataSource registered with the name "${sourceName}"`)
     }
 
-    this.activeSourceName = sourceName
+    this._activeSourceName = sourceName
   }
 
   public static source(sourceName: string): DataSource {
     this._ensureConfigured()
 
-    const source = this.sources.get(sourceName)
+    const source = this._sources.get(sourceName)
 
     if (!source) {
       throw new Error(`No DataSource registered with the name "${sourceName}"`)
@@ -70,7 +98,7 @@ export abstract class DB {
    *   DB_REPORTING_DRIVER=sqlite DB_REPORTING_FILE=./reporting.db
    */
   public static configure(): void {
-    if (this.sources.size > 0) {
+    if (this._sources.size > 0) {
       return // already configured — manual register() takes precedence
     }
 
@@ -99,7 +127,7 @@ export abstract class DB {
       this.register(name, this._buildSourceFromEnv(env[key]!, get))
     }
 
-    if (this.sources.size === 0) {
+    if (this._sources.size === 0) {
       throw new Error(
         'No data source configured. ' +
           'Call DB.register() or set the DB_DRIVER environment variable ' +
@@ -197,7 +225,7 @@ export abstract class DB {
   }
 
   private static _ensureConfigured(): void {
-    if (this.sources.size === 0) {
+    if (this._sources.size === 0) {
       this.configure()
     }
   }
@@ -205,7 +233,7 @@ export abstract class DB {
   // ── Query builder helpers ────────────────────────────────────────────────────
 
   public static table(tableName: string): DataTable {
-    return this.activeSource.table(tableName)
+    return this._activeSource.table(tableName)
   }
 
   public static conditionGroup(): ConditionGroup {
@@ -231,7 +259,7 @@ export abstract class DB {
   // ── Connection ──────────────────────────────────────────────────────────────
 
   public static connection(): Promise<DataConnection> {
-    return this.activeSource.getConnection()
+    return this._activeSource.getConnection()
   }
 
   // ── Query / Execute ─────────────────────────────────────────────────────────
@@ -275,12 +303,12 @@ export abstract class DB {
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   public static getActiveSource(): DataSource {
-    return this.activeSource
+    return this._activeSource
   }
 
-  private static get activeSource(): DataSource {
+  private static get _activeSource(): DataSource {
     this._ensureConfigured()
 
-    return this.sources.get(this.activeSourceName!) as DataSource
+    return this._sources.get(this._activeSourceName!) as DataSource
   }
 }

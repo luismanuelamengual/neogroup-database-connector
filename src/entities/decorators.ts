@@ -251,6 +251,34 @@ export function Entity(options?: EntityOptions) {
         return hydrateRow(row)
       }
 
+      toJSON(): Record<string, any> {
+        const result: Record<string, any> = {}
+
+        // Own enumerable properties — column values set by hydrateRow
+        for (const key of Object.keys(this as any)) {
+          result[key] = (this as any)[key]
+        }
+
+        // Getters defined on the user's class prototype (computed attributes)
+        for (const key of Object.getOwnPropertyNames(BaseClass.prototype)) {
+          if (key === 'constructor' || key in result) {
+            continue
+          }
+
+          const descriptor = Object.getOwnPropertyDescriptor(BaseClass.prototype, key)
+
+          if (descriptor && typeof descriptor.get === 'function') {
+            try {
+              result[key] = (this as any)[key]
+            } catch {
+              // skip getters that throw (e.g. unloaded relationships)
+            }
+          }
+        }
+
+        return result
+      }
+
       // ── Static query methods ───────────────────────────────────────────
 
       static async find(id: any): Promise<any> {
