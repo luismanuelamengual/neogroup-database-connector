@@ -1,10 +1,10 @@
-[![npm version](https://badge.fury.io/js/@neogroup%2Fdatabase-connector.svg)](https://badge.fury.io/js/@neogroup%2Fdatabase-connector)
-![](https://img.shields.io/github/forks/luismanuelamengual/neogroup-database-connector.svg?style=social&label=Fork)
-![](https://img.shields.io/github/stars/luismanuelamengual/neogroup-database-connector.svg?style=social&label=Star)
-![](https://img.shields.io/github/watchers/luismanuelamengual/neogroup-database-connector.svg?style=social&label=Watch)
+[![npm version](https://badge.fury.io/js/@neogroup%2Fneorm.svg)](https://badge.fury.io/js/@neogroup%2Fneorm)
+![](https://img.shields.io/github/forks/luismanuelamengual/NeORM.svg?style=social&label=Fork)
+![](https://img.shields.io/github/stars/luismanuelamengual/NeORM.svg?style=social&label=Star)
+![](https://img.shields.io/github/watchers/luismanuelamengual/NeORM.svg?style=social&label=Watch)
 ![](https://img.shields.io/github/followers/luismanuelamengual.svg?style=social&label=Follow)
 
-# @neogroup/database-connector
+# NeORM
 
 A lightweight, fluent TypeScript library for interacting with relational databases. It provides a chainable query builder, connection/transaction management, and pluggable data sources for **PostgreSQL**, **MySQL**, and **SQLite** — with a clean architecture that makes it easy to add new engines.
 
@@ -53,7 +53,7 @@ A lightweight, fluent TypeScript library for interacting with relational databas
 ## Installation
 
 ```bash
-npm install @neogroup/database-connector
+npm install @neogroup/neorm
 ```
 
 Depending on the database engine you use, install the corresponding driver:
@@ -73,7 +73,7 @@ A **DataSource** represents a configured connection to a database engine. Regist
 ### PostgreSQL
 
 ```typescript
-import { DB, PostgresDataSource } from '@neogroup/database-connector'
+import { DB, PostgresDataSource } from '@neogroup/neorm'
 
 const source = new PostgresDataSource()
 source.setHost('localhost')
@@ -88,7 +88,7 @@ DB.register(source)
 ### MySQL
 
 ```typescript
-import { DB, MysqlDataSource } from '@neogroup/database-connector'
+import { DB, MysqlDataSource } from '@neogroup/neorm'
 
 const source = new MysqlDataSource()
 source.setHost('localhost')
@@ -105,7 +105,7 @@ MySQL identifiers (table names, column names) are automatically quoted with back
 ### SQLite
 
 ```typescript
-import { DB, SqliteDataSource } from '@neogroup/database-connector'
+import { DB, SqliteDataSource } from '@neogroup/neorm'
 
 const source = new SqliteDataSource()         // in-memory database
 // source.setFilename('./data.db')            // or a file path
@@ -383,7 +383,7 @@ When `condition` is falsy the callback is skipped and the chain continues unchan
 await DB.table('users').orderBy('name').get()
 
 // ORDER BY age DESC
-import { OrderByDirection } from '@neogroup/database-connector'
+import { OrderByDirection } from '@neogroup/neorm'
 await DB.table('users').orderBy('age', OrderByDirection.DESC).get()
 
 // Multiple sort fields
@@ -588,7 +588,7 @@ For queries that go beyond a single table — unions, subqueries, or complex joi
 ### UNION / UNION ALL
 
 ```typescript
-import { DB } from '@neogroup/database-connector'
+import { DB } from '@neogroup/neorm'
 
 // SELECT name FROM users WHERE active = 1
 // UNION
@@ -714,7 +714,7 @@ Annotate any class with `@Entity` and mark its columns with `@Column`. All stati
 import {
   Entity, Column, Entities,
   HasOne, HasMany, BelongsTo, HasOneThrough, HasManyThrough
-} from '@neogroup/database-connector'
+} from '@neogroup/neorm'
 
 @Entity()                          // table name defaults to lowercase class name + 's' → 'users'
 class User {
@@ -966,7 +966,7 @@ source.setReadonly(true)
 Implement `DataSource` to connect any database engine:
 
 ```typescript
-import { Connection, DataSource } from '@neogroup/database-connector'
+import { Connection, DataSource } from '@neogroup/neorm'
 
 class MyConnection implements Connection {
   async query(sql: string, bindings?: any[]): Promise<any[]> { /* ... */ }
@@ -991,7 +991,7 @@ class MyDataSource extends DataSource {
 Override `DefaultQueryBuilder` to adapt SQL generation for your engine:
 
 ```typescript
-import { DefaultQueryBuilder, Statement, Table } from '@neogroup/database-connector'
+import { DefaultQueryBuilder, Statement, Table } from '@neogroup/neorm'
 
 class MyQueryBuilder extends DefaultQueryBuilder {
   protected buildTable(table: Table, statement: Statement) {
@@ -1016,4 +1016,4 @@ class MyDataSource extends DataSource {
 
 ## Contact
 
-For bugs or feature requests open an issue on [GitHub](https://github.com/luismanuelamengual/neogroup-database-connector/issues) or contact the author at luismanuelamengual@gmail.com.
+For bugs or feature requests open an issue on [GitHub](https://github.com/luismanuelamengual/NeORM/issues) or contact the author at luismanuelamengual@gmail.com.

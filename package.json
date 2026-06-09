@@ -1,15 +1,15 @@
 {
-  "name": "@neogroup/database-connector",
-  "version": "0.0.4",
+  "name": "@neogroup/neorm",
+  "version": "0.0.1",
   "description": "Database connector for javascript",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "author": "Luis Manuel Amengual",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/luismanuelamengual/neogroup-database-connector/issues"
+    "url": "https://github.com/luismanuelamengual/NeORM/issues"
   },
-  "homepage": "https://github.com/luismanuelamengual/neogroup-database-connector#readme",
+  "homepage": "https://github.com/luismanuelamengual/NeORM#readme",
   "keywords": [
     "database",
     "connector",
@@ -18,9 +18,12 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luismanuelamengual/neogroup-database-connector.git"
+    "url": "git+https://github.com/luismanuelamengual/NeORM.git"
   },
   "scripts": {
     "build": "jest --passWithNoTests && tsc",
