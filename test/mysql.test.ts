@@ -124,9 +124,9 @@ describe('MySQL — integración local', () => {
 
       const changes = await source
         .table('users')
-        .set('name', 'Alice')
-        .set('email', 'alice@example.com')
-        .set('age', 30)
+        .setFieldValue('name', 'Alice')
+        .setFieldValue('email', 'alice@example.com')
+        .setFieldValue('age', 30)
         .insert()
 
       expect(changes).toBe(1)
@@ -161,7 +161,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(3)
     })
@@ -182,7 +182,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const users = await source.table('users').where('active', 1).find()
+      const users = await source.table('users').where('active', 1).get()
 
       expect(users).toHaveLength(2)
     })
@@ -192,7 +192,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const users = await source.table('users').select('name', 'age').find()
+      const users = await source.table('users').select('name', 'age').get()
 
       expect(users[0]).toHaveProperty('name')
       expect(users[0]).toHaveProperty('age')
@@ -204,7 +204,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const users = await source.table('users').whereIn('age', [25, 35]).find()
+      const users = await source.table('users').whereIn('age', [25, 35]).get()
 
       expect(users).toHaveLength(2)
     })
@@ -214,7 +214,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const users = await source.table('users').whereBetween('age', [25, 30]).find()
+      const users = await source.table('users').whereBetween('age', [25, 30]).get()
 
       expect(users).toHaveLength(2)
     })
@@ -225,8 +225,8 @@ describe('MySQL — integración local', () => {
       }
 
       await source.table('users').where('name', 'Alice').update({ nickname: 'Ali' })
-      const nullRows = await source.table('users').whereNull('nickname').find()
-      const nonNullRows = await source.table('users').whereNotNull('nickname').find()
+      const nullRows = await source.table('users').whereNull('nickname').get()
+      const nonNullRows = await source.table('users').whereNotNull('nickname').get()
 
       expect(nullRows).toHaveLength(2)
       expect(nonNullRows).toHaveLength(1)
@@ -237,7 +237,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const users = await source.table('users').whereLike('email', '%@example.com').find()
+      const users = await source.table('users').whereLike('email', '%@example.com').get()
 
       expect(users).toHaveLength(3)
     })
@@ -247,7 +247,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const users = await source.table('users').where('name', 'Alice').orWhere('name', 'Bob').find()
+      const users = await source.table('users').where('name', 'Alice').orWhere('name', 'Bob').get()
 
       expect(users).toHaveLength(2)
     })
@@ -260,7 +260,7 @@ describe('MySQL — integración local', () => {
       const users = await source
         .table('users')
         .where((q) => q.whereIn('age', [25, 35]))
-        .find()
+        .get()
 
       expect(users).toHaveLength(2)
     })
@@ -272,7 +272,7 @@ describe('MySQL — integración local', () => {
 
       // age = active nunca es true con nuestros datos (age >> active)
       // whereColumn('active', '<', 'age') debería traer todos
-      const users = await source.table('users').whereColumn('active', '<', 'age').find()
+      const users = await source.table('users').whereColumn('active', '<', 'age').get()
 
       expect(users).toHaveLength(3)
     })
@@ -282,8 +282,8 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const asc = await source.table('users').orderBy('age').find()
-      const desc = await source.table('users').orderBy('age', OrderByDirection.DESC).find()
+      const asc = await source.table('users').orderBy('age').get()
+      const desc = await source.table('users').orderBy('age', OrderByDirection.DESC).get()
 
       expect(asc[0].name).toBe('Bob')
       expect(desc[0].name).toBe('Charlie')
@@ -294,7 +294,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const page = await source.table('users').orderBy('age').limit(1).offset(1).find()
+      const page = await source.table('users').orderBy('age').limit(1).offset(1).get()
 
       expect(page).toHaveLength(1)
       expect(page[0].name).toBe('Alice')
@@ -306,7 +306,7 @@ describe('MySQL — integración local', () => {
       }
 
       await source.table('users').insert({ name: 'Alice2', email: 'alice2@example.com', age: 30, active: 1 })
-      const rows = await source.table('users').distinct().select('age').find()
+      const rows = await source.table('users').distinct().select('age').get()
       const ages = rows.map((r: any) => Number(r.age))
 
       expect(ages.filter((a: number) => a === 30)).toHaveLength(1)
@@ -334,7 +334,7 @@ describe('MySQL — integración local', () => {
         .select('active', 'COUNT(*) AS total')
         .groupBy('active')
         .orderBy('active', OrderByDirection.DESC)
-        .find()
+        .get()
 
       expect(rows).toHaveLength(2)
       expect(Number(rows[0].total)).toBe(2) // active=1: Alice + Bob
@@ -350,7 +350,7 @@ describe('MySQL — integración local', () => {
         .select('active', 'COUNT(*) AS total')
         .groupBy('active')
         .having('COUNT(*)', '>', 1)
-        .find()
+        .get()
 
       expect(rows).toHaveLength(1)
       expect(Number(rows[0].total)).toBe(2)
@@ -378,7 +378,7 @@ describe('MySQL — integración local', () => {
         .table('users')
         .innerJoin('orders', 'users.id', 'orders.user_id')
         .select('users.name', 'orders.product')
-        .find()
+        .get()
 
       expect(rows).toHaveLength(3)
       expect(rows.find((r: any) => r.name === 'Charlie')).toBeUndefined()
@@ -393,7 +393,7 @@ describe('MySQL — integración local', () => {
         .table('users')
         .leftJoin('orders', 'users.id', 'orders.user_id')
         .select('users.name', 'orders.product')
-        .find()
+        .get()
       const charlie = rows.filter((r: any) => r.name === 'Charlie')
 
       expect(charlie.length).toBeGreaterThan(0)
@@ -411,7 +411,7 @@ describe('MySQL — integración local', () => {
         .select('users.name', 'COUNT(orders.id) AS order_count')
         .groupBy('users.id', 'users.name')
         .orderBy('order_count', OrderByDirection.DESC)
-        .find()
+        .get()
 
       expect(rows[0].name).toBe('Alice')
       expect(Number(rows[0].order_count)).toBe(2)
@@ -434,7 +434,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      await source.table('users').where('name', 'Alice').set('age', 99).update()
+      await source.table('users').where('name', 'Alice').setFieldValue('age', 99).update()
       const user = await source.table('users').where('name', 'Alice').first()
 
       expect(user!.age).toBe(99)
@@ -457,7 +457,7 @@ describe('MySQL — integración local', () => {
         return
       }
 
-      const changes = await source.table('users').set('active', 0).update()
+      const changes = await source.table('users').setFieldValue('active', 0).update()
 
       expect(changes).toBe(3)
     })
@@ -480,7 +480,7 @@ describe('MySQL — integración local', () => {
       }
 
       await source.table('users').where('name', 'Alice').delete()
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(2)
     })
@@ -532,7 +532,7 @@ describe('MySQL — integración local', () => {
         await conn.close()
       }
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(2)
     })
@@ -552,7 +552,7 @@ describe('MySQL — integración local', () => {
         await conn.close()
       }
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(1)
     })
@@ -575,7 +575,7 @@ describe('MySQL — integración local', () => {
         await conn.close()
       }
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(1)
     })
@@ -599,7 +599,7 @@ describe('MySQL — integración local', () => {
 
       // Verifica que la query no falle con palabras reservadas en nombres de campo
       // `select` es reservada en MySQL — aquí forzamos un alias con ese nombre
-      const rows = await source.table('users').select('name', 'age').where('active', 1).find()
+      const rows = await source.table('users').select('name', 'age').where('active', 1).get()
 
       expect(rows).toHaveLength(2)
     })
@@ -614,7 +614,7 @@ describe('MySQL — integración local', () => {
         .table('users')
         .innerJoin('orders', 'users.id', 'orders.user_id')
         .select('users.name', 'orders.product')
-        .find()
+        .get()
 
       expect(rows.length).toBeGreaterThan(0)
     })

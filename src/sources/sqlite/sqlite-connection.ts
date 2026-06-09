@@ -3,6 +3,7 @@ import { DataSet } from '../../data-set'
 
 export class SqliteConnection implements Connection {
   private db: any
+  private _lastInsertId: number = 0
 
   constructor(db: any) {
     this.db = db
@@ -18,7 +19,13 @@ export class SqliteConnection implements Connection {
     const stmt = this.db.prepare(sql)
     const result = stmt.run(...(bindings ?? []))
 
+    this._lastInsertId = Number(result.lastInsertRowid ?? 0)
+
     return result.changes ?? 0
+  }
+
+  public async lastInsertId(): Promise<number> {
+    return this._lastInsertId
   }
 
   public async beginTransaction(): Promise<void> {

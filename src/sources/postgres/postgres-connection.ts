@@ -20,6 +20,15 @@ export class PostgresConnection implements Connection {
     return response.rowCount
   }
 
+  public async lastInsertId(): Promise<number> {
+    try {
+      const result = await this.client.query('SELECT lastval() AS id')
+      return Number(result.rows[0]?.id ?? 0)
+    } catch {
+      return 0
+    }
+  }
+
   public async beginTransaction(): Promise<void> {
     await this.client.query('BEGIN')
   }

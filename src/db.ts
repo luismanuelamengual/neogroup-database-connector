@@ -113,6 +113,10 @@ export abstract class DB {
 
   // ── Private helpers ─────────────────────────────────────────────────────────
 
+  public static getActiveSource(): DataSource {
+    return this.activeSource
+  }
+
   private static get activeSource(): DataSource {
     if (this.sources.size === 0) {
       throw new Error('No DataSources registered. Register a DataSource with DB.register() first.')

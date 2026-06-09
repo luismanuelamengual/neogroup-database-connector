@@ -29,7 +29,7 @@ export class DataTable {
     this.setTable(name)
   }
 
-  public async find(): Promise<Array<DataSet>> {
+  public async get(): Promise<Array<DataSet>> {
     return await this.source.query(this.createSelectQuery())
   }
 

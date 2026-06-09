@@ -45,24 +45,24 @@ describe('SQLite — CRUD completo', () => {
   async function seedUsers() {
     await source
       .table('users')
-      .set('name', 'Alice')
-      .set('email', 'alice@example.com')
-      .set('age', 30)
-      .set('active', 1)
+      .setFieldValue('name', 'Alice')
+      .setFieldValue('email', 'alice@example.com')
+      .setFieldValue('age', 30)
+      .setFieldValue('active', 1)
       .insert()
     await source
       .table('users')
-      .set('name', 'Bob')
-      .set('email', 'bob@example.com')
-      .set('age', 25)
-      .set('active', 1)
+      .setFieldValue('name', 'Bob')
+      .setFieldValue('email', 'bob@example.com')
+      .setFieldValue('age', 25)
+      .setFieldValue('active', 1)
       .insert()
     await source
       .table('users')
-      .set('name', 'Charlie')
-      .set('email', 'charlie@example.com')
-      .set('age', 35)
-      .set('active', 0)
+      .setFieldValue('name', 'Charlie')
+      .setFieldValue('email', 'charlie@example.com')
+      .setFieldValue('age', 35)
+      .setFieldValue('active', 0)
       .insert()
   }
 
@@ -71,9 +71,24 @@ describe('SQLite — CRUD completo', () => {
     const alice = await source.table('users').where('name', 'Alice').first()
     const bob = await source.table('users').where('name', 'Bob').first()
 
-    await source.table('orders').set('user_id', alice!.id).set('product', 'Widget').set('amount', 9.99).insert()
-    await source.table('orders').set('user_id', alice!.id).set('product', 'Gadget').set('amount', 24.99).insert()
-    await source.table('orders').set('user_id', bob!.id).set('product', 'Doohickey').set('amount', 4.99).insert()
+    await source
+      .table('orders')
+      .setFieldValue('user_id', alice!.id)
+      .setFieldValue('product', 'Widget')
+      .setFieldValue('amount', 9.99)
+      .insert()
+    await source
+      .table('orders')
+      .setFieldValue('user_id', alice!.id)
+      .setFieldValue('product', 'Gadget')
+      .setFieldValue('amount', 24.99)
+      .insert()
+    await source
+      .table('orders')
+      .setFieldValue('user_id', bob!.id)
+      .setFieldValue('product', 'Doohickey')
+      .setFieldValue('amount', 4.99)
+      .insert()
     // Charlie no tiene órdenes
   }
 
@@ -83,9 +98,9 @@ describe('SQLite — CRUD completo', () => {
     it('inserta un registro y retorna 1 fila afectada', async () => {
       const changes = await source
         .table('users')
-        .set('name', 'Alice')
-        .set('email', 'alice@example.com')
-        .set('age', 30)
+        .setFieldValue('name', 'Alice')
+        .setFieldValue('email', 'alice@example.com')
+        .setFieldValue('age', 30)
         .insert()
 
       expect(changes).toBe(1)
@@ -94,15 +109,13 @@ describe('SQLite — CRUD completo', () => {
     it('inserta múltiples registros y los persiste todos', async () => {
       await seedUsers()
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(3)
     })
 
     it('insert acepta un objeto de fields como argumento', async () => {
-      const changes = await source
-        .table('users')
-        .insert({ name: 'Dave', email: 'dave@example.com', age: 28 })
+      const changes = await source.table('users').insert({ name: 'Dave', email: 'dave@example.com', age: 28 })
 
       expect(changes).toBe(1)
 
@@ -124,20 +137,20 @@ describe('SQLite — CRUD completo', () => {
 
     describe('Básico', () => {
       it('retorna todos los registros', async () => {
-        const users = await source.table('users').find()
+        const users = await source.table('users').get()
 
         expect(users).toHaveLength(3)
       })
 
       it('retorna campos seleccionados con select()', async () => {
-        const users = await source.table('users').select('name', 'age').find()
+        const users = await source.table('users').select('name', 'age').get()
 
         expect(users).toHaveLength(3)
         expect(Object.keys(users[0])).toEqual(['name', 'age'])
       })
 
       it('retorna campo con alias', async () => {
-        const users = await source.table('users').select({ name: 'name', alias: 'nombre' }).find()
+        const users = await source.table('users').select({ name: 'name', alias: 'nombre' }).get()
 
         expect(users[0].nombre).toBeDefined()
         expect(users[0].name).toBeUndefined()
@@ -158,7 +171,7 @@ describe('SQLite — CRUD completo', () => {
 
       it('retorna resultados distintos con distinct()', async () => {
         // Hay dos valores posibles de active (0 y 1)
-        const rows = await source.table('users').select('active').distinct().find()
+        const rows = await source.table('users').select('active').distinct().get()
 
         expect(rows).toHaveLength(2)
       })
@@ -168,47 +181,47 @@ describe('SQLite — CRUD completo', () => {
 
     describe('WHERE', () => {
       it('filtra con igualdad simple', async () => {
-        const users = await source.table('users').where('active', 1).find()
+        const users = await source.table('users').where('active', 1).get()
 
         expect(users).toHaveLength(2)
       })
 
       it('filtra con operador de comparación (>)', async () => {
-        const users = await source.table('users').where('age', '>', 28).find()
+        const users = await source.table('users').where('age', '>', 28).get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Charlie'])
       })
 
       it('filtra con operador de comparación (<)', async () => {
-        const users = await source.table('users').where('age', '<', 30).find()
+        const users = await source.table('users').where('age', '<', 30).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Bob')
       })
 
       it('filtra con operador de comparación (<>)', async () => {
-        const users = await source.table('users').where('active', '<>', 1).find()
+        const users = await source.table('users').where('active', '<>', 1).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Charlie')
       })
 
       it('filtra con múltiples condiciones AND', async () => {
-        const users = await source.table('users').where('active', 1).where('age', '>', 26).find()
+        const users = await source.table('users').where('active', 1).where('age', '>', 26).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Alice')
       })
 
       it('filtra con OR WHERE', async () => {
-        const users = await source.table('users').where('name', 'Alice').orWhere('name', 'Bob').find()
+        const users = await source.table('users').where('name', 'Alice').orWhere('name', 'Bob').get()
 
         expect(users).toHaveLength(2)
       })
 
       it('filtra con IN sobre lista de valores', async () => {
-        const users = await source.table('users').where('age', 'in', [25, 35]).orderBy('age').find()
+        const users = await source.table('users').where('age', 'in', [25, 35]).orderBy('age').get()
 
         expect(users).toHaveLength(2)
         expect(users[0].name).toBe('Bob')
@@ -217,7 +230,7 @@ describe('SQLite — CRUD completo', () => {
 
       it('filtra con IS NULL', async () => {
         // Ningún usuario tiene email null → resultado vacío
-        const users = await source.table('users').where('email', null).find()
+        const users = await source.table('users').where('email', null).get()
 
         expect(users).toHaveLength(0)
       })
@@ -229,7 +242,7 @@ describe('SQLite — CRUD completo', () => {
           .table('users')
           .where(DB.conditionGroup().where('name', 'Alice').orWhere('name', 'Bob'))
           .where('active', 1)
-          .find()
+          .get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
@@ -241,7 +254,7 @@ describe('SQLite — CRUD completo', () => {
           .table('users')
           .where((group) => group.where('name', 'Alice').orWhere('name', 'Bob'))
           .where('active', 1)
-          .find()
+          .get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
@@ -253,11 +266,9 @@ describe('SQLite — CRUD completo', () => {
         const users = await source
           .table('users')
           .where((group) =>
-            group
-              .where('active', 1)
-              .where((inner) => inner.where('age', '<', 28).orWhere('age', '>', 33))
+            group.where('active', 1).where((inner) => inner.where('age', '<', 28).orWhere('age', '>', 33))
           )
-          .find()
+          .get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Bob')
@@ -270,7 +281,7 @@ describe('SQLite — CRUD completo', () => {
           .table('users')
           .where('name', 'Charlie')
           .orWhere((group) => group.where('active', 1).where('age', '<', 28))
-          .find()
+          .get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
@@ -278,7 +289,7 @@ describe('SQLite — CRUD completo', () => {
 
       it('filtra con BETWEEN (rango inclusivo)', async () => {
         // Bob(25), Alice(30) están en [25, 30]; Charlie(35) queda fuera
-        const users = await source.table('users').where('age', 'BETWEEN', [25, 30]).orderBy('age').find()
+        const users = await source.table('users').where('age', 'BETWEEN', [25, 30]).orderBy('age').get()
 
         expect(users).toHaveLength(2)
         expect(users[0].name).toBe('Bob')
@@ -287,20 +298,20 @@ describe('SQLite — CRUD completo', () => {
 
       it('filtra con NOT BETWEEN', async () => {
         // Solo Charlie(35) queda fuera del rango [25, 30]
-        const users = await source.table('users').where('age', 'NOT BETWEEN', [25, 30]).find()
+        const users = await source.table('users').where('age', 'NOT BETWEEN', [25, 30]).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Charlie')
       })
 
       it('filtra con LIKE', async () => {
-        const users = await source.table('users').where('email', 'LIKE', '%example.com').find()
+        const users = await source.table('users').where('email', 'LIKE', '%example.com').get()
 
         expect(users).toHaveLength(3)
       })
 
       it('filtra con NOT LIKE', async () => {
-        const users = await source.table('users').where('name', 'NOT LIKE', 'A%').find()
+        const users = await source.table('users').where('name', 'NOT LIKE', 'A%').get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
@@ -308,13 +319,13 @@ describe('SQLite — CRUD completo', () => {
 
       // whereLike / whereNotLike
       it('whereLike filtra con patrón LIKE', async () => {
-        const users = await source.table('users').whereLike('email', '%example.com').find()
+        const users = await source.table('users').whereLike('email', '%example.com').get()
 
         expect(users).toHaveLength(3)
       })
 
       it('whereNotLike excluye registros que coinciden con el patrón', async () => {
-        const users = await source.table('users').whereNotLike('name', 'A%').find()
+        const users = await source.table('users').whereNotLike('name', 'A%').get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
@@ -322,7 +333,7 @@ describe('SQLite — CRUD completo', () => {
 
       it('orWhereLike combina con OR', async () => {
         // name = 'Charlie' OR email LIKE 'alice%'  → Charlie + Alice
-        const users = await source.table('users').where('name', 'Charlie').orWhereLike('email', 'alice%').find()
+        const users = await source.table('users').where('name', 'Charlie').orWhereLike('email', 'alice%').get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Charlie'])
@@ -330,14 +341,14 @@ describe('SQLite — CRUD completo', () => {
 
       it('orWhereNotLike combina con OR', async () => {
         // active = 0 OR name NOT LIKE 'A%'  → Charlie (inactivo y no empieza con A) + Bob
-        const users = await source.table('users').where('active', 0).orWhereNotLike('name', 'A%').find()
+        const users = await source.table('users').where('active', 0).orWhereNotLike('name', 'A%').get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
       })
 
       it('filtra con NOT IN', async () => {
-        const users = await source.table('users').where('age', 'NOT IN', [25, 35]).find()
+        const users = await source.table('users').where('age', 'NOT IN', [25, 35]).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Alice')
@@ -345,14 +356,14 @@ describe('SQLite — CRUD completo', () => {
 
       // whereIn / whereNotIn
       it('whereIn retorna solo los registros cuyo campo está en la lista', async () => {
-        const users = await source.table('users').whereIn('name', ['Alice', 'Bob']).find()
+        const users = await source.table('users').whereIn('name', ['Alice', 'Bob']).get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
       })
 
       it('whereNotIn excluye los registros cuyo campo está en la lista', async () => {
-        const users = await source.table('users').whereNotIn('name', ['Alice', 'Bob']).find()
+        const users = await source.table('users').whereNotIn('name', ['Alice', 'Bob']).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Charlie')
@@ -360,14 +371,14 @@ describe('SQLite — CRUD completo', () => {
 
       it('orWhereIn combina con OR', async () => {
         // name = 'Charlie' OR age IN (25, 30)  → los tres
-        const users = await source.table('users').where('name', 'Charlie').orWhereIn('age', [25, 30]).find()
+        const users = await source.table('users').where('name', 'Charlie').orWhereIn('age', [25, 30]).get()
 
         expect(users).toHaveLength(3)
       })
 
       it('orWhereNotIn combina con OR', async () => {
         // active = 0 OR age NOT IN (25, 30)  → Charlie (inactivo y 35)
-        const users = await source.table('users').where('active', 0).orWhereNotIn('age', [25, 30]).find()
+        const users = await source.table('users').where('active', 0).orWhereNotIn('age', [25, 30]).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Charlie')
@@ -375,7 +386,7 @@ describe('SQLite — CRUD completo', () => {
 
       // whereBetween / whereNotBetween
       it('whereBetween retorna registros dentro del rango', async () => {
-        const users = await source.table('users').whereBetween('age', [25, 30]).orderBy('age').find()
+        const users = await source.table('users').whereBetween('age', [25, 30]).orderBy('age').get()
 
         expect(users).toHaveLength(2)
         expect(users[0].name).toBe('Bob')
@@ -383,7 +394,7 @@ describe('SQLite — CRUD completo', () => {
       })
 
       it('whereNotBetween retorna registros fuera del rango', async () => {
-        const users = await source.table('users').whereNotBetween('age', [25, 30]).find()
+        const users = await source.table('users').whereNotBetween('age', [25, 30]).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Charlie')
@@ -391,7 +402,7 @@ describe('SQLite — CRUD completo', () => {
 
       it('orWhereBetween combina con OR', async () => {
         // name = 'Charlie' OR age BETWEEN 25 AND 26  → Charlie + Bob
-        const users = await source.table('users').where('name', 'Charlie').orWhereBetween('age', [25, 26]).find()
+        const users = await source.table('users').where('name', 'Charlie').orWhereBetween('age', [25, 26]).get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
@@ -399,7 +410,7 @@ describe('SQLite — CRUD completo', () => {
 
       it('orWhereNotBetween combina con OR', async () => {
         // active = 1 OR age NOT BETWEEN 25 AND 34  → Alice + Bob (activos) + Charlie (35)
-        const users = await source.table('users').where('active', 1).orWhereNotBetween('age', [25, 34]).find()
+        const users = await source.table('users').where('active', 1).orWhereNotBetween('age', [25, 34]).get()
 
         expect(users).toHaveLength(3)
       })
@@ -409,37 +420,61 @@ describe('SQLite — CRUD completo', () => {
       // Sólo los que se insertan en cada test con nickname explícito son NOT NULL.
       it('whereNull retorna registros con campo NULL', async () => {
         // Alice, Bob y Charlie tienen nickname NULL; Dave tiene nickname asignado
-        await source.table('users').set('name', 'Dave').set('email', 'dave@example.com').set('age', 28).set('nickname', 'dv').insert()
+        await source
+          .table('users')
+          .setFieldValue('name', 'Dave')
+          .setFieldValue('email', 'dave@example.com')
+          .setFieldValue('age', 28)
+          .setFieldValue('nickname', 'dv')
+          .insert()
 
-        const users = await source.table('users').whereNull('nickname').find()
+        const users = await source.table('users').whereNull('nickname').get()
 
         expect(users).toHaveLength(3)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob', 'Charlie'])
       })
 
       it('whereNotNull retorna registros donde el campo NO es NULL', async () => {
-        await source.table('users').set('name', 'Dave').set('email', 'dave@example.com').set('age', 28).set('nickname', 'dv').insert()
+        await source
+          .table('users')
+          .setFieldValue('name', 'Dave')
+          .setFieldValue('email', 'dave@example.com')
+          .setFieldValue('age', 28)
+          .setFieldValue('nickname', 'dv')
+          .insert()
 
-        const users = await source.table('users').whereNotNull('nickname').find()
+        const users = await source.table('users').whereNotNull('nickname').get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Dave')
       })
 
       it('orWhereNull combina con OR', async () => {
-        await source.table('users').set('name', 'Dave').set('email', 'dave@example.com').set('age', 28).set('nickname', 'dv').insert()
+        await source
+          .table('users')
+          .setFieldValue('name', 'Dave')
+          .setFieldValue('email', 'dave@example.com')
+          .setFieldValue('age', 28)
+          .setFieldValue('nickname', 'dv')
+          .insert()
 
         // name = 'Dave' OR nickname IS NULL → Dave + Alice + Bob + Charlie
-        const users = await source.table('users').where('name', 'Dave').orWhereNull('nickname').find()
+        const users = await source.table('users').where('name', 'Dave').orWhereNull('nickname').get()
 
         expect(users).toHaveLength(4)
       })
 
       it('orWhereNotNull combina con OR', async () => {
-        await source.table('users').set('name', 'Dave').set('email', 'dave@example.com').set('age', 28).set('nickname', 'dv').insert()
+        await source
+          .table('users')
+          .setFieldValue('name', 'Dave')
+          .setFieldValue('email', 'dave@example.com')
+          .setFieldValue('age', 28)
+          .setFieldValue('nickname', 'dv')
+          .insert()
 
         // active = 0 OR nickname IS NOT NULL → Charlie (inactivo) + Dave (nickname asignado)
-        const users = await source.table('users').where('active', 0).orWhereNotNull('nickname').find()
+        const users = await source.table('users').where('active', 0).orWhereNotNull('nickname').get()
 
         expect(users).toHaveLength(2)
         expect(users.map((u: any) => u.name).sort()).toEqual(['Charlie', 'Dave'])
@@ -494,21 +529,21 @@ describe('SQLite — CRUD completo', () => {
 
     describe('ORDER BY', () => {
       it('ordena ASC por campo numérico', async () => {
-        const users = await source.table('users').orderBy('age', OrderByDirection.ASC).find()
+        const users = await source.table('users').orderBy('age', OrderByDirection.ASC).get()
 
         expect(users[0].name).toBe('Bob')
         expect(users[2].name).toBe('Charlie')
       })
 
       it('ordena DESC por campo numérico', async () => {
-        const users = await source.table('users').orderBy('age', OrderByDirection.DESC).find()
+        const users = await source.table('users').orderBy('age', OrderByDirection.DESC).get()
 
         expect(users[0].name).toBe('Charlie')
         expect(users[2].name).toBe('Bob')
       })
 
       it('ordena ASC por campo de texto', async () => {
-        const users = await source.table('users').orderBy('name', OrderByDirection.ASC).find()
+        const users = await source.table('users').orderBy('name', OrderByDirection.ASC).get()
 
         expect(users[0].name).toBe('Alice')
         expect(users[2].name).toBe('Charlie')
@@ -520,7 +555,7 @@ describe('SQLite — CRUD completo', () => {
           .table('users')
           .orderBy('active', OrderByDirection.DESC)
           .orderBy('age', OrderByDirection.ASC)
-          .find()
+          .get()
 
         // active=1: Bob(25), Alice(30) → active=0: Charlie(35)
         expect(users[0].name).toBe('Bob')
@@ -533,28 +568,28 @@ describe('SQLite — CRUD completo', () => {
 
     describe('LIMIT / OFFSET', () => {
       it('aplica LIMIT correctamente', async () => {
-        const users = await source.table('users').orderBy('age').limit(2).find()
+        const users = await source.table('users').orderBy('age').limit(2).get()
 
         expect(users).toHaveLength(2)
       })
 
       it('aplica LIMIT + OFFSET correctamente', async () => {
         // ordenados por age: Bob(25), Alice(30), Charlie(35)
-        const users = await source.table('users').orderBy('age').limit(1).offset(1).find()
+        const users = await source.table('users').orderBy('age').limit(1).offset(1).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Alice')
       })
 
       it('OFFSET sin LIMIT retorna desde la posición indicada', async () => {
-        const users = await source.table('users').orderBy('age').offset(2).find()
+        const users = await source.table('users').orderBy('age').offset(2).get()
 
         expect(users).toHaveLength(1)
         expect(users[0].name).toBe('Charlie')
       })
 
       it('LIMIT mayor que los registros retorna todos', async () => {
-        const users = await source.table('users').limit(100).find()
+        const users = await source.table('users').limit(100).get()
 
         expect(users).toHaveLength(3)
       })
@@ -570,7 +605,7 @@ describe('SQLite — CRUD completo', () => {
           .select('active', { name: 'id', function: 'count', alias: 'total' })
           .groupBy('active')
           .orderBy('active')
-          .find()
+          .get()
 
         expect(groups).toHaveLength(2)
         expect(groups[0].active).toBe(0)
@@ -586,7 +621,7 @@ describe('SQLite — CRUD completo', () => {
           .select('active', { name: 'age', function: 'sum', alias: 'total_age' })
           .groupBy('active')
           .orderBy('active')
-          .find()
+          .get()
 
         expect(groups).toHaveLength(2)
         expect(groups[0].total_age).toBe(35) // Charlie (age=35, active=0)
@@ -599,7 +634,7 @@ describe('SQLite — CRUD completo', () => {
           .select('active', { name: 'age', function: 'avg', alias: 'avg_age' })
           .groupBy('active')
           .orderBy('active')
-          .find()
+          .get()
 
         expect(groups).toHaveLength(2)
         expect(groups[0].avg_age).toBe(35) // Charlie
@@ -617,7 +652,7 @@ describe('SQLite — CRUD completo', () => {
           .select('active', { name: 'id', function: 'count', alias: 'total' })
           .groupBy('active')
           .having('COUNT(id)', '>', 1)
-          .find()
+          .get()
 
         expect(groups).toHaveLength(1)
         expect(groups[0].active).toBe(1)
@@ -634,7 +669,7 @@ describe('SQLite — CRUD completo', () => {
           .where('age', '<', 33)
           .groupBy('active')
           .having('COUNT(id)', '>=', 2)
-          .find()
+          .get()
 
         expect(groups).toHaveLength(1)
         expect(groups[0].active).toBe(1)
@@ -656,7 +691,7 @@ describe('SQLite — CRUD completo', () => {
           .select({ name: 'name', table: 'users' }, { name: 'product', table: 'orders' })
           .innerJoin('orders', { name: 'id', table: 'users' }, { name: 'user_id', table: 'orders' })
           .orderBy({ name: 'name', table: 'users' })
-          .find()
+          .get()
 
         expect(rows).toHaveLength(3) // Alice×2 + Bob×1
         expect(rows.map((r: any) => r.name).sort()).toEqual(['Alice', 'Alice', 'Bob'])
@@ -668,7 +703,7 @@ describe('SQLite — CRUD completo', () => {
           .select({ name: 'name', table: 'users' }, { name: 'amount', table: 'orders' })
           .innerJoin('orders', { name: 'id', table: 'users' }, { name: 'user_id', table: 'orders' })
           .where({ name: 'amount', table: 'orders' }, '>', 10)
-          .find()
+          .get()
 
         // Solo la orden de Alice con amount=24.99 supera 10
         expect(rows).toHaveLength(1)
@@ -682,7 +717,7 @@ describe('SQLite — CRUD completo', () => {
           .select({ name: 'name', table: 'users' }, { name: 'product', table: 'orders' })
           .leftJoin('orders', { name: 'id', table: 'users' }, { name: 'user_id', table: 'orders' })
           .orderBy({ name: 'name', table: 'users' })
-          .find()
+          .get()
 
         // Alice×2 + Bob×1 + Charlie×1(product=null)
         expect(rows).toHaveLength(4)
@@ -703,7 +738,7 @@ describe('SQLite — CRUD completo', () => {
           .innerJoin('orders', { name: 'id', table: 'users' }, { name: 'user_id', table: 'orders' })
           .groupBy({ name: 'user_id', table: 'orders' })
           .orderBy({ name: 'name', table: 'users' })
-          .find()
+          .get()
 
         expect(rows).toHaveLength(2) // Alice y Bob (Charlie no tiene órdenes)
         expect(rows[0].name).toBe('Alice')
@@ -720,7 +755,7 @@ describe('SQLite — CRUD completo', () => {
           .select('users.name', 'orders.product')
           .innerJoin('orders', 'users.id', 'orders.user_id')
           .orderBy('users.name')
-          .find()
+          .get()
 
         expect(rows).toHaveLength(3)
         expect(rows.map((r: any) => r.name).sort()).toEqual(['Alice', 'Alice', 'Bob'])
@@ -732,7 +767,7 @@ describe('SQLite — CRUD completo', () => {
           .select('users.name', 'orders.amount')
           .leftJoin('orders', 'users.id', 'orders.user_id')
           .where('orders.amount', '>', 10)
-          .find()
+          .get()
 
         expect(rows).toHaveLength(1)
         expect(rows[0].name).toBe('Alice')
@@ -746,7 +781,7 @@ describe('SQLite — CRUD completo', () => {
           .innerJoin('orders', 'users.id', 'orders.user_id')
           .groupBy('users.id')
           .orderBy('users.name')
-          .find()
+          .get()
 
         expect(rows).toHaveLength(2)
         expect(rows[0].name).toBe('Alice')
@@ -768,7 +803,7 @@ describe('SQLite — CRUD completo', () => {
       const users = await source
         .table('users')
         .where((q) => q.whereIn('age', [25, 35]))
-        .find()
+        .get()
 
       expect(users).toHaveLength(2)
       expect(users.map((u: any) => u.name).sort()).toEqual(['Bob', 'Charlie'])
@@ -778,18 +813,18 @@ describe('SQLite — CRUD completo', () => {
       const users = await source
         .table('users')
         .where((q) => q.whereBetween('age', [25, 30]))
-        .find()
+        .get()
 
       expect(users).toHaveLength(2)
       expect(users.map((u: any) => u.name).sort()).toEqual(['Alice', 'Bob'])
     })
 
     it('whereNull dentro de un callback de grupo', async () => {
-      await source.table('users').where('name', 'Alice').set('nickname', 'Ali').update()
+      await source.table('users').where('name', 'Alice').setFieldValue('nickname', 'Ali').update()
       const users = await source
         .table('users')
         .where((q) => q.whereNull('nickname'))
-        .find()
+        .get()
 
       expect(users).toHaveLength(2)
       expect(users.find((u: any) => u.name === 'Alice')).toBeUndefined()
@@ -799,7 +834,7 @@ describe('SQLite — CRUD completo', () => {
       const users = await source
         .table('users')
         .where((q) => q.whereLike('email', '%@example.com'))
-        .find()
+        .get()
 
       expect(users).toHaveLength(3)
     })
@@ -809,7 +844,7 @@ describe('SQLite — CRUD completo', () => {
       const users = await source
         .table('users')
         .where((q) => q.whereIn('age', [25, 30]).orWhere('name', 'Charlie'))
-        .find()
+        .get()
 
       expect(users).toHaveLength(3)
     })
@@ -820,7 +855,7 @@ describe('SQLite — CRUD completo', () => {
         .table('users')
         .where((q) => q.whereBetween('age', [25, 30]).orWhereNull('nickname'))
         .where('active', 1)
-        .find()
+        .get()
 
       // Alice (age=30, active=1) y Bob (age=25, active=1) — Charlie is inactive
       expect(users).toHaveLength(2)
@@ -848,9 +883,9 @@ describe('SQLite — CRUD completo', () => {
         )
       `)
       await source.execute('DELETE FROM col_test')
-      await source.execute("INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (2, 3), (4, 4)")
+      await source.execute('INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (2, 3), (4, 4)')
 
-      const rows = await source.table('col_test').whereColumn('col_a', 'col_b').find()
+      const rows = await source.table('col_test').whereColumn('col_a', 'col_b').get()
 
       expect(rows).toHaveLength(2)
       expect(rows.every((r: any) => r.col_a === r.col_b)).toBe(true)
@@ -858,9 +893,9 @@ describe('SQLite — CRUD completo', () => {
 
     it('whereColumn compara dos columnas con operador explícito >', async () => {
       await source.execute('DELETE FROM col_test')
-      await source.execute("INSERT INTO col_test (col_a, col_b) VALUES (5, 3), (1, 2), (7, 7)")
+      await source.execute('INSERT INTO col_test (col_a, col_b) VALUES (5, 3), (1, 2), (7, 7)')
 
-      const rows = await source.table('col_test').whereColumn('col_a', '>', 'col_b').find()
+      const rows = await source.table('col_test').whereColumn('col_a', '>', 'col_b').get()
 
       expect(rows).toHaveLength(1)
       expect(rows[0].col_a).toBe(5)
@@ -868,23 +903,27 @@ describe('SQLite — CRUD completo', () => {
 
     it('orWhereColumn agrega condición OR de comparación de columnas', async () => {
       await source.execute('DELETE FROM col_test')
-      await source.execute("INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (5, 3), (2, 2)")
+      await source.execute('INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (5, 3), (2, 2)')
 
       // col_a = col_b OR col_a > col_b
-      const rows = await source.table('col_test').whereColumn('col_a', 'col_b').orWhereColumn('col_a', '>', 'col_b').find()
+      const rows = await source
+        .table('col_test')
+        .whereColumn('col_a', 'col_b')
+        .orWhereColumn('col_a', '>', 'col_b')
+        .get()
 
       expect(rows).toHaveLength(3)
     })
 
     it('whereColumn dentro de un callback de grupo', async () => {
       await source.execute('DELETE FROM col_test')
-      await source.execute("INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (5, 3), (2, 2), (9, 1)")
+      await source.execute('INSERT INTO col_test (col_a, col_b) VALUES (1, 1), (5, 3), (2, 2), (9, 1)')
 
       // (col_a = col_b OR col_a > col_b) AND col_b >= 1
       const rows = await source
         .table('col_test')
         .where((q) => q.whereColumn('col_a', 'col_b').orWhereColumn('col_a', '>', 'col_b'))
-        .find()
+        .get()
 
       expect(rows).toHaveLength(4)
     })
@@ -898,7 +937,7 @@ describe('SQLite — CRUD completo', () => {
     })
 
     it('actualiza un registro específico con WHERE', async () => {
-      const changes = await source.table('users').set('age', 31).where('name', 'Alice').update()
+      const changes = await source.table('users').setFieldValue('age', 31).where('name', 'Alice').update()
 
       expect(changes).toBe(1)
 
@@ -908,7 +947,7 @@ describe('SQLite — CRUD completo', () => {
     })
 
     it('actualiza múltiples campos a la vez', async () => {
-      await source.table('users').set('age', 26).set('active', 0).where('name', 'Bob').update()
+      await source.table('users').setFieldValue('age', 26).setFieldValue('active', 0).where('name', 'Bob').update()
 
       const user = await source.table('users').where('name', 'Bob').first()
 
@@ -917,20 +956,17 @@ describe('SQLite — CRUD completo', () => {
     })
 
     it('actualiza todos los registros cuando no hay WHERE', async () => {
-      const changes = await source.table('users').set('active', 0).update()
+      const changes = await source.table('users').setFieldValue('active', 0).update()
 
       expect(changes).toBe(3)
 
-      const activeUsers = await source.table('users').where('active', 1).find()
+      const activeUsers = await source.table('users').where('active', 1).get()
 
       expect(activeUsers).toHaveLength(0)
     })
 
     it('update acepta un objeto de fields como argumento', async () => {
-      const changes = await source
-        .table('users')
-        .where('name', 'Alice')
-        .update({ age: 99, active: 0 })
+      const changes = await source.table('users').where('name', 'Alice').update({ age: 99, active: 0 })
 
       expect(changes).toBe(1)
 
@@ -953,7 +989,7 @@ describe('SQLite — CRUD completo', () => {
 
       expect(changes).toBe(1)
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(2)
       expect(users.find((u: any) => u.name === 'Bob')).toBeUndefined()
@@ -970,7 +1006,7 @@ describe('SQLite — CRUD completo', () => {
 
       expect(changes).toBe(3)
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(0)
     })
@@ -980,7 +1016,12 @@ describe('SQLite — CRUD completo', () => {
 
   describe('TRANSACTIONS', () => {
     beforeEach(async () => {
-      await source.table('users').set('name', 'Alice').set('email', 'alice@example.com').set('age', 30).insert()
+      await source
+        .table('users')
+        .setFieldValue('name', 'Alice')
+        .setFieldValue('email', 'alice@example.com')
+        .setFieldValue('age', 30)
+        .insert()
     })
 
     it('commit: los cambios persisten después de confirmar', async () => {
@@ -994,7 +1035,7 @@ describe('SQLite — CRUD completo', () => {
         await conn.close()
       }
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(2)
     })
@@ -1014,7 +1055,7 @@ describe('SQLite — CRUD completo', () => {
         await conn.close()
       }
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(1)
     })
@@ -1029,7 +1070,7 @@ describe('SQLite — CRUD completo', () => {
 
       await conn.close()
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       expect(users).toHaveLength(3)
     })
@@ -1048,7 +1089,7 @@ describe('SQLite — CRUD completo', () => {
         await conn.close()
       }
 
-      const users = await source.table('users').find()
+      const users = await source.table('users').get()
 
       // Solo Alice (la de beforeEach) debe existir
       expect(users).toHaveLength(1)

@@ -35,6 +35,14 @@ A lightweight, fluent TypeScript library for interacting with relational databas
 - [Connections & transactions](#connections--transactions)
   - [Explicit connection](#explicit-connection)
   - [DB shorthand methods](#db-shorthand-methods)
+- [Resources (Active Record)](#resources-active-record)
+  - [Defining a Resource](#defining-a-resource)
+  - [Querying](#querying)
+  - [Saving & deleting](#saving--deleting)
+  - [Casts](#casts)
+  - [Relationships](#relationships)
+  - [Eager loading — with()](#eager-loading--with)
+  - [Joining via relationships](#joining-via-relationships)
 - [Debug mode](#debug-mode)
 - [Extending the library](#extending-the-library)
 - [Contact](#contact)
@@ -115,7 +123,7 @@ DB.register('primary', primarySource)
 DB.register('reporting', reportingSource)
 
 // Use a specific source explicitly
-const rows = await DB.source('reporting').table('analytics').find()
+const rows = await DB.source('reporting').table('analytics').get()
 ```
 
 The first registered source becomes the **active source** automatically. `DB.table(...)`, `DB.query(...)`, `DB.execute(...)` and the transaction helpers all target it. You can change it at any time with `setActiveSource()`:
@@ -124,7 +132,7 @@ The first registered source becomes the **active source** automatically. `DB.tab
 DB.setActiveSource('reporting')
 
 // Now all DB.* calls target reportingSource
-const rows = await DB.table('analytics').find()
+const rows = await DB.table('analytics').get()
 ```
 
 ---
@@ -137,7 +145,7 @@ const rows = await DB.table('analytics').find()
 
 ```typescript
 // SELECT * FROM users
-const users = await DB.table('users').find()
+const users = await DB.table('users').get()
 
 // SELECT * FROM users LIMIT 1
 const user = await DB.table('users').first()   // returns null if no rows match
@@ -149,7 +157,7 @@ Select specific columns:
 // SELECT id, name, email FROM users
 const users = await DB.table('users')
   .select('id', 'name', 'email')
-  .find()
+  .get()
 ```
 
 ---
@@ -160,38 +168,38 @@ const users = await DB.table('users')
 
 ```typescript
 // WHERE name = 'Alice'
-await DB.table('users').where('name', 'Alice').find()
+await DB.table('users').where('name', 'Alice').get()
 ```
 
 **Comparison operators** (`=`, `<>`, `<`, `>`, `<=`, `>=`):
 
 ```typescript
-await DB.table('users').where('age', '>', 18).find()
-await DB.table('users').where('age', '<>', 30).find()
+await DB.table('users').where('age', '>', 18).get()
+await DB.table('users').where('age', '<>', 30).get()
 ```
 
 **Multiple conditions (AND by default):**
 
 ```typescript
 // WHERE active = 1 AND age > 18
-await DB.table('users').where('active', 1).where('age', '>', 18).find()
+await DB.table('users').where('active', 1).where('age', '>', 18).get()
 ```
 
 **OR conditions:**
 
 ```typescript
 // WHERE name = 'Alice' OR name = 'Bob'
-await DB.table('users').where('name', 'Alice').orWhere('name', 'Bob').find()
+await DB.table('users').where('name', 'Alice').orWhere('name', 'Bob').get()
 ```
 
 **IN / NOT IN:**
 
 ```typescript
 // WHERE role IN ('admin', 'editor')
-await DB.table('users').whereIn('role', ['admin', 'editor']).find()
+await DB.table('users').whereIn('role', ['admin', 'editor']).get()
 
 // WHERE id NOT IN (1, 2, 3)
-await DB.table('users').whereNotIn('id', [1, 2, 3]).find()
+await DB.table('users').whereNotIn('id', [1, 2, 3]).get()
 ```
 
 Also available as `orWhereIn` / `orWhereNotIn`.
@@ -200,10 +208,10 @@ Also available as `orWhereIn` / `orWhereNotIn`.
 
 ```typescript
 // WHERE age BETWEEN 18 AND 65
-await DB.table('users').whereBetween('age', [18, 65]).find()
+await DB.table('users').whereBetween('age', [18, 65]).get()
 
 // WHERE created_at NOT BETWEEN '2024-01-01' AND '2024-12-31'
-await DB.table('orders').whereNotBetween('created_at', ['2024-01-01', '2024-12-31']).find()
+await DB.table('orders').whereNotBetween('created_at', ['2024-01-01', '2024-12-31']).get()
 ```
 
 Also available as `orWhereBetween` / `orWhereNotBetween`.
@@ -211,8 +219,8 @@ Also available as `orWhereBetween` / `orWhereNotBetween`.
 **LIKE / NOT LIKE:**
 
 ```typescript
-await DB.table('users').whereLike('email', '%@gmail.com').find()
-await DB.table('users').whereNotLike('name', 'A%').find()
+await DB.table('users').whereLike('email', '%@gmail.com').get()
+await DB.table('users').whereNotLike('name', 'A%').get()
 ```
 
 Also available as `orWhereLike` / `orWhereNotLike`.
@@ -221,10 +229,10 @@ Also available as `orWhereLike` / `orWhereNotLike`.
 
 ```typescript
 // WHERE deleted_at IS NULL
-await DB.table('users').whereNull('deleted_at').find()
+await DB.table('users').whereNull('deleted_at').get()
 
 // WHERE deleted_at IS NOT NULL
-await DB.table('users').whereNotNull('deleted_at').find()
+await DB.table('users').whereNotNull('deleted_at').get()
 ```
 
 Also available as `orWhereNull` / `orWhereNotNull`.
@@ -238,18 +246,18 @@ Pass a callback to `where()` to create a parenthesized group. Inside the callbac
 await DB.table('users')
   .where((group) => group.where('name', 'Alice').orWhere('name', 'Bob'))
   .where('active', 1)
-  .find()
+  .get()
 
 // WHERE (age IN (25, 30)) AND active = 1
 await DB.table('users')
   .where((q) => q.whereIn('age', [25, 30]))
   .where('active', 1)
-  .find()
+  .get()
 
 // WHERE (age BETWEEN 18 AND 40 OR nickname IS NULL)
 await DB.table('users')
   .where((q) => q.whereBetween('age', [18, 40]).orWhereNull('nickname'))
-  .find()
+  .get()
 ```
 
 Nest groups as deep as needed:
@@ -262,7 +270,7 @@ await DB.table('users')
       .where('role', 'admin')
       .orWhere((inner) => inner.where('role', 'editor').where('verified', 1))
   )
-  .find()
+  .get()
 ```
 
 `orWhere()` also accepts a callback, producing an OR-connected group.
@@ -273,13 +281,13 @@ Compare two columns against each other instead of against a scalar value:
 
 ```typescript
 // WHERE updated_at > created_at
-await DB.table('users').whereColumn('updated_at', '>', 'created_at').find()
+await DB.table('users').whereColumn('updated_at', '>', 'created_at').get()
 
 // WHERE col_a = col_b  (operator defaults to =)
-await DB.table('items').whereColumn('col_a', 'col_b').find()
+await DB.table('items').whereColumn('col_a', 'col_b').get()
 
 // OR variant
-await DB.table('items').whereColumn('a', 'b').orWhereColumn('a', '>', 'b').find()
+await DB.table('items').whereColumn('a', 'b').orWhereColumn('a', '>', 'b').get()
 ```
 
 `whereColumn` / `orWhereColumn` are also available inside grouped-condition callbacks:
@@ -287,7 +295,7 @@ await DB.table('items').whereColumn('a', 'b').orWhereColumn('a', '>', 'b').find(
 ```typescript
 await DB.table('items')
   .where((q) => q.whereColumn('a', 'b').orWhereColumn('a', '>', 'b'))
-  .find()
+  .get()
 ```
 
 ---
@@ -303,7 +311,7 @@ const minAge = 18
 const users = await DB.table('users')
   .when(onlyActive, (q) => q.where('active', 1))
   .when(minAge != null, (q) => q.where('age', '>=', minAge))
-  .find()
+  .get()
 ```
 
 When `condition` is falsy the callback is skipped and the chain continues unchanged. `when` works on both `DataTable` and `SelectQuery`.
@@ -314,17 +322,17 @@ When `condition` is falsy the callback is skipped and the chain continues unchan
 
 ```typescript
 // ORDER BY name ASC
-await DB.table('users').orderBy('name').find()
+await DB.table('users').orderBy('name').get()
 
 // ORDER BY age DESC
 import { OrderByDirection } from '@neogroup/database-connector'
-await DB.table('users').orderBy('age', OrderByDirection.DESC).find()
+await DB.table('users').orderBy('age', OrderByDirection.DESC).get()
 
 // Multiple sort fields
 await DB.table('users')
   .orderBy('country', OrderByDirection.ASC)
   .orderBy('age', OrderByDirection.DESC)
-  .find()
+  .get()
 ```
 
 ---
@@ -333,13 +341,13 @@ await DB.table('users')
 
 ```typescript
 // LIMIT 10
-await DB.table('users').limit(10).find()
+await DB.table('users').limit(10).get()
 
 // LIMIT 10 OFFSET 20  (page 3)
-await DB.table('users').limit(10).offset(20).find()
+await DB.table('users').limit(10).offset(20).get()
 
 // OFFSET only (SQLite emits LIMIT -1 automatically)
-await DB.table('users').offset(5).find()
+await DB.table('users').offset(5).get()
 ```
 
 ---
@@ -351,7 +359,7 @@ await DB.table('users').offset(5).find()
 await DB.table('users')
   .select('country', 'COUNT(*) AS total')
   .groupBy('country')
-  .find()
+  .get()
 
 // GROUP BY + HAVING
 // HAVING COUNT(*) > 5
@@ -359,7 +367,7 @@ await DB.table('users')
   .select('country', 'COUNT(*) AS total')
   .groupBy('country')
   .having('COUNT(*)', '>', 5)
-  .find()
+  .get()
 ```
 
 `having()` and `orHaving()` accept the same signatures as `where()`.
@@ -372,12 +380,12 @@ await DB.table('users')
 // INNER JOIN orders ON users.id = orders.user_id
 await DB.table('users')
   .innerJoin('orders', 'users.id', 'orders.user_id')
-  .find()
+  .get()
 
 // LEFT JOIN
 await DB.table('users')
   .leftJoin('orders', 'users.id', 'orders.user_id')
-  .find()
+  .get()
 ```
 
 Fields follow the `'table.field'` notation — the builder parses and quotes each component according to the engine (e.g. backticks in MySQL). Object form is also accepted for finer control:
@@ -394,7 +402,7 @@ Join with table alias:
 await DB.table('users')
   .innerJoin('orders', 'users.id', 'orders.user_id', 'o')
   .select('users.name', 'o.total')
-  .find()
+  .get()
 ```
 
 ---
@@ -403,7 +411,7 @@ await DB.table('users')
 
 ```typescript
 // SELECT DISTINCT country FROM users
-await DB.table('users').distinct().select('country').find()
+await DB.table('users').distinct().select('country').get()
 ```
 
 ---
@@ -418,7 +426,7 @@ await DB.table('users')
   .select('users.name', 'COUNT(orders.id) AS order_count')
   .innerJoin('orders', 'users.id', 'orders.user_id')
   .groupBy('users.id')
-  .find()
+  .get()
 ```
 
 Object form is also available for precise control:
@@ -427,12 +435,12 @@ Object form is also available for precise control:
 // SELECT COUNT(*) AS total FROM users
 await DB.table('users')
   .select({ name: '*', function: 'COUNT', alias: 'total' })
-  .find()
+  .get()
 
 // SELECT MAX(age) AS max_age FROM users
 await DB.table('users')
   .select({ name: 'age', function: 'MAX', alias: 'max_age' })
-  .find()
+  .get()
 ```
 
 ---
@@ -441,7 +449,7 @@ await DB.table('users')
 
 ```typescript
 // FROM users AS u
-await DB.table('users').alias('u').find()
+await DB.table('users').alias('u').get()
 ```
 
 ---
@@ -634,6 +642,203 @@ try {
 
 ---
 
+## Resources (Active Record)
+
+Resources are Eloquent-style Active Record models that map a class to a database table. They sit on top of `DataTable` and add hydration, casts, relationships, and instance-level `save()`/`delete()`.
+
+### Defining a Resource
+
+```typescript
+import { Resource, hasMany, hasOne, belongsTo } from '@neogroup/database-connector'
+
+class User extends Resource {
+  static table = 'users'           // DB table name (defaults to lowercase class name + 's')
+  static primaryKey = 'id'         // default: 'id'
+  static fields = ['id', 'name', 'email', 'age', 'active']
+
+  static casts = {
+    age:    'number',
+    active: 'boolean',
+  } as const
+
+  static relationships = {
+    orders:  hasMany(() => Order, 'userId'),          // Order.userId → User.id
+    profile: hasOne(() => Profile, 'userId'),         // Profile.userId → User.id
+  }
+
+  // Optional: custom computed attributes
+  static customAttributes = {
+    displayName: (u: User) => `${u.name} (${u.email})`,
+  }
+
+  // Typed instance fields
+  id!: number
+  name!: string
+  email!: string
+  age!: number
+  active!: boolean
+  displayName!: string
+}
+
+class Order extends Resource {
+  static table = 'orders'
+  static relationships = {
+    user: belongsTo(() => User, 'userId'),            // Order.userId → User.id
+  }
+
+  id!: number
+  userId!: number
+  total!: number
+}
+```
+
+The `source` static property defaults to the active source (`DB.getActiveSource()`). Override it on any class to target a different source:
+
+```typescript
+class ArchiveUser extends Resource {
+  static table   = 'users'
+  static source  = DB.source('archive')
+}
+```
+
+---
+
+### Querying
+
+All `DataTable` query methods are available as static methods on every Resource, returning a chainable `ResourceQuery<T>`:
+
+```typescript
+// Fetch all
+const users = await User.get()
+
+// Find by primary key
+const user = await User.find(1)   // User | null
+
+// First match
+const admin = await User.where('role', 'admin').first()
+
+// Chained conditions
+const adults = await User.where('active', true)
+  .whereNotNull('email')
+  .orderBy('name')
+  .limit(20)
+  .get()
+```
+
+The full `where*` / `orWhere*` API, `select()`, `orderBy()`, `limit()`, `offset()`, `groupBy()`, `distinct()`, and `whereColumn()` are all supported.
+
+---
+
+### Saving & deleting
+
+```typescript
+// INSERT — primary key is set automatically after insert
+const user = new User()
+user.name  = 'Alice'
+user.email = 'alice@example.com'
+user.age   = 30
+await user.save()
+console.log(user.id)  // set from lastInsertId
+
+// UPDATE — detected by the presence of a primary key value
+user.age = 31
+await user.save()
+
+// DELETE
+await user.delete()
+```
+
+---
+
+### Casts
+
+Declare `casts` to automatically convert raw DB values when hydrating a row:
+
+| Cast type  | Description                                   |
+|------------|-----------------------------------------------|
+| `'number'` | `Number(value)`                               |
+| `'boolean'`| `true` for `1`, `'1'`, `'true'`; `false` otherwise |
+| `'string'` | `String(value)`                               |
+| `'json'`   | `JSON.parse(value)` on read, `JSON.stringify` on write |
+| `'date'`   | `new Date(value)`                             |
+
+Booleans stored as integers (SQLite, MySQL) are handled transparently.
+
+---
+
+### Relationships
+
+Import the factory functions and declare them in `static relationships`:
+
+```typescript
+import { hasOne, hasMany, belongsTo, hasOneThrough, hasManyThrough } from '@neogroup/database-connector'
+
+// hasOne(related, foreignKey, localKey = 'id')
+// hasMany(related, foreignKey, localKey = 'id')
+// belongsTo(related, foreignKey, localKey = 'id')
+// hasOneThrough(related, through, foreignKey, throughForeignKey, localKey, throughLocalKey)
+// hasManyThrough(related, through, foreignKey, throughForeignKey, localKey, throughLocalKey)
+
+class Country extends Resource {
+  static relationships = {
+    users:     hasMany(() => User, 'countryId'),
+    // reach Users' Orders through the Users table
+    orders:    hasManyThrough(() => Order, () => User, 'userId', 'countryId'),
+  }
+}
+```
+
+---
+
+### Eager loading — `with()`
+
+Pass relation names to `with()` to load related resources in a single extra query per relation (avoids N+1):
+
+```typescript
+// Preload orders for each user
+const users = await User.with('orders').get()
+users.forEach(u => console.log(u.orders))  // Order[] attached
+
+// Multiple relations
+const users = await User.with('orders', 'profile').get()
+
+// Dot-notation for nested eager loading
+// Loads users → persons → locations in 3 total queries
+const users = await User.with('person.location').get()
+users.forEach(u => console.log(u.person.location))
+```
+
+`with()` is chainable after any `where*` or ordering method:
+
+```typescript
+const users = await User.where('active', true).with('orders').orderBy('name').get()
+```
+
+---
+
+### Joining via relationships
+
+Use `joinRelationship` / `innerJoinRelationship` / `leftJoinRelationship` to add SQL JOINs derived from relationship definitions:
+
+```typescript
+// INNER JOIN orders ON users.id = orders.userId
+const users = await User.innerJoinRelationship('orders')
+  .select('users.*', 'COUNT(orders.id) AS orderCount')
+  .groupBy('users.id')
+  .get()
+
+// LEFT JOIN
+const users = await User.leftJoinRelationship('profile').get()
+```
+
+These are available as static methods on every Resource and also on `ResourceQuery`:
+
+```typescript
+const query = User.where('active', true).leftJoinRelationship('profile')
+```
+
+---
+
 ## Debug mode
 
 Enable SQL logging on a data source to print every statement and its bindings to the console:
@@ -668,6 +873,7 @@ import { Connection, DataSource } from '@neogroup/database-connector'
 class MyConnection implements Connection {
   async query(sql: string, bindings?: any[]): Promise<any[]> { /* ... */ }
   async execute(sql: string, bindings?: any[]): Promise<number> { /* ... */ }
+  async lastInsertId(): Promise<number> { /* ... */ }
   async beginTransaction(): Promise<void> { /* ... */ }
   async commitTransaction(): Promise<void> { /* ... */ }
   async rollbackTransaction(): Promise<void> { /* ... */ }

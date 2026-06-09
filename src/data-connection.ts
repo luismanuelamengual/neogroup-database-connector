@@ -60,6 +60,10 @@ export class DataConnection {
     }
   }
 
+  public async lastInsertId(): Promise<number> {
+    return this.connection.lastInsertId()
+  }
+
   public async close(): Promise<void> {
     await this.connection.close()
   }

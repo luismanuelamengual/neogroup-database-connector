@@ -4,6 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "experimentalDecorators": true,
+    "useDefineForClassFields": false,
     "lib": ["dom","es2017"],
     "moduleResolution": "nodenext",
     "module": "nodenext",

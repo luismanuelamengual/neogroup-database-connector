@@ -3,6 +3,7 @@ import { DataSet } from '../../data-set'
 
 export class MysqlConnection implements Connection {
   private connection: any
+  private _lastInsertId: number = 0
 
   constructor(connection: any) {
     this.connection = connection
@@ -17,7 +18,13 @@ export class MysqlConnection implements Connection {
   public async execute(sql: string, bindings?: Array<any>): Promise<number> {
     const [result] = await this.connection.execute(sql, bindings ?? [])
 
+    this._lastInsertId = (result as any).insertId ?? 0
+
     return (result as any).affectedRows ?? 0
+  }
+
+  public async lastInsertId(): Promise<number> {
+    return this._lastInsertId
   }
 
   public async beginTransaction(): Promise<void> {
