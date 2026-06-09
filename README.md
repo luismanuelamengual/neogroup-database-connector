@@ -16,6 +16,7 @@ A lightweight, fluent TypeScript library for interacting with relational databas
   - [MySQL](#mysql)
   - [SQLite](#sqlite)
   - [Multiple sources](#multiple-sources)
+  - [Configuration via environment variables](#configuration-via-environment-variables)
 - [Querying with DataTable](#querying-with-datatable)
   - [SELECT — basic](#select--basic)
   - [Filtering — WHERE](#filtering--where)
@@ -134,6 +135,63 @@ DB.setActiveSource('reporting')
 // Now all DB.* calls target reportingSource
 const rows = await DB.table('analytics').get()
 ```
+
+### Configuration via environment variables
+
+Instead of calling `DB.register()` in code, you can configure data sources entirely through environment variables. The library auto-detects them the first time a source is needed — no bootstrap code required.
+
+**Default source** — used by all `DB.*` calls:
+
+| Variable      | Description                                        |
+|---------------|----------------------------------------------------|
+| `DB_DRIVER`   | `sqlite` \| `postgres` \| `mysql` **(required)**  |
+| `DB_FILE`     | SQLite file path (default: `:memory:`)             |
+| `DB_HOST`     | Database host (postgres / mysql)                   |
+| `DB_PORT`     | Database port (postgres / mysql)                   |
+| `DB_NAME`     | Database name (postgres / mysql)                   |
+| `DB_USERNAME` | Login username (postgres / mysql)                  |
+| `DB_PASSWORD` | Login password (postgres / mysql)                  |
+
+**Named sources** — replace `<NAME>` with the source name in upper-case:
+
+```
+DB_<NAME>_DRIVER, DB_<NAME>_HOST, DB_<NAME>_PORT, DB_<NAME>_NAME,
+DB_<NAME>_USERNAME, DB_<NAME>_PASSWORD, DB_<NAME>_FILE
+```
+
+Examples:
+
+```bash
+# Single SQLite source — no code needed
+DB_DRIVER=sqlite
+DB_FILE=./data.db
+```
+
+```bash
+# PostgreSQL default + named SQLite for reporting
+DB_DRIVER=postgres
+DB_HOST=localhost
+DB_NAME=myapp
+DB_USERNAME=admin
+DB_PASSWORD=secret
+
+DB_REPORTING_DRIVER=sqlite
+DB_REPORTING_FILE=./reporting.db
+```
+
+```typescript
+// No DB.register() anywhere — sources are resolved from the environment
+const users = await DB.table('users').get()
+const report = await DB.source('reporting').table('stats').get()
+```
+
+You can also call `DB.configure()` explicitly at startup if you want fail-fast behaviour (e.g. crash early instead of on the first query if a required variable is missing):
+
+```typescript
+DB.configure()   // throws immediately if DB_DRIVER is not set or invalid
+```
+
+`DB.configure()` is a no-op if sources have already been registered manually, so it is safe to mix both styles in the same application.
 
 ---
 
