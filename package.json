@@ -14,9 +14,9 @@
   "author": "Luis Manuel Amengual",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/luismanuelamengual/NeORM/issues"
+    "url": "https://github.com/luismanuelamengual/neogroup-neorm/issues"
   },
-  "homepage": "https://github.com/luismanuelamengual/NeORM#readme",
+  "homepage": "https://github.com/luismanuelamengual/neogroup-neorm#readme",
   "keywords": [
     "database",
     "connector",
@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luismanuelamengual/NeORM.git"
+    "url": "git+https://github.com/luismanuelamengual/neogroup-neorm.git"
   },
   "scripts": {
     "build": "jest --passWithNoTests && tsc",
