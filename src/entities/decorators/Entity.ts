@@ -1,4 +1,3 @@
-import { DataSource } from '../../database/DataSource'
 import { CastType } from '../CastType'
 import { Relationship } from '../Relationship'
 import { registry } from './metadata'
@@ -8,8 +7,11 @@ export interface EntityOptions {
   table?: string
   /** Primary key column name. Defaults to 'id'. */
   primaryKey?: string
-  /** DataSource to use. Defaults to DB.getActiveSource(). */
-  source?: DataSource | null
+  /**
+   * Registered DataSource name. When set, the entity operates on
+   * DB.source(sourceName); otherwise it operates directly on DB.
+   */
+  source?: string | null
 }
 
 /**

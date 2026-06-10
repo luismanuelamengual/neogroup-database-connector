@@ -35,13 +35,13 @@ export abstract class BaseEntity {
   static casts: Record<string, CastType>
   /** Relationship name → relationship definition. */
   static relationships: Record<string, Relationship>
-  /** DataSource override. Falls back to DB.getActiveSource(). */
-  static source: DataSource | null
+  /** Registered DataSource name. When null, the entity operates directly on DB. */
+  static source: string | null
 
   // ── Internals ────────────────────────────────────────────────────────────────
 
   static getSource(): DataSource {
-    return this.source ?? DB.getActiveSource()
+    return this.source ? DB.source(this.source) : DB.getActiveSource()
   }
 
   /** Creates a new EntityQuery for this entity. */

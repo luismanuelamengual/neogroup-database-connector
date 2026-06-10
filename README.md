@@ -781,10 +781,12 @@ class ShippingAddress extends BaseEntity {
 }
 ```
 
-To target a specific data source instead of the active one:
+To target a specific registered data source (by name) instead of the active one:
 
 ```typescript
-@Entity({ source: DB.source('archive') })
+DB.register('archive', archiveSource)
+
+@Entity({ source: 'archive' })   // the entity operates on DB.source('archive')
 class ArchiveUser extends BaseEntity {
   // ...
 }
