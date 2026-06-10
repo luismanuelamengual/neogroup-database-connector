@@ -2,6 +2,8 @@ import { CastType } from '../CastType'
 import { getOrCreate } from './metadata'
 
 export interface ColumnOptions {
+  /** Database column name. Defaults to the property name. */
+  columnName?: string
   /** Automatic type coercion when reading from the database. */
   cast?: CastType
   /** Mark this column as the primary key. */
