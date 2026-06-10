@@ -1,8 +1,8 @@
+import { DefaultQueryBuilder, Query, QueryBuilder } from '../query'
 import { Connection } from './Connection'
 import { DataConnection } from './DataConnection'
 import { DataSet } from './DataSet'
 import { DataTable } from './DataTable'
-import { DefaultQueryBuilder, Query, QueryBuilder } from './query'
 
 export abstract class DataSource {
   protected debug = false

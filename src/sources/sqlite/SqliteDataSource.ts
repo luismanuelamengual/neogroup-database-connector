@@ -1,5 +1,5 @@
-import { Connection } from '../../Connection'
-import { DataSource } from '../../DataSource'
+import { Connection } from '../../database/Connection'
+import { DataSource } from '../../database/DataSource'
 import { SqliteConnection } from './SqliteConnection'
 import { SqliteQueryBuilder } from './SqliteQueryBuilder'
 

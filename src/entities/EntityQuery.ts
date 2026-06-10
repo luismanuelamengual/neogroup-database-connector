@@ -1,4 +1,4 @@
-import { DataTable } from '../DataTable'
+import { DataTable } from '../database/DataTable'
 import { Field } from '../query'
 import { Condition, ConditionGroup } from '../query/conditions'
 import { JoinType } from '../query/features/HasJoins'

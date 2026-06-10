@@ -1,5 +1,5 @@
-import { DataSource } from '../../DataSource'
-import { DB } from '../../DB'
+import { DataSource } from '../../database/DataSource'
+import { DB } from '../../database/DB'
 import { Field } from '../../query'
 import { Condition, ConditionGroup } from '../../query/conditions'
 import { OrderByDirection } from '../../query/features/HasOrderByFields'

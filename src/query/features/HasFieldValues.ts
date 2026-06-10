@@ -1,4 +1,4 @@
-import { DataSet } from '../../DataSet'
+import { DataSet } from '../../database/DataSet'
 
 export abstract class HasFieldValues<R> {
   protected _fields?: DataSet
