@@ -30,7 +30,8 @@ export function Entity(options?: EntityOptions) {
     const meta = registry.get(BaseClass.prototype) ?? { columns: [], relationships: [] }
     const tableName = options?.table ?? originalName.toLowerCase() + 's'
     const primaryKeyMeta = meta.columns.find((c) => c.primaryKey)
-    const primaryKeyCol = (primaryKeyMeta && (primaryKeyMeta.columnName ?? primaryKeyMeta.name)) ?? options?.primaryKey ?? 'id'
+    const primaryKeyCol =
+      (primaryKeyMeta && (primaryKeyMeta.columnName ?? primaryKeyMeta.name)) ?? options?.primaryKey ?? 'id'
     const fieldNames = meta.columns.map((c) => c.name)
     // Property name → database column name (defaults to the property name)
     const columnsMap: Record<string, string> = {}
