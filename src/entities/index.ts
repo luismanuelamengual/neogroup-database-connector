@@ -1,4 +1,5 @@
-export * from './relationship'
+export * from './Relationship'
+export * from './RelationshipType'
 export * from './EntityQuery'
 export type { CastType } from './CastType'
 export * from './decorators'

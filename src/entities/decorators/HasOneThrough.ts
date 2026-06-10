@@ -1,4 +1,3 @@
-import { hasOneThrough as _hasOneThrough } from '../relationship'
 import { getOrCreate } from './metadata'
 
 /** Has-one through an intermediate model. */
@@ -15,7 +14,15 @@ export function HasOneThrough(
 
     m.relationships.push({
       name: String(propertyKey),
-      relationship: _hasOneThrough(related, through, foreignKey, throughForeignKey, localKey, throughLocalKey)
+      relationship: {
+        type: 'hasOneThrough',
+        related,
+        through,
+        foreignKey,
+        throughForeignKey,
+        localKey,
+        throughLocalKey
+      }
     })
   }
 }

@@ -1,4 +1,3 @@
-import { hasManyThrough as _hasManyThrough } from '../relationship'
 import { getOrCreate } from './metadata'
 
 /** Has-many through an intermediate model. */
@@ -15,7 +14,15 @@ export function HasManyThrough(
 
     m.relationships.push({
       name: String(propertyKey),
-      relationship: _hasManyThrough(related, through, foreignKey, throughForeignKey, localKey, throughLocalKey)
+      relationship: {
+        type: 'hasManyThrough',
+        related,
+        through,
+        foreignKey,
+        throughForeignKey,
+        localKey,
+        throughLocalKey
+      }
     })
   }
 }

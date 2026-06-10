@@ -5,7 +5,7 @@ import { Condition, ConditionGroup } from '../../query/conditions'
 import { OrderByDirection } from '../../query/features/HasOrderByFields'
 import { CastType } from '../CastType'
 import { EntityQuery } from '../EntityQuery'
-import { Relationship } from '../relationship'
+import { Relationship } from '../Relationship'
 import { applyCast } from './casts'
 import { registry } from './metadata'
 

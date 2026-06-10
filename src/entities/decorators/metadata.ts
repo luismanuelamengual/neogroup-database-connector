@@ -1,5 +1,5 @@
 import { CastType } from '../CastType'
-import { Relationship } from '../relationship'
+import { Relationship } from '../Relationship'
 
 // ── Metadata registry ─────────────────────────────────────────────────────────
 // Decorators run before the class decorator, storing per-prototype metadata.
