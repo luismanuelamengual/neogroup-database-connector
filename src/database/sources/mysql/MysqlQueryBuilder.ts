@@ -1,4 +1,4 @@
-import { DefaultQueryBuilder, QueryTable, Statement } from '../../query'
+import { DefaultQueryBuilder, QueryTable, Statement } from '../../../query'
 
 export class MysqlQueryBuilder extends DefaultQueryBuilder {
   private static readonly BACKTICK = '`'

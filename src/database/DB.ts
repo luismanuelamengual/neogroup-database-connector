@@ -140,7 +140,7 @@ export abstract class DB {
     switch (driver.toLowerCase()) {
       case 'sqlite': {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { SqliteDataSource } = require('../sources/sqlite')
+        const { SqliteDataSource } = require('./sources/sqlite')
         const s = new SqliteDataSource()
         const file = get('FILE')
 
@@ -155,7 +155,7 @@ export abstract class DB {
 
       case 'postgresql': {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { PostgresDataSource } = require('../sources/postgres')
+        const { PostgresDataSource } = require('./sources/postgres')
         const s = new PostgresDataSource()
         const host = get('HOST')
         const port = get('PORT')
@@ -188,7 +188,7 @@ export abstract class DB {
 
       case 'mysql': {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { MysqlDataSource } = require('../sources/mysql')
+        const { MysqlDataSource } = require('./sources/mysql')
         const s = new MysqlDataSource()
         const host = get('HOST')
         const port = get('PORT')

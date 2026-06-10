@@ -1,5 +1,5 @@
-import { Connection } from '../../database/Connection'
-import { DataSet } from '../../database/DataSet'
+import { Connection } from '../../Connection'
+import { DataSet } from '../../DataSet'
 
 export class MysqlConnection implements Connection {
   private connection: any

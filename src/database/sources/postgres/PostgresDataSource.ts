@@ -1,9 +1,9 @@
-import { Connection } from '../../database/Connection'
-import { DataSource } from '../../database/DataSource'
-import { MysqlConnection } from './MysqlConnection'
-import { MysqlQueryBuilder } from './MysqlQueryBuilder'
+import { Connection } from '../../Connection'
+import { DataSource } from '../../DataSource'
+import { PostgresConnection } from './PostgresConnection'
+import { PostgresQueryBuilder } from './PostgresQueryBuilder'
 
-export class MysqlDataSource extends DataSource {
+export class PostgresDataSource extends DataSource {
   private lib: any
   private pool: any
   private host: string
@@ -13,16 +13,16 @@ export class MysqlDataSource extends DataSource {
   private password: string
 
   constructor() {
-    super(new MysqlQueryBuilder())
+    super(new PostgresQueryBuilder())
 
     try {
-      this.lib = require('mysql2/promise')
+      this.lib = require('pg')
     } catch (e) {
-      throw new Error('MySQL module not found. Please install it via "npm install -S mysql2"')
+      throw new Error('PostgreSQL module not found. Please install it via "npm install -S pg"')
     }
 
     this.host = ''
-    this.port = 3306
+    this.port = 5432
     this.databaseName = ''
     this.username = ''
     this.password = ''
@@ -77,15 +77,17 @@ export class MysqlDataSource extends DataSource {
 
   protected async requestConnection(): Promise<Connection> {
     if (!this.pool) {
-      this.pool = this.lib.createPool({
+      const config: any = {
         host: this.getHost(),
         port: this.getPort(),
         database: this.getDatabaseName(),
         user: this.getUsername(),
         password: this.getPassword()
-      })
+      }
+
+      this.pool = new this.lib.Pool(config)
     }
 
-    return new MysqlConnection(await this.pool.getConnection())
+    return new PostgresConnection(await this.pool.connect())
   }
 }
