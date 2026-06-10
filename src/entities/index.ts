@@ -1,6 +1,6 @@
+export * from './BaseEntity'
 export * from './CastType'
 export * from './decorators'
-export * from './Entities'
 export * from './EntityQuery'
 export * from './Relationship'
 export * from './RelationshipType'
