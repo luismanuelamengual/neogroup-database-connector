@@ -1,24 +1,7 @@
-import { Field } from './fields'
-
-export type BasicCondition = { field: Field; operator?: string; value: any }
-
-export type ColumnCondition = { field: Field; operator: string; column: Field }
-
-export type RawCondition = string | { sql: string; bindings: Array<any> }
-
-export enum ConditionConnector {
-  AND,
-  OR
-}
-
-export type Condition =
-  | RawCondition
-  | BasicCondition
-  | ColumnCondition
-  | ConditionGroup
-  | ((group: ConditionGroup) => void)
-
-export type ConnectedCondition = { condition: Condition; connector: ConditionConnector }
+import { Field } from '../fields'
+import { Condition } from './Condition'
+import { ConditionConnector } from './ConditionConnector'
+import { ConnectedCondition } from './ConnectedCondition'
 
 export class ConditionGroup {
   private conditions: Array<ConnectedCondition> = []
