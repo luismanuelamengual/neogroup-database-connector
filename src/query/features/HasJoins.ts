@@ -1,5 +1,5 @@
 import { ConditionGroup } from '../conditions'
-import { Field, toField } from '../fields'
+import { Field } from '../fields'
 import { Table } from '../table'
 
 export enum JoinType {
@@ -43,7 +43,7 @@ export abstract class HasJoins<R> {
       const [type, table, sourceField, remoteField, alias] = arguments
       const condition = new ConditionGroup()
 
-      condition.where(toField(sourceField), toField(remoteField))
+      condition.whereColumn(sourceField, remoteField)
       join = { type, table, condition, alias }
     }
 
