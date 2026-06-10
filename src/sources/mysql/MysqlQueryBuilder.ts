@@ -1,6 +1,4 @@
-import { DefaultQueryBuilder } from '../../query/builders/DefaultQueryBuilder'
-import { Statement } from '../../query/Statement'
-import { Table } from '../../query/table'
+import { DefaultQueryBuilder, QueryTable, Statement } from '../../query'
 
 export class MysqlQueryBuilder extends DefaultQueryBuilder {
   private static readonly BACKTICK = '`'
@@ -10,7 +8,7 @@ export class MysqlQueryBuilder extends DefaultQueryBuilder {
   // buildTable y buildFieldName son suficientes — buildRawFieldString los invoca
   // automáticamente al parsear notaciones 'tabla.campo' y 'FUNC(tabla.campo)'.
 
-  protected buildTable(table: Table, statement: Statement) {
+  protected buildTable(table: QueryTable, statement: Statement) {
     if (typeof table === 'string' || table instanceof String) {
       statement.sql += MysqlQueryBuilder.BACKTICK + table + MysqlQueryBuilder.BACKTICK
     } else {

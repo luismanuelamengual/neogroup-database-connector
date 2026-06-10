@@ -1,10 +1,10 @@
 import { applyMixins } from '../utilities'
 import { HasFieldValues, HasTable, HasWhereConditions } from './features'
 import { Query } from './Query'
-import { Table } from './table'
+import { QueryTable } from './QueryTable'
 
 export class UpdateQuery extends Query {
-  constructor(table?: Table) {
+  constructor(table?: QueryTable) {
     super()
 
     if (table) {

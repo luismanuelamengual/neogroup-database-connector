@@ -16,10 +16,10 @@ import {
 } from './features'
 import { HasOrderByFields } from './features/HasOrderByFields'
 import { Query } from './Query'
-import { Table } from './table'
+import { QueryTable } from './QueryTable'
 
 export class SelectQuery extends Query {
-  constructor(table?: Table) {
+  constructor(table?: QueryTable) {
     super()
 
     if (table) {

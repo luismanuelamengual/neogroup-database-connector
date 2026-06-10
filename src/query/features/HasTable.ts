@@ -1,19 +1,19 @@
-import { Table } from '../table'
+import { QueryTable } from '../QueryTable'
 
 export abstract class HasTable<R> {
-  protected _table: Table = ''
+  protected _table: QueryTable = ''
 
-  public setTable(table: Table): R {
+  public setTable(table: QueryTable): R {
     this._table = table
 
     return this as unknown as R
   }
 
-  public getTable(): Table {
+  public getTable(): QueryTable {
     return this._table
   }
 
-  public table(table: Table): R {
+  public table(table: QueryTable): R {
     return this.setTable(table)
   }
 }

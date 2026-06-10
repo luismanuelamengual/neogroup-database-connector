@@ -2,7 +2,7 @@ import { DataConnection } from './DataConnection'
 import { DataSet } from './DataSet'
 import { DataSource } from './DataSource'
 import { DataTable } from './DataTable'
-import { ConditionGroup, DeleteQuery, InsertQuery, Query, SelectQuery, Table, UpdateQuery } from './query'
+import { ConditionGroup, DeleteQuery, InsertQuery, Query, QueryTable, SelectQuery, UpdateQuery } from './query'
 
 // ── Global state — survives Next.js hot reloads ───────────────────────────────
 
@@ -240,19 +240,19 @@ export abstract class DB {
     return new ConditionGroup()
   }
 
-  public static selectQuery(table?: Table): SelectQuery {
+  public static selectQuery(table?: QueryTable): SelectQuery {
     return new SelectQuery(table)
   }
 
-  public static updateQuery(table?: Table): UpdateQuery {
+  public static updateQuery(table?: QueryTable): UpdateQuery {
     return new UpdateQuery(table)
   }
 
-  public static deleteQuery(table?: Table): DeleteQuery {
+  public static deleteQuery(table?: QueryTable): DeleteQuery {
     return new DeleteQuery(table)
   }
 
-  public static insertQuery(table?: Table): InsertQuery {
+  public static insertQuery(table?: QueryTable): InsertQuery {
     return new InsertQuery(table)
   }
 

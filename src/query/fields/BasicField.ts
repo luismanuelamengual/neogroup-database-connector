@@ -1,3 +1,3 @@
-import { Table } from '../table'
+import { QueryTable } from '../QueryTable'
 
-export type BasicField = { name: string; table?: Table }
+export type BasicField = { name: string; table?: QueryTable }

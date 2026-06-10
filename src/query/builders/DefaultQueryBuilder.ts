@@ -4,9 +4,9 @@ import { Join, JoinType, OrderByField, SelectField } from '../features'
 import { Field } from '../fields'
 import { InsertQuery } from '../InsertQuery'
 import { Query } from '../Query'
+import { QueryTable } from '../QueryTable'
 import { SelectQuery } from '../SelectQuery'
 import { Statement } from '../Statement'
-import { Table } from '../table'
 import { UpdateQuery } from '../UpdateQuery'
 import { QueryBuilder } from './QueryBuilder'
 
@@ -543,7 +543,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     this.buildConditionGroup(condition, statement)
   }
 
-  protected buildTable(table: Table, statement: Statement) {
+  protected buildTable(table: QueryTable, statement: Statement) {
     if (typeof table === 'string' || table instanceof String) {
       statement.sql += table
     } else {
