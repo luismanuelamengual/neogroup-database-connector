@@ -1,4 +1,4 @@
-import { CastType } from '../entity'
+import { CastType } from '../CastType'
 import { Relationship } from '../relationship'
 
 // ── Metadata registry ─────────────────────────────────────────────────────────

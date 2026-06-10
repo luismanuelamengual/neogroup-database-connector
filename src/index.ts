@@ -1,8 +1,8 @@
-export * from './connection'
-export * from './data-set'
-export * from './data-source'
-export * from './data-table'
-export * from './db'
+export * from './Connection'
+export * from './DataSet'
+export * from './DataSource'
+export * from './DataTable'
+export * from './DB'
 //Queries
 export * from './query'
 //Entities

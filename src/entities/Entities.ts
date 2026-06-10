@@ -1,9 +1,9 @@
-import { DataSet } from '../data-set'
-import { DataSource } from '../data-source'
-import { DB } from '../db'
+import { DataSet } from '../DataSet'
+import { DataSource } from '../DataSource'
+import { DB } from '../DB'
 import { InsertQuery } from '../query'
+import { CastType } from './CastType'
 import { applyCastForStorage } from './decorators/casts'
-import { CastType } from './entity'
 
 // ── Entities namespace ────────────────────────────────────────────────────────
 

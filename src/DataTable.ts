@@ -1,5 +1,5 @@
-import { DataSet } from './data-set'
-import { DataSource } from './data-source'
+import { DataSet } from './DataSet'
+import { DataSource } from './DataSource'
 import {
   DeleteQuery,
   HasAlias,
@@ -18,7 +18,7 @@ import {
   SelectQuery,
   UpdateQuery
 } from './query'
-import { HasOrderByFields } from './query/features/has-order-by-fields'
+import { HasOrderByFields } from './query/features/HasOrderByFields'
 import { applyMixins } from './utilities'
 
 export class DataTable {

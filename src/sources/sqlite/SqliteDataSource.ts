@@ -1,7 +1,7 @@
-import { Connection } from '../../connection'
-import { DataSource } from '../../data-source'
-import { SqliteConnection } from './sqlite-connection'
-import { SqliteQueryBuilder } from './sqlite-query-builder'
+import { Connection } from '../../Connection'
+import { DataSource } from '../../DataSource'
+import { SqliteConnection } from './SqliteConnection'
+import { SqliteQueryBuilder } from './SqliteQueryBuilder'
 
 export class SqliteDataSource extends DataSource {
   private db: any

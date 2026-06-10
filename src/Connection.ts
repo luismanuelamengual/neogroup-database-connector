@@ -1,4 +1,4 @@
-import { DataSet } from './data-set'
+import { DataSet } from './DataSet'
 
 export interface Connection {
   query(sql: string, bindings?: Array<any>): Promise<Array<DataSet>>

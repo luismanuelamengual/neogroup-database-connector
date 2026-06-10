@@ -1,8 +1,8 @@
-import { DataTable } from '../data-table'
+import { DataTable } from '../DataTable'
 import { Field } from '../query'
 import { Condition, ConditionGroup } from '../query/conditions'
-import { JoinType } from '../query/features/has-joins'
-import { OrderByDirection } from '../query/features/has-order-by-fields'
+import { JoinType } from '../query/features/HasJoins'
+import { OrderByDirection } from '../query/features/HasOrderByFields'
 import { Relationship } from './relationship'
 
 type EntityClass<T> = (new () => T) & {

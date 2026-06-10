@@ -2,8 +2,8 @@ import { DB, SqliteDataSource } from '../src'
 
 // Reset DB static state between tests so each case starts clean.
 function resetDB() {
-  ;(DB as any).sources.clear()
-  ;(DB as any).activeSourceName = undefined
+  ;(DB as any)._sources.clear()
+  ;(DB as any)._activeSourceName = undefined
 }
 
 // Manipulate process.env safely.

@@ -1,5 +1,5 @@
-import { Connection } from '../../connection'
-import { DataSet } from '../../data-set'
+import { Connection } from '../../Connection'
+import { DataSet } from '../../DataSet'
 
 export class PostgresConnection implements Connection {
   private client: any

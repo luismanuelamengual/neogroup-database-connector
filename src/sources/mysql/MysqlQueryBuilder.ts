@@ -1,5 +1,5 @@
-import { DefaultQueryBuilder } from '../../query/builders/default-query-builder'
-import { Statement } from '../../query/statement'
+import { DefaultQueryBuilder } from '../../query/builders/DefaultQueryBuilder'
+import { Statement } from '../../query/Statement'
 import { Table } from '../../query/table'
 
 export class MysqlQueryBuilder extends DefaultQueryBuilder {

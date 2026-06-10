@@ -1,7 +1,7 @@
-import { DataConnection } from './data-connection'
-import { DataSet } from './data-set'
-import { DataSource } from './data-source'
-import { DataTable } from './data-table'
+import { DataConnection } from './DataConnection'
+import { DataSet } from './DataSet'
+import { DataSource } from './DataSource'
+import { DataTable } from './DataTable'
 import { ConditionGroup, DeleteQuery, InsertQuery, Query, SelectQuery, Table, UpdateQuery } from './query'
 
 // ── Global state — survives Next.js hot reloads ───────────────────────────────

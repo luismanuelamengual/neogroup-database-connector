@@ -1,6 +1,6 @@
 import { applyMixins } from '../utilities'
 import { HasFieldValues, HasTable, HasWhereConditions } from './features'
-import { Query } from './query'
+import { Query } from './Query'
 import { Table } from './table'
 
 export class UpdateQuery extends Query {

@@ -1,7 +1,7 @@
-import { Connection } from './connection'
-import { DataConnection } from './data-connection'
-import { DataSet } from './data-set'
-import { DataTable } from './data-table'
+import { Connection } from './Connection'
+import { DataConnection } from './DataConnection'
+import { DataSet } from './DataSet'
+import { DataTable } from './DataTable'
 import { DefaultQueryBuilder, Query, QueryBuilder } from './query'
 
 export abstract class DataSource {

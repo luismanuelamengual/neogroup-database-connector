@@ -14,8 +14,8 @@ import {
   HasWhen,
   HasWhereConditions
 } from './features'
-import { HasOrderByFields } from './features/has-order-by-fields'
-import { Query } from './query'
+import { HasOrderByFields } from './features/HasOrderByFields'
+import { Query } from './Query'
 import { Table } from './table'
 
 export class SelectQuery extends Query {

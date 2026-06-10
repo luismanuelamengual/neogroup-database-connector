@@ -1,7 +1,7 @@
-import { Connection } from '../../connection'
-import { DataSource } from '../../data-source'
-import { MysqlConnection } from './mysql-connection'
-import { MysqlQueryBuilder } from './mysql-query-builder'
+import { Connection } from '../../Connection'
+import { DataSource } from '../../DataSource'
+import { MysqlConnection } from './MysqlConnection'
+import { MysqlQueryBuilder } from './MysqlQueryBuilder'
 
 export class MysqlDataSource extends DataSource {
   private lib: any

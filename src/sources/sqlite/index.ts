@@ -1,3 +1,3 @@
-export * from './sqlite-connection'
-export * from './sqlite-data-source'
-export * from './sqlite-query-builder'
+export * from './SqliteConnection'
+export * from './SqliteDataSource'
+export * from './SqliteQueryBuilder'

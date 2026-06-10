@@ -1,4 +1,4 @@
-import { SelectQuery } from '../select-query'
+import { SelectQuery } from '../SelectQuery'
 
 export abstract class HasUnions<R> {
   protected _unions?: Array<{ query: SelectQuery; all: boolean }>

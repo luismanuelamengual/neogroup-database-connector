@@ -1,5 +1,5 @@
-import { Connection } from './connection'
-import { DataSet } from './data-set'
+import { Connection } from './Connection'
+import { DataSet } from './DataSet'
 import { Query, QueryBuilder } from './query'
 import { debugLog } from './utilities'
 

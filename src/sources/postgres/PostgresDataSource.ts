@@ -1,7 +1,7 @@
-import { Connection } from '../../connection'
-import { DataSource } from '../../data-source'
-import { PostgresConnection } from './postgres-connection'
-import { PostgresQueryBuilder } from './postgres-query-builder'
+import { Connection } from '../../Connection'
+import { DataSource } from '../../DataSource'
+import { PostgresConnection } from './PostgresConnection'
+import { PostgresQueryBuilder } from './PostgresQueryBuilder'
 
 export class PostgresDataSource extends DataSource {
   private lib: any

@@ -1,4 +1,4 @@
-import { CastType } from '../entity'
+import { CastType } from '../CastType'
 
 // ── Cast helpers ──────────────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 export * from './relationship'
-export * from './entity-query'
-export type { CastType } from './entity'
+export * from './EntityQuery'
+export type { CastType } from './CastType'
 export * from './decorators'
-export * from './entities'
+export * from './Entities'

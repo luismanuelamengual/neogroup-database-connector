@@ -1,6 +1,6 @@
-import { DefaultQueryBuilder } from '../../query/builders/default-query-builder'
-import { SelectQuery } from '../../query/select-query'
-import { Statement } from '../../query/statement'
+import { DefaultQueryBuilder } from '../../query/builders/DefaultQueryBuilder'
+import { SelectQuery } from '../../query/SelectQuery'
+import { Statement } from '../../query/Statement'
 
 export class SqliteQueryBuilder extends DefaultQueryBuilder {
   protected buildLimitOffset(query: SelectQuery, statement: Statement) {
