@@ -1,7 +1,7 @@
 {
   "name": "@neogroup/neorm",
-  "version": "0.0.2",
-  "description": "Database connector for javascript",
+  "version": "0.0.3",
+  "description": "Database connector and ORM for javascript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -20,7 +20,11 @@
   "keywords": [
     "database",
     "connector",
-    "javascript"
+    "javascript",
+    "typescript",
+    "orm",
+    "mysql",
+    "postgres"
   ],
   "files": [
     "dist"
