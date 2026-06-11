@@ -1,4 +1,4 @@
-import { applyMixins } from '../utilities'
+import { applyMixins } from '../../utilities'
 import {
   HasAlias,
   HasDistinct,

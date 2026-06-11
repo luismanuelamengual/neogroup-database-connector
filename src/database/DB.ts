@@ -1,4 +1,4 @@
-import { ConditionGroup, DeleteQuery, InsertQuery, Query, QueryTable, SelectQuery, UpdateQuery } from '../query'
+import { ConditionGroup, DeleteQuery, InsertQuery, Query, QueryTable, SelectQuery, UpdateQuery } from './query'
 import { DataConnection } from './DataConnection'
 import { DataSet } from './DataSet'
 import { DataSource } from './DataSource'

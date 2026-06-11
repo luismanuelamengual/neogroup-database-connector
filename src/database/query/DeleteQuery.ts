@@ -1,4 +1,4 @@
-import { applyMixins } from '../utilities'
+import { applyMixins } from '../../utilities'
 import { HasTable, HasWhereConditions } from './features'
 import { Query } from './Query'
 import { QueryTable } from './QueryTable'

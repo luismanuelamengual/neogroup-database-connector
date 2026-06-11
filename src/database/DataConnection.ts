@@ -1,4 +1,4 @@
-import { Query, QueryBuilder } from '../query'
+import { Query, QueryBuilder } from './query'
 import { debugLog } from '../utilities'
 import { Connection } from './Connection'
 import { DataSet } from './DataSet'

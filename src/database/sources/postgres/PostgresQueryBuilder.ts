@@ -1,4 +1,4 @@
-import { DefaultQueryBuilder, Statement } from '../../../query'
+import { DefaultQueryBuilder, Statement } from '../../query'
 
 export class PostgresQueryBuilder extends DefaultQueryBuilder {
   private static readonly CURRENCY = '$'
