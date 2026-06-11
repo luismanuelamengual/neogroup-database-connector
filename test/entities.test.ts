@@ -8,6 +8,7 @@ import {
   HasManyThrough,
   HasOne,
   HasOneThrough,
+  OrderByDirection,
   SqliteDataSource
 } from '../src'
 
@@ -743,6 +744,117 @@ describe('Entities (Active Record — BaseEntity)', () => {
 
       await employee.delete()
       expect(await EmployeeModel.find(id)).toBeNull()
+    })
+  })
+
+  // ─── Resolución de nombres de propiedad → columna en queries ──────────────
+
+  describe('resolución de propiedades en queries', () => {
+    beforeEach(async () => {
+      await source.execute('DELETE FROM employees')
+      await source.execute(`
+        INSERT INTO employees (first_name, is_active, email) VALUES
+          ('Luis', 1, 'luis@x.com'),
+          ('Ana', 0, 'ana@x.com'),
+          ('Zoe', 1, 'zoe@x.com')
+      `)
+    })
+
+    it('where() acepta el nombre de propiedad', async () => {
+      const employee = await EmployeeModel.where('firstName', 'Luis').first()
+
+      expect(employee).not.toBeNull()
+      expect(employee.firstName).toBe('Luis')
+    })
+
+    it('where() sigue aceptando el nombre de columna de la DB', async () => {
+      const employee = await EmployeeModel.where('first_name', 'Luis').first()
+
+      expect(employee).not.toBeNull()
+      expect(employee.firstName).toBe('Luis')
+    })
+
+    it('where() con operador acepta el nombre de propiedad', async () => {
+      const employees = await EmployeeModel.where('isActive', '=', 1).get()
+
+      expect(employees).toHaveLength(2)
+    })
+
+    it('where() resuelve propiedades calificadas con la tabla de la entidad', async () => {
+      const employee = await EmployeeModel.where('employees.firstName', 'Ana').first()
+
+      expect(employee).not.toBeNull()
+      expect(employee.firstName).toBe('Ana')
+    })
+
+    it('orderBy() acepta el nombre de propiedad', async () => {
+      const employees = await EmployeeModel.orderBy('firstName', OrderByDirection.DESC).get()
+
+      expect(employees.map((e: any) => e.firstName)).toEqual(['Zoe', 'Luis', 'Ana'])
+    })
+
+    it('whereIn() acepta el nombre de propiedad', async () => {
+      const employees = await EmployeeModel.whereIn('firstName', ['Luis', 'Zoe']).get()
+
+      expect(employees).toHaveLength(2)
+    })
+
+    it('whereLike() acepta el nombre de propiedad', async () => {
+      const employees = await EmployeeModel.whereLike('firstName', 'L%').get()
+
+      expect(employees).toHaveLength(1)
+      expect(employees[0].firstName).toBe('Luis')
+    })
+
+    it('orWhere() acepta el nombre de propiedad', async () => {
+      const employees = await EmployeeModel.where('firstName', 'Luis').orWhere('firstName', 'Ana').get()
+
+      expect(employees).toHaveLength(2)
+    })
+
+    it('select() acepta nombres de propiedad', async () => {
+      const employee = await EmployeeModel.select('firstName').where('firstName', 'Luis').first()
+
+      expect(employee.firstName).toBe('Luis')
+      expect(employee.email).toBeUndefined()
+    })
+
+    it('groupBy() acepta el nombre de propiedad', async () => {
+      const employees = await EmployeeModel.select('isActive').groupBy('isActive').get()
+
+      expect(employees).toHaveLength(2)
+    })
+
+    it('where(callback) resuelve propiedades dentro del grupo', async () => {
+      const employees = await EmployeeModel.where((group: any) =>
+        group.where('firstName', 'Luis').orWhere('firstName', 'Ana')
+      ).get()
+
+      expect(employees).toHaveLength(2)
+    })
+
+    it('where(callback) resuelve propiedades en grupos anidados', async () => {
+      const employees = await EmployeeModel.where((group: any) =>
+        group.where('isActive', 1).where((inner: any) => inner.where('firstName', 'Luis').orWhere('firstName', 'Zoe'))
+      ).get()
+
+      expect(employees).toHaveLength(2)
+    })
+
+    it('where(callback) resuelve métodos de conveniencia del grupo', async () => {
+      const employees = await EmployeeModel.where((group: any) =>
+        group.whereIn('firstName', ['Luis', 'Ana']).whereLike('firstName', 'L%')
+      ).get()
+
+      expect(employees).toHaveLength(1)
+      expect(employees[0].firstName).toBe('Luis')
+    })
+
+    it('where(condition) resuelve propiedades en condiciones directas', async () => {
+      const employees = await EmployeeModel.where({ field: 'firstName', operator: '=', value: 'Ana' }).get()
+
+      expect(employees).toHaveLength(1)
+      expect(employees[0].firstName).toBe('Ana')
     })
   })
 })

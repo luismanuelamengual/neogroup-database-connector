@@ -8,6 +8,7 @@ import { Relationship } from './Relationship'
 type EntityClass<T> = (new () => T) & {
   table: string
   primaryKey: string
+  columnsMap: Record<string, string>
   relationships: Record<string, Relationship>
   fromRow(row: Record<string, any>): T
 }
@@ -279,6 +280,89 @@ export class EntityQuery<T> {
     }
   }
 
+  // ── Field-name resolution ────────────────────────────────────────────────────
+  // Query methods accept either entity property names ("firstName") or database
+  // column names ("first_name"). If the field matches a registered property of
+  // the entity, it is mapped to its database column; otherwise it passes through
+  // untouched.
+
+  private _resolveFieldName(name: string): string {
+    const columnsMap = this._entityClass.columnsMap ?? {}
+
+    return columnsMap[name] ?? name
+  }
+
+  private _resolveField<F extends Field>(field: F): F {
+    if (typeof field === 'string') {
+      const dot = field.lastIndexOf('.')
+
+      if (dot === -1) {
+        return this._resolveFieldName(field) as F
+      }
+
+      // "table.field" — only resolve fields qualified with this entity's table
+      const tablePart = field.substring(0, dot)
+
+      if (tablePart !== this._entityClass.table) {
+        return field
+      }
+
+      return `${tablePart}.${this._resolveFieldName(field.substring(dot + 1))}` as F
+    }
+
+    if (field && typeof field === 'object' && typeof (field as any).name === 'string') {
+      const table = (field as any).table
+      const tableName = typeof table === 'string' ? table : table?.name
+
+      if (tableName != null && tableName !== this._entityClass.table) {
+        return field
+      }
+
+      return { ...(field as any), name: this._resolveFieldName((field as any).name) }
+    }
+
+    return field
+  }
+
+  /**
+   * Resolves field names inside a Condition: basic/column conditions get their
+   * fields mapped, condition groups are resolved recursively (in-place), and
+   * callbacks are wrapped so the resulting group is resolved after it runs.
+   * Raw conditions pass through untouched.
+   */
+  private _resolveCondition(condition: any): any {
+    if (typeof condition === 'function') {
+      return (group: ConditionGroup) => {
+        condition(group)
+        this._resolveConditionGroup(group)
+      }
+    }
+
+    if (condition instanceof ConditionGroup) {
+      this._resolveConditionGroup(condition)
+
+      return condition
+    }
+
+    if (condition && typeof condition === 'object' && 'field' in condition) {
+      const resolved: any = { ...condition, field: this._resolveField(condition.field) }
+
+      if ('column' in condition) {
+        resolved.column = this._resolveField(condition.column)
+      }
+
+      return resolved
+    }
+
+    return condition
+  }
+
+  private _resolveConditionGroup(group: ConditionGroup): void {
+    for (const entry of group.getConditions()) {
+      entry.condition = this._resolveCondition(entry.condition)
+    }
+  }
+
   // ── DataTable method proxies ─────────────────────────────────────────────────
   // (returning `this` so the query stays EntityQuery-typed)
 
@@ -287,55 +371,61 @@ export class EntityQuery<T> {
   public where(field: Field, value: any): this
   public where(field: Field, operator: string, value: any): this
   public where(...args: any[]): this {
+    if (args.length >= 2) {
+      args[0] = this._resolveField(args[0])
+    } else if (args.length === 1) {
+      args[0] = this._resolveCondition(args[0])
+    }
+
     ;(this._table as any).where(...args)
 
     return this
   }
 
   public whereIn(field: Field, values: any[]): this {
-    this._table.whereIn(field, values)
+    this._table.whereIn(this._resolveField(field), values)
 
     return this
   }
 
   public whereNotIn(field: Field, values: any[]): this {
-    this._table.whereNotIn(field, values)
+    this._table.whereNotIn(this._resolveField(field), values)
 
     return this
   }
 
   public whereBetween(field: Field, range: [any, any]): this {
-    this._table.whereBetween(field, range)
+    this._table.whereBetween(this._resolveField(field), range)
 
     return this
   }
 
   public whereNotBetween(field: Field, range: [any, any]): this {
-    this._table.whereNotBetween(field, range)
+    this._table.whereNotBetween(this._resolveField(field), range)
 
     return this
   }
 
   public whereNull(field: Field): this {
-    this._table.whereNull(field)
+    this._table.whereNull(this._resolveField(field))
 
     return this
   }
 
   public whereNotNull(field: Field): this {
-    this._table.whereNotNull(field)
+    this._table.whereNotNull(this._resolveField(field))
 
     return this
   }
 
   public whereLike(field: Field, pattern: string): this {
-    this._table.whereLike(field, pattern)
+    this._table.whereLike(this._resolveField(field), pattern)
 
     return this
   }
 
   public whereNotLike(field: Field, pattern: string): this {
-    this._table.whereNotLike(field, pattern)
+    this._table.whereNotLike(this._resolveField(field), pattern)
 
     return this
   }
@@ -343,79 +433,91 @@ export class EntityQuery<T> {
   public whereColumn(field: Field, column: Field): this
   public whereColumn(field: Field, operator: string, column: Field): this
   public whereColumn(...args: any[]): this {
+    args[0] = this._resolveField(args[0])
+    args[args.length - 1] = this._resolveField(args[args.length - 1])
     ;(this._table as any).whereColumn(...args)
 
     return this
   }
 
   public orWhere(...args: any[]): this {
+    if (args.length >= 2) {
+      args[0] = this._resolveField(args[0])
+    } else if (args.length === 1) {
+      args[0] = this._resolveCondition(args[0])
+    }
+
     ;(this._table as any).orWhere(...args)
 
     return this
   }
 
   public orWhereIn(field: Field, values: any[]): this {
-    this._table.orWhereIn(field, values)
+    this._table.orWhereIn(this._resolveField(field), values)
 
     return this
   }
 
   public orWhereNotIn(field: Field, values: any[]): this {
-    this._table.orWhereNotIn(field, values)
+    this._table.orWhereNotIn(this._resolveField(field), values)
 
     return this
   }
 
   public orWhereBetween(field: Field, range: [any, any]): this {
-    this._table.orWhereBetween(field, range)
+    this._table.orWhereBetween(this._resolveField(field), range)
 
     return this
   }
 
   public orWhereNotBetween(field: Field, range: [any, any]): this {
-    this._table.orWhereNotBetween(field, range)
+    this._table.orWhereNotBetween(this._resolveField(field), range)
 
     return this
   }
 
   public orWhereNull(field: Field): this {
-    this._table.orWhereNull(field)
+    this._table.orWhereNull(this._resolveField(field))
 
     return this
   }
 
   public orWhereNotNull(field: Field): this {
-    this._table.orWhereNotNull(field)
+    this._table.orWhereNotNull(this._resolveField(field))
 
     return this
   }
 
   public orWhereLike(field: Field, pattern: string): this {
-    this._table.orWhereLike(field, pattern)
+    this._table.orWhereLike(this._resolveField(field), pattern)
 
     return this
   }
 
   public orWhereNotLike(field: Field, pattern: string): this {
-    this._table.orWhereNotLike(field, pattern)
+    this._table.orWhereNotLike(this._resolveField(field), pattern)
 
     return this
   }
 
   public select(...fields: (Field | Field[])[]): this {
-    ;(this._table as any).select(...fields)
+    const resolved = fields.map((f) =>
+      Array.isArray(f) ? f.map((inner) => this._resolveField(inner)) : this._resolveField(f)
+    )
+
+    ;(this._table as any).select(...resolved)
 
     return this
   }
 
   public orderBy(field: Field, direction?: OrderByDirection): this {
-    this._table.orderBy(field, direction as any)
+    this._table.orderBy(this._resolveField(field), direction as any)
 
     return this
   }
 
   public groupBy(...fields: Field[]): this {
-    ;(this._table as any).groupBy(...fields)
+    ;(this._table as any).groupBy(...fields.map((f) => this._resolveField(f)))
 
     return this
   }
