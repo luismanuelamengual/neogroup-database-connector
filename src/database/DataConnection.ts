@@ -1,7 +1,7 @@
-import { Query, QueryBuilder } from './query'
 import { debugLog } from '../utilities'
 import { Connection } from './Connection'
 import { DataSet } from './DataSet'
+import { Query, QueryBuilder } from './query'
 
 export class DataConnection {
   private connection: Connection

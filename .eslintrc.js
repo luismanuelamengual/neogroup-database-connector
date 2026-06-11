@@ -6,7 +6,7 @@ module.exports = {
     node: true,
     browser: true
   },
-  extends: ['eslint:recommended', 'prettier', 'next'],
+  extends: ['eslint:recommended', 'prettier'],
   plugins: ['@typescript-eslint', 'simple-import-sort', 'eslint-plugin-absolute-imports-only', 'prettier'],
   rules: {
     'prettier/prettier': 'error',
@@ -34,7 +34,6 @@ module.exports = {
         caughtErrorsIgnorePattern: '^_'
       }
     ],
-    'import/no-anonymous-default-export': 'off',
     'no-dupe-class-members': 'off',
     'prefer-const': 'warn',
     semi: 'off',
@@ -106,9 +105,6 @@ module.exports = {
   settings: {
     'absolute-imports-only': {
       project: path.resolve(__dirname, 'tsconfig.json')
-    },
-    next: {
-      rootDir: __dirname
     }
   }
 }

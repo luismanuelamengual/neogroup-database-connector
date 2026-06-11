@@ -37,7 +37,7 @@ describe('DB.configure() — env var auto-bootstrap', () => {
   describe('DB.configure() explicit call', () => {
     it('registra un source SQLite en memoria con DB_DRIVER=sqlite', () => {
       withEnv({ DB_DRIVER: 'sqlite' }, () => {
-        DB.configure()
+        DB['configure']()
 
         expect(DB.getActiveSource()).toBeInstanceOf(SqliteDataSource)
       })
@@ -45,7 +45,7 @@ describe('DB.configure() — env var auto-bootstrap', () => {
 
     it('respeta DB_FILE para SQLite', () => {
       withEnv({ DB_DRIVER: 'sqlite', DB_FILE: './test.db' }, () => {
-        DB.configure()
+        DB['configure']()
 
         const src = DB.getActiveSource() as SqliteDataSource
 
@@ -59,7 +59,7 @@ describe('DB.configure() — env var auto-bootstrap', () => {
       DB.register(manual)
 
       withEnv({ DB_DRIVER: 'sqlite', DB_FILE: './should-not-be-used.db' }, () => {
-        DB.configure()
+        DB['configure']()
 
         // The active source must still be the one registered manually
         expect(DB.getActiveSource()).toBe(manual)
@@ -67,12 +67,12 @@ describe('DB.configure() — env var auto-bootstrap', () => {
     })
 
     it('lanza error si no hay vars de DB_DRIVER ni sources manuales', () => {
-      expect(() => DB.configure()).toThrow(/DB_DRIVER/)
+      expect(() => DB['configure']()).toThrow(/DB_DRIVER/)
     })
 
     it('lanza error si el driver es desconocido', () => {
       withEnv({ DB_DRIVER: 'oracle' }, () => {
-        expect(() => DB.configure()).toThrow(/Unknown DB driver/)
+        expect(() => DB['configure']()).toThrow(/Unknown DB driver/)
       })
     })
   })
@@ -82,7 +82,7 @@ describe('DB.configure() — env var auto-bootstrap', () => {
   describe('named sources via DB_<NAME>_DRIVER', () => {
     it('registra un source nombrado y lo hace accesible via DB.source()', () => {
       withEnv({ DB_REPORTING_DRIVER: 'sqlite', DB_REPORTING_FILE: './reporting.db' }, () => {
-        DB.configure()
+        DB['configure']()
 
         const reporting = DB.source('reporting') as SqliteDataSource
 
@@ -99,7 +99,7 @@ describe('DB.configure() — env var auto-bootstrap', () => {
           DB_REPORTING_FILE: './reporting.db'
         },
         () => {
-          DB.configure()
+          DB['configure']()
 
           // Active source is the unnamed default
           const active = DB.getActiveSource() as SqliteDataSource
@@ -116,12 +116,57 @@ describe('DB.configure() — env var auto-bootstrap', () => {
 
     it('sin DB_DRIVER, el primer source nombrado (alfabético) queda como activo', () => {
       withEnv({ DB_REPORTING_DRIVER: 'sqlite', DB_REPORTING_FILE: './r.db' }, () => {
-        DB.configure()
+        DB['configure']()
 
         const active = DB.getActiveSource() as SqliteDataSource
 
         expect(active.getFilename()).toBe('./r.db')
       })
+    })
+  })
+
+  // ── Debug / Readonly via env vars ────────────────────────────────────────────
+
+  describe('DB_DEBUG y DB_READONLY', () => {
+    it('habilita debugMode y readonly en el source por defecto', () => {
+      withEnv({ DB_DRIVER: 'sqlite', DB_DEBUG: 'true', DB_READONLY: '1' }, () => {
+        DB['configure']()
+
+        const src = DB.getActiveSource()
+
+        expect(src.isDebugEnabled()).toBe(true)
+        expect(src.isReadonly()).toBe(true)
+      })
+    })
+
+    it('quedan deshabilitados con valores falsos', () => {
+      withEnv({ DB_DRIVER: 'sqlite', DB_DEBUG: 'false', DB_READONLY: 'off' }, () => {
+        DB['configure']()
+
+        const src = DB.getActiveSource()
+
+        expect(src.isDebugEnabled()).toBe(false)
+        expect(src.isReadonly()).toBe(false)
+      })
+    })
+
+    it('soporta DB_<NAME>_DEBUG y DB_<NAME>_READONLY en sources nombrados', () => {
+      withEnv(
+        {
+          DB_DRIVER: 'sqlite',
+          DB_REPORTING_DRIVER: 'sqlite',
+          DB_REPORTING_DEBUG: 'yes',
+          DB_REPORTING_READONLY: 'on'
+        },
+        () => {
+          DB['configure']()
+
+          expect(DB.getActiveSource().isDebugEnabled()).toBe(false)
+          expect(DB.getActiveSource().isReadonly()).toBe(false)
+          expect(DB.source('reporting').isDebugEnabled()).toBe(true)
+          expect(DB.source('reporting').isReadonly()).toBe(true)
+        }
+      )
     })
   })
 

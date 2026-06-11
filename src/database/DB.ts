@@ -1,8 +1,8 @@
-import { ConditionGroup, DeleteQuery, InsertQuery, Query, QueryTable, SelectQuery, UpdateQuery } from './query'
 import { DataConnection } from './DataConnection'
 import { DataSet } from './DataSet'
 import { DataSource } from './DataSource'
 import { DataTable } from './DataTable'
+import { ConditionGroup, DeleteQuery, InsertQuery, Query, QueryTable, SelectQuery, UpdateQuery } from './query'
 
 // ── Global state — survives Next.js hot reloads ───────────────────────────────
 
@@ -88,16 +88,19 @@ export abstract class DB {
    *     DB_NAME       database name                (postgres / mysql)
    *     DB_USERNAME   login username               (postgres / mysql)
    *     DB_PASSWORD   login password               (postgres / mysql)
+   *     DB_DEBUG      enable debug mode            (true/false, 1/0, yes/no, on/off)
+   *     DB_READONLY   readonly mode                (true/false, 1/0, yes/no, on/off)
    *
    *   Named source  (replace <NAME> with the desired source name in upper-case):
    *     DB_<NAME>_DRIVER, DB_<NAME>_HOST, DB_<NAME>_PORT, DB_<NAME>_NAME,
-   *     DB_<NAME>_USERNAME, DB_<NAME>_PASSWORD, DB_<NAME>_FILE
+   *     DB_<NAME>_USERNAME, DB_<NAME>_PASSWORD, DB_<NAME>_FILE,
+   *     DB_<NAME>_DEBUG, DB_<NAME>_READONLY
    *
    * Example:
    *   DB_DRIVER=postgres DB_HOST=localhost DB_NAME=app DB_USERNAME=user DB_PASSWORD=pass
    *   DB_REPORTING_DRIVER=sqlite DB_REPORTING_FILE=./reporting.db
    */
-  public static configure(): void {
+  private static configure(): void {
     if (this._sources.size > 0) {
       return // already configured — manual register() takes precedence
     }
@@ -137,6 +140,26 @@ export abstract class DB {
   }
 
   private static _buildSourceFromEnv(driver: string, get: (key: string) => string | undefined): DataSource {
+    const source = this._buildDriverSource(driver, get)
+    const debug = get('DEBUG')
+    const readonly = get('READONLY')
+
+    if (debug !== undefined) {
+      source.setDebugEnabled(this._parseEnvBoolean(debug))
+    }
+
+    if (readonly !== undefined) {
+      source.setReadonly(this._parseEnvBoolean(readonly))
+    }
+
+    return source
+  }
+
+  private static _parseEnvBoolean(value: string): boolean {
+    return ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase())
+  }
+
+  private static _buildDriverSource(driver: string, get: (key: string) => string | undefined): DataSource {
     switch (driver.toLowerCase()) {
       case 'sqlite': {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
