@@ -372,7 +372,7 @@ const users = await DB.table('users')
   .get()
 ```
 
-When `condition` is falsy the callback is skipped and the chain continues unchanged. `when` works on both `DataTable` and `SelectQuery`.
+When `condition` is falsy the callback is skipped and the chain continues unchanged. `when` works on `DataTable`, `SelectQuery` and `EntityQuery` (entity queries).
 
 ---
 

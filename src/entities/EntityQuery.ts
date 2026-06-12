@@ -27,6 +27,16 @@ export class EntityQuery<T> {
     this._table = table
   }
 
+  // ── Conditional clauses ──────────────────────────────────────────────────────
+
+  public when(condition: boolean, callback: (query: this) => void): this {
+    if (condition) {
+      callback(this)
+    }
+
+    return this
+  }
+
   // ── Eager loading ────────────────────────────────────────────────────────────
 
   public with(relations: string | string[], ...rest: string[]): this {
