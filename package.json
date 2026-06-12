@@ -37,7 +37,8 @@
     "url": "git+https://github.com/luismanuelamengual/neogroup-neorm.git"
   },
   "scripts": {
-    "build": "jest --passWithNoTests && tsc",
+    "build": "jest --passWithNoTests && npm run clean && tsc",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
     "test": "jest",
     "lint": "eslint src test --ext .ts,.js --fix",
     "prepublishOnly": "npm run build"

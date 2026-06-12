@@ -77,15 +77,30 @@ export class MysqlDataSource extends DataSource {
 
   protected async requestConnection(): Promise<Connection> {
     if (!this.pool) {
-      this.pool = this.lib.createPool({
-        host: this.getHost(),
-        port: this.getPort(),
-        database: this.getDatabaseName(),
-        user: this.getUsername(),
-        password: this.getPassword()
-      })
+      this.pool = this.createPool()
     }
 
-    return new MysqlConnection(await this.pool.getConnection())
+    try {
+      return new MysqlConnection(await this.pool.getConnection())
+    } catch (e: any) {
+      // Si el pool fue cerrado externamente (p.ej. HMR en dev), se recrea y se reintenta una vez
+      if (typeof e?.message === 'string' && e.message.toLowerCase().includes('pool is closed')) {
+        this.pool = this.createPool()
+
+        return new MysqlConnection(await this.pool.getConnection())
+      }
+
+      throw e
+    }
+  }
+
+  private createPool(): any {
+    return this.lib.createPool({
+      host: this.getHost(),
+      port: this.getPort(),
+      database: this.getDatabaseName(),
+      user: this.getUsername(),
+      password: this.getPassword()
+    })
   }
 }

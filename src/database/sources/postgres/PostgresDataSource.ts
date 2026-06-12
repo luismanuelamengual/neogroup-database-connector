@@ -76,18 +76,23 @@ export class PostgresDataSource extends DataSource {
   }
 
   protected async requestConnection(): Promise<Connection> {
-    if (!this.pool) {
-      const config: any = {
-        host: this.getHost(),
-        port: this.getPort(),
-        database: this.getDatabaseName(),
-        user: this.getUsername(),
-        password: this.getPassword()
-      }
-
-      this.pool = new this.lib.Pool(config)
+    // pg expone pool.ended cuando se llamó a end(); en ese caso se recrea el pool
+    if (!this.pool || this.pool.ended) {
+      this.pool = this.createPool()
     }
 
     return new PostgresConnection(await this.pool.connect())
+  }
+
+  private createPool(): any {
+    const config: any = {
+      host: this.getHost(),
+      port: this.getPort(),
+      database: this.getDatabaseName(),
+      user: this.getUsername(),
+      password: this.getPassword()
+    }
+
+    return new this.lib.Pool(config)
   }
 }
