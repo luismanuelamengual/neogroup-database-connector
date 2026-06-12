@@ -6,6 +6,7 @@ import { Condition, ConditionGroup } from '../database/query/conditions'
 import { OrderByDirection } from '../database/query/features/HasOrderByFields'
 import { CastType } from './CastType'
 import { applyCast, applyCastForStorage } from './decorators/casts'
+import type { Dto } from './Dto'
 import { EntityQuery } from './EntityQuery'
 import { Relationship } from './Relationship'
 
@@ -261,6 +262,27 @@ export abstract class BaseEntity {
   }
 
   // ── Serialization ────────────────────────────────────────────────────────────
+
+  /**
+   * Returns a typed plain object (DTO) with the entity's columns, getters and
+   * loaded relationships, without methods nor BaseEntity members. Nested
+   * entities (and arrays of entities) are converted recursively.
+   */
+  toDto(): Dto<this> {
+    const result = this.toJSON()
+
+    for (const key of Object.keys(result)) {
+      const value = result[key]
+
+      if (value instanceof BaseEntity) {
+        result[key] = value.toDto()
+      } else if (Array.isArray(value)) {
+        result[key] = value.map((item) => (item instanceof BaseEntity ? item.toDto() : item))
+      }
+    }
+
+    return result as Dto<this>
+  }
 
   toJSON(): Record<string, any> {
     const result: Record<string, any> = {}
