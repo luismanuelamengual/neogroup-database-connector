@@ -24,4 +24,11 @@ export class MysqlQueryBuilder extends DefaultQueryBuilder {
   protected buildFieldName(name: string, statement: Statement) {
     statement.sql += MysqlQueryBuilder.BACKTICK + name + MysqlQueryBuilder.BACKTICK
   }
+
+  protected buildOperator(operator: string, statement: Statement) {
+    // MySQL LIKE is case-insensitive for default collations; translate ILIKE (default) → LIKE
+    const upper = operator.toUpperCase()
+
+    statement.sql += upper === 'ILIKE' ? 'LIKE' : upper === 'NOT ILIKE' ? 'NOT LIKE' : upper
+  }
 }

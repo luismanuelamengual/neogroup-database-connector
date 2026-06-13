@@ -210,12 +210,12 @@ export class EntityRepository<T> {
     return this.query().whereNotNull(field)
   }
 
-  whereLike(field: Field, pattern: string): EntityQuery<T> {
-    return this.query().whereLike(field, pattern)
+  whereLike(field: Field, pattern: string, caseSensitive = false): EntityQuery<T> {
+    return this.query().whereLike(field, pattern, caseSensitive)
   }
 
-  whereNotLike(field: Field, pattern: string): EntityQuery<T> {
-    return this.query().whereNotLike(field, pattern)
+  whereNotLike(field: Field, pattern: string, caseSensitive = false): EntityQuery<T> {
+    return this.query().whereNotLike(field, pattern, caseSensitive)
   }
 
   whereColumn(field: Field, column: Field): EntityQuery<T>

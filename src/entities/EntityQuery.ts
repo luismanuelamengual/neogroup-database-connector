@@ -406,14 +406,14 @@ export class EntityQuery<T> {
     return this
   }
 
-  public whereLike(field: Field, pattern: string): this {
-    this._table.whereLike(this._resolveField(field), pattern)
+  public whereLike(field: Field, pattern: string, caseSensitive = false): this {
+    this._table.whereLike(this._resolveField(field), pattern, caseSensitive)
 
     return this
   }
 
-  public whereNotLike(field: Field, pattern: string): this {
-    this._table.whereNotLike(this._resolveField(field), pattern)
+  public whereNotLike(field: Field, pattern: string, caseSensitive = false): this {
+    this._table.whereNotLike(this._resolveField(field), pattern, caseSensitive)
 
     return this
   }
@@ -476,14 +476,14 @@ export class EntityQuery<T> {
     return this
   }
 
-  public orWhereLike(field: Field, pattern: string): this {
-    this._table.orWhereLike(this._resolveField(field), pattern)
+  public orWhereLike(field: Field, pattern: string, caseSensitive = false): this {
+    this._table.orWhereLike(this._resolveField(field), pattern, caseSensitive)
 
     return this
   }
 
-  public orWhereNotLike(field: Field, pattern: string): this {
-    this._table.orWhereNotLike(this._resolveField(field), pattern)
+  public orWhereNotLike(field: Field, pattern: string, caseSensitive = false): this {
+    this._table.orWhereNotLike(this._resolveField(field), pattern, caseSensitive)
 
     return this
   }

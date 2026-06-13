@@ -55,12 +55,13 @@ export abstract class HasWhereConditions<R> {
     return this.where(field, '<>', null)
   }
 
-  public whereLike(field: Field, pattern: string): R {
-    return this.where(field, 'LIKE', pattern)
+  /** Case-insensitive by default. Pass caseSensitive=true for exact-case matching. */
+  public whereLike(field: Field, pattern: string, caseSensitive = false): R {
+    return this.where(field, caseSensitive ? 'LIKE' : 'ILIKE', pattern)
   }
 
-  public whereNotLike(field: Field, pattern: string): R {
-    return this.where(field, 'NOT LIKE', pattern)
+  public whereNotLike(field: Field, pattern: string, caseSensitive = false): R {
+    return this.where(field, caseSensitive ? 'NOT LIKE' : 'NOT ILIKE', pattern)
   }
 
   // ── OR WHERE ─────────────────────────────────────────────────────────────────
@@ -100,12 +101,13 @@ export abstract class HasWhereConditions<R> {
     return this.orWhere(field, '<>', null)
   }
 
-  public orWhereLike(field: Field, pattern: string): R {
-    return this.orWhere(field, 'LIKE', pattern)
+  /** Case-insensitive by default. Pass caseSensitive=true for exact-case matching. */
+  public orWhereLike(field: Field, pattern: string, caseSensitive = false): R {
+    return this.orWhere(field, caseSensitive ? 'LIKE' : 'ILIKE', pattern)
   }
 
-  public orWhereNotLike(field: Field, pattern: string): R {
-    return this.orWhere(field, 'NOT LIKE', pattern)
+  public orWhereNotLike(field: Field, pattern: string, caseSensitive = false): R {
+    return this.orWhere(field, caseSensitive ? 'NOT LIKE' : 'NOT ILIKE', pattern)
   }
 
   // ── WHERE COLUMN ──────────────────────────────────────────────────────────
