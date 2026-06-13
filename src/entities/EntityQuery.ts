@@ -3,27 +3,21 @@ import { Field } from '../database/query'
 import { Condition, ConditionGroup } from '../database/query/conditions'
 import { JoinType } from '../database/query/features/HasJoins'
 import { OrderByDirection } from '../database/query/features/HasOrderByFields'
-import { Relationship } from './Relationship'
-
-type EntityClass<T> = (new () => T) & {
-  table: string
-  primaryKey: string
-  columnsMap: Record<string, string>
-  relationships: Record<string, Relationship>
-  fromRow(row: Record<string, any>): T
-}
+import { EntityRepository, Repository } from './EntityRepository'
 
 /**
  * Chainable query builder for Entities. Wraps DataTable and hydrates rows
- * into typed Entity instances when a terminal method is called.
+ * into typed entity instances when a terminal method is called.
+ *
+ * Constructed by EntityRepository.query() — do not instantiate directly.
  */
 export class EntityQuery<T> {
-  private _entityClass: EntityClass<T>
+  private _repository: EntityRepository<T>
   private _table: DataTable
   private _withs: string[] = []
 
-  constructor(entityClass: EntityClass<T>, table: DataTable) {
-    this._entityClass = entityClass
+  constructor(repository: EntityRepository<T>, table: DataTable) {
+    this._repository = repository
     this._table = table
   }
 
@@ -62,36 +56,35 @@ export class EntityQuery<T> {
   }
 
   private _applyJoin(joinType: JoinType, relationName: string): this {
-    const rel = this._entityClass.relationships[relationName]
+    const rel = this._repository.relationships[relationName]
 
     if (!rel) {
-      throw new Error(`Relationship "${relationName}" is not defined on ${this._entityClass.name}`)
+      throw new Error(`Relationship "${relationName}" is not defined on ${this._repository.table}`)
     }
 
     const RelatedClass = rel.related()
-    const relatedTable: string = RelatedClass.table
+    const relatedRepo = Repository.get(RelatedClass)
+    const relatedTable = relatedRepo.table
 
     if (rel.type === 'hasOne' || rel.type === 'hasMany') {
-      // local table.localKey = related table.foreignKey
-      const sourceField = `${this._entityClass.table}.${rel.localKey}`
+      const sourceField = `${this._repository.table}.${rel.localKey}`
       const remoteField = `${relatedTable}.${rel.foreignKey}`
 
       this._table.join(joinType, relatedTable, sourceField, remoteField)
     } else if (rel.type === 'belongsTo') {
-      // local table.foreignKey = related table.localKey
-      const sourceField = `${this._entityClass.table}.${rel.foreignKey}`
+      const sourceField = `${this._repository.table}.${rel.foreignKey}`
       const remoteField = `${relatedTable}.${rel.localKey}`
 
       this._table.join(joinType, relatedTable, sourceField, remoteField)
     } else if (rel.type === 'hasOneThrough' || rel.type === 'hasManyThrough') {
-      // local → through → related
       const ThroughClass = rel.through!()
-      const throughTable: string = ThroughClass.table
+      const throughRepo = Repository.get(ThroughClass)
+      const throughTable = throughRepo.table
 
       this._table.join(
         joinType,
         throughTable,
-        `${this._entityClass.table}.${rel.localKey}`,
+        `${this._repository.table}.${rel.localKey}`,
         `${throughTable}.${rel.throughForeignKey}`
       )
       this._table.join(
@@ -109,10 +102,10 @@ export class EntityQuery<T> {
 
   public async get(): Promise<T[]> {
     const rows = await this._table.get()
-    const entities = rows.map((row) => this._entityClass.fromRow(row))
+    const entities = rows.map((row) => this._repository.fromRow(row))
 
     if (this._withs.length > 0) {
-      await this._loadRelations(entities as any[], this._withs, this._entityClass)
+      await this._loadRelations(entities as any[], this._withs, this._repository)
     }
 
     return entities
@@ -125,26 +118,26 @@ export class EntityQuery<T> {
       return null
     }
 
-    const entity = this._entityClass.fromRow(row)
+    const entity = this._repository.fromRow(row)
 
     if (this._withs.length > 0) {
-      await this._loadRelations([entity as any], this._withs, this._entityClass)
+      await this._loadRelations([entity as any], this._withs, this._repository)
     }
 
     return entity
   }
 
   public async find(id: any): Promise<T | null> {
-    const row = await this._table.where(this._entityClass.primaryKey, id).first()
+    const row = await this._table.where(this._repository.primaryKey, id).first()
 
     if (!row) {
       return null
     }
 
-    const entity = this._entityClass.fromRow(row)
+    const entity = this._repository.fromRow(row)
 
     if (this._withs.length > 0) {
-      await this._loadRelations([entity as any], this._withs, this._entityClass)
+      await this._loadRelations([entity as any], this._withs, this._repository)
     }
 
     return entity
@@ -152,7 +145,7 @@ export class EntityQuery<T> {
 
   // ── Eager-load implementation ────────────────────────────────────────────────
 
-  private async _loadRelations(entities: any[], relations: string[], ParentClass: EntityClass<any>): Promise<void> {
+  private async _loadRelations(entities: any[], relations: string[], parentRepo: EntityRepository<any>): Promise<void> {
     // Group by top-level relation name; accumulate nested paths
     const groups = new Map<string, string[]>()
 
@@ -171,13 +164,14 @@ export class EntityQuery<T> {
     }
 
     for (const [head, nested] of groups) {
-      const rel = ParentClass.relationships[head]
+      const rel = parentRepo.relationships[head]
 
       if (!rel) {
         continue
       }
 
       const RelatedClass = rel.related()
+      const relatedRepo = Repository.get(RelatedClass)
       let relatedItems: any[] = []
 
       if (rel.type === 'hasOne' || rel.type === 'hasMany') {
@@ -187,9 +181,8 @@ export class EntityQuery<T> {
           continue
         }
 
-        relatedItems = await RelatedClass.whereIn(rel.foreignKey, keys).get()
+        relatedItems = await relatedRepo.whereIn(rel.foreignKey, keys).get()
 
-        // Build lookup: foreignKeyValue → items[]
         const lookup = new Map<any, any[]>()
 
         relatedItems.forEach((item: any) => {
@@ -214,9 +207,8 @@ export class EntityQuery<T> {
           continue
         }
 
-        relatedItems = await RelatedClass.whereIn(rel.localKey, keys).get()
+        relatedItems = await relatedRepo.whereIn(rel.localKey, keys).get()
 
-        // Build lookup: localKeyValue → item
         const lookup = new Map<any, any>()
 
         relatedItems.forEach((item: any) => lookup.set(item[rel.localKey], item))
@@ -226,14 +218,14 @@ export class EntityQuery<T> {
         })
       } else if (rel.type === 'hasOneThrough' || rel.type === 'hasManyThrough') {
         const ThroughClass = rel.through!()
+        const throughRepo = Repository.get(ThroughClass)
         const localKeys = [...new Set(entities.map((r) => r[rel.localKey]).filter((v) => v != null))]
 
         if (localKeys.length === 0) {
           continue
         }
 
-        // Load through intermediates
-        const throughItems = await ThroughClass.whereIn(rel.throughForeignKey, localKeys).get()
+        const throughItems = await throughRepo.whereIn(rel.throughForeignKey!, localKeys).get()
         const throughKeys = [
           ...new Set(throughItems.map((t: any) => t[rel.throughLocalKey!]).filter((v: any) => v != null))
         ]
@@ -242,7 +234,6 @@ export class EntityQuery<T> {
           continue
         }
 
-        // Map parent localKey → through items
         const throughByParent = new Map<any, any[]>()
 
         throughItems.forEach((t: any) => {
@@ -255,9 +246,8 @@ export class EntityQuery<T> {
           throughByParent.get(k)!.push(t)
         })
 
-        relatedItems = await RelatedClass.whereIn(rel.foreignKey, throughKeys).get()
+        relatedItems = await relatedRepo.whereIn(rel.foreignKey, throughKeys).get()
 
-        // Map through localKey → related items
         const relatedByThrough = new Map<any, any[]>()
 
         relatedItems.forEach((item: any) => {
@@ -285,19 +275,15 @@ export class EntityQuery<T> {
 
       // Recurse for nested dot-notation paths
       if (nested.length > 0 && relatedItems.length > 0) {
-        await this._loadRelations(relatedItems, nested, RelatedClass)
+        await this._loadRelations(relatedItems, nested, relatedRepo)
       }
     }
   }
 
   // ── Field-name resolution ────────────────────────────────────────────────────
-  // Query methods accept either entity property names ("firstName") or database
-  // column names ("first_name"). If the field matches a registered property of
-  // the entity, it is mapped to its database column; otherwise it passes through
-  // untouched.
 
   private _resolveFieldName(name: string): string {
-    const columnsMap = this._entityClass.columnsMap ?? {}
+    const columnsMap = this._repository.columnsMap
 
     return columnsMap[name] ?? name
   }
@@ -310,10 +296,9 @@ export class EntityQuery<T> {
         return this._resolveFieldName(field) as F
       }
 
-      // "table.field" — only resolve fields qualified with this entity's table
       const tablePart = field.substring(0, dot)
 
-      if (tablePart !== this._entityClass.table) {
+      if (tablePart !== this._repository.table) {
         return field
       }
 
@@ -324,7 +309,7 @@ export class EntityQuery<T> {
       const table = (field as any).table
       const tableName = typeof table === 'string' ? table : table?.name
 
-      if (tableName != null && tableName !== this._entityClass.table) {
+      if (tableName != null && tableName !== this._repository.table) {
         return field
       }
 
@@ -334,12 +319,6 @@ export class EntityQuery<T> {
     return field
   }
 
-  /**
-   * Resolves field names inside a Condition: basic/column conditions get their
-   * fields mapped, condition groups are resolved recursively (in-place), and
-   * callbacks are wrapped so the resulting group is resolved after it runs.
-   * Raw conditions pass through untouched.
-   */
   private _resolveCondition(condition: any): any {
     if (typeof condition === 'function') {
       return (group: ConditionGroup) => {
@@ -374,7 +353,6 @@ export class EntityQuery<T> {
   }
 
   // ── DataTable method proxies ─────────────────────────────────────────────────
-  // (returning `this` so the query stays EntityQuery-typed)
 
   public where(callback: (group: ConditionGroup) => void): this
   public where(condition: Condition): this
