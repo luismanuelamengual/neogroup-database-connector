@@ -43,4 +43,8 @@ export abstract class HasOrderByFields<R> {
 
     return this as unknown as R
   }
+
+  public orderByDesc(field: RawField | BasicField): R {
+    return this.orderBy(field, OrderByDirection.DESC)
+  }
 }

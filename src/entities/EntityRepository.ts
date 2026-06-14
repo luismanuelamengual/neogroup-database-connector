@@ -228,6 +228,10 @@ export class EntityRepository<T> {
     return this.query().orderBy(field, direction)
   }
 
+  orderByDesc(field: Field): EntityQuery<T> {
+    return this.query().orderByDesc(field)
+  }
+
   limit(value: number): EntityQuery<T> {
     return this.query().limit(value)
   }

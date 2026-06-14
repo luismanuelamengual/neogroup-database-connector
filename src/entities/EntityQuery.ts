@@ -579,6 +579,10 @@ export class EntityQuery<T> {
     return this
   }
 
+  public orderByDesc(field: Field): this {
+    return this.orderBy(field, OrderByDirection.DESC)
+  }
+
   public groupBy(...fields: Field[]): this {
     ;(this._table as any).groupBy(...fields.map((f) => this._resolveField(f)))
 

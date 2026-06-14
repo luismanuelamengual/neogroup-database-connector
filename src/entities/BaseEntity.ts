@@ -107,6 +107,10 @@ export abstract class BaseEntity {
     return this._repo().orderBy(field, direction)
   }
 
+  static orderByDesc<T extends BaseEntity>(this: EntityClass<T>, field: Field): EntityQuery<T> {
+    return this._repo().orderByDesc(field)
+  }
+
   static limit<T extends BaseEntity>(this: EntityClass<T>, value: number): EntityQuery<T> {
     return this._repo().limit(value)
   }
