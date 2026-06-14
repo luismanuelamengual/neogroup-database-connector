@@ -244,7 +244,7 @@ export class EntityRepository<T> {
     return this.query().with(relations, ...rest)
   }
 
-  when(condition: boolean, callback: (query: EntityQuery<T>) => void): EntityQuery<T> {
+  when(condition: boolean | undefined | null, callback: (query: EntityQuery<T>) => void): EntityQuery<T> {
     return this.query().when(condition, callback)
   }
 

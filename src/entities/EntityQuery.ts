@@ -23,7 +23,7 @@ export class EntityQuery<T> {
 
   // ── Conditional clauses ──────────────────────────────────────────────────────
 
-  public when(condition: boolean, callback: (query: this) => void): this {
+  public when(condition: boolean | undefined | null, callback: (query: this) => void): this {
     if (condition) {
       callback(this)
     }
