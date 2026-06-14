@@ -9,6 +9,16 @@ import { applyCast, applyCastForStorage } from './decorators/casts'
 import { EntityQuery } from './EntityQuery'
 import { Relationship } from './Relationship'
 
+// ── Serialization helpers ───────────────────────────────────────────────────────
+
+/**
+ * Strict ISO-8601 date-time matcher used to revive Date values from plain
+ * objects when a column was not explicitly declared with `cast: 'date'`.
+ * Requires the full "T" time component plus an explicit timezone (Z or ±hh:mm)
+ * so ordinary strings are never misinterpreted as dates.
+ */
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/
+
 // ── Entity metadata ───────────────────────────────────────────────────────────
 
 export interface EntityMeta {
@@ -160,6 +170,174 @@ export class EntityRepository<T> {
     }
 
     return instance
+  }
+
+  // ── Serialization ────────────────────────────────────────────────────────────
+
+  /**
+   * Serializes an entity instance into a plain, JSON-safe object.
+   *
+   * - Own data properties and prototype getters are included.
+   * - `Date` values are converted to ISO-8601 strings.
+   * - Loaded relationships (and any nested entity values) are serialized
+   *   recursively into plain objects.
+   *
+   * Works with any entity class, whether or not it extends BaseEntity:
+   *
+   *   Repository.get(Country).toJSON(countryInstance)
+   */
+  toJSON(instance: T): Record<string, any> {
+    return this._serialize(instance, new WeakSet())
+  }
+
+  /**
+   * Re-hydrates a plain object (typically the output of toJSON, or the result
+   * of JSON.parse on a serialized entity) back into a typed entity instance.
+   *
+   * - Fields declared with a cast are coerced through it (e.g. `cast: 'date'`
+   *   revives Date instances, `cast: 'json'` keeps the parsed object, …).
+   * - String values that look like full ISO-8601 timestamps are revived into
+   *   Date instances even when no cast was declared.
+   * - Relationships are re-hydrated recursively into their related entity types
+   *   (single instance for hasOne/belongsTo, array for hasMany/*Through).
+   *
+   * Works with any entity class, whether or not it extends BaseEntity:
+   *
+   *   Repository.get(Country).fromJSON(countryInstanceJSON)
+   */
+  fromJSON(json: Record<string, any>): T {
+    const instance = new (this._entityClass as any)()
+
+    if (json == null) {
+      return instance
+    }
+
+    const relationships = this.relationships
+    const castsMap = this.casts
+
+    for (const key of Object.keys(json)) {
+      const value = json[key]
+      const rel = relationships[key]
+
+      if (rel) {
+        if (value == null) {
+          this._assign(instance, key, value)
+        } else {
+          const relatedRepo = Repository.get(rel.related())
+
+          this._assign(
+            instance,
+            key,
+            Array.isArray(value) ? value.map((item) => relatedRepo.fromJSON(item)) : relatedRepo.fromJSON(value)
+          )
+        }
+
+        continue
+      }
+
+      const cast = castsMap[key]
+
+      this._assign(instance, key, cast ? applyCast(value, cast) : this._reviveValue(value))
+    }
+
+    return instance
+  }
+
+  /** Builds the plain object for an instance, guarding against circular graphs. */
+  private _serialize(instance: any, seen: WeakSet<object>): Record<string, any> {
+    const result: Record<string, any> = {}
+
+    if (instance == null) {
+      return result
+    }
+
+    seen.add(instance)
+
+    for (const key of this._serializableKeys(instance)) {
+      let value: any
+
+      try {
+        value = instance[key]
+      } catch {
+        continue // skip getters that throw (e.g. unloaded relationships)
+      }
+
+      result[key] = this._serializeValue(value, seen)
+    }
+
+    return result
+  }
+
+  /** Recursively converts a single value into a JSON-safe representation. */
+  private _serializeValue(value: any, seen: WeakSet<object>): any {
+    if (value == null) {
+      return value
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString()
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((item) => this._serializeValue(item, seen))
+    }
+
+    if (typeof value === 'object') {
+      const ctor = value.constructor
+
+      // Nested registered entity (a loaded relationship) → serialize recursively.
+      if (ctor && _metaStore.has(ctor)) {
+        if (seen.has(value)) {
+          return undefined // break circular references
+        }
+
+        return Repository.get(ctor)._serialize(value, seen)
+      }
+    }
+
+    return value
+  }
+
+  /** Collects own enumerable properties plus inherited getters (e.g. computed columns). */
+  private _serializableKeys(instance: any): string[] {
+    const keys = new Set<string>(Object.keys(instance))
+    let proto = Object.getPrototypeOf(instance)
+
+    while (proto && proto !== Object.prototype) {
+      for (const key of Object.getOwnPropertyNames(proto)) {
+        if (key === 'constructor' || keys.has(key)) {
+          continue
+        }
+
+        const descriptor = Object.getOwnPropertyDescriptor(proto, key)
+
+        if (descriptor && typeof descriptor.get === 'function') {
+          keys.add(key)
+        }
+      }
+
+      proto = Object.getPrototypeOf(proto)
+    }
+
+    return [...keys]
+  }
+
+  /** Revives a non-cast value, turning full ISO-8601 strings into Date instances. */
+  private _reviveValue(value: any): any {
+    if (typeof value === 'string' && ISO_DATE_RE.test(value)) {
+      return new Date(value)
+    }
+
+    return value
+  }
+
+  /** Assigns a value, silently skipping read-only / getter-only properties. */
+  private _assign(instance: any, key: string, value: any): void {
+    try {
+      instance[key] = value
+    } catch {
+      // ignore computed getters / read-only properties
+    }
   }
 
   // ── Terminal query methods ─────────────────────────────────────────────────

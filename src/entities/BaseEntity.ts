@@ -36,6 +36,15 @@ export abstract class BaseEntity {
     return this._repo().fromRow(row)
   }
 
+  /**
+   * Re-hydrates a plain object (typically the output of toJSON, or JSON.parse
+   * of a serialized entity) back into a typed entity instance. Date fields and
+   * related entities are restored recursively.
+   */
+  static fromJSON<T extends BaseEntity>(this: EntityClass<T>, json: Record<string, any>): T {
+    return this._repo().fromJSON(json)
+  }
+
   static async find<T extends BaseEntity>(this: EntityClass<T>, id: any): Promise<T | null> {
     return this._repo().find(id)
   }
@@ -180,50 +189,16 @@ export abstract class BaseEntity {
   // ── Serialization ────────────────────────────────────────────────────────────
 
   toDto(): Record<string, any> {
-    const result = this.toJSON()
-
-    for (const key of Object.keys(result)) {
-      const value = result[key]
-
-      if (value instanceof BaseEntity) {
-        result[key] = value.toDto()
-      } else if (Array.isArray(value)) {
-        result[key] = value.map((item) => (item instanceof BaseEntity ? item.toDto() : item))
-      }
-    }
-
-    return result
+    return this.toJSON()
   }
 
+  /**
+   * Serializes this entity into a plain, JSON-safe object: Date values become
+   * ISO-8601 strings and loaded relationships are serialized recursively.
+   * Delegates to the EntityRepository so behaviour matches
+   * Repository.get(EntityClass).toJSON(instance).
+   */
   toJSON(): Record<string, any> {
-    const result: Record<string, any> = {}
-
-    for (const key of Object.keys(this as any)) {
-      result[key] = (this as any)[key]
-    }
-
-    let proto = Object.getPrototypeOf(this)
-
-    while (proto && proto !== BaseEntity.prototype && proto !== Object.prototype) {
-      for (const key of Object.getOwnPropertyNames(proto)) {
-        if (key === 'constructor' || key in result) {
-          continue
-        }
-
-        const descriptor = Object.getOwnPropertyDescriptor(proto, key)
-
-        if (descriptor && typeof descriptor.get === 'function') {
-          try {
-            result[key] = (this as any)[key]
-          } catch {
-            // skip getters that throw (e.g. unloaded relationships)
-          }
-        }
-      }
-
-      proto = Object.getPrototypeOf(proto)
-    }
-
-    return result
+    return Repository.get(this.constructor as any).toJSON(this)
   }
 }
