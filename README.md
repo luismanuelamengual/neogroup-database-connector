@@ -44,6 +44,7 @@ A lightweight, fluent TypeScript library for interacting with relational databas
   - [Relationships](#relationships)
   - [Eager loading — with()](#eager-loading--with)
   - [Joining via relationships](#joining-via-relationships)
+  - [Existence checks — whereHas / orWhereHas](#existence-checks--wherehas--orwherehas)
 - [Debug mode](#debug-mode)
 - [Extending the library](#extending-the-library)
 - [Contact](#contact)
@@ -935,6 +936,66 @@ These are available as static methods on every Entity and also on `EntityQuery`:
 ```typescript
 const query = User.where('active', 1).leftJoinRelationship('profile')
 ```
+
+---
+
+### Existence checks — `whereHas` / `orWhereHas`
+
+`whereHas(relation, callback?)` filters the query to only include records that have at least one matching related record. It generates a correlated `WHERE EXISTS (SELECT 1 FROM …)` subquery — no JOIN duplicates, no extra columns needed.
+
+```typescript
+// Users who have at least one order
+const users = await User.whereHas('orders').get()
+
+// Users who have at least one order for a specific product
+const users = await User.whereHas('orders', (q) => q.where('product', 'Widget')).get()
+
+// Users who have a profile (hasOne)
+const users = await User.whereHas('profile').get()
+
+// Countries that have at least one order (hasManyThrough)
+const countries = await Country.whereHas('orders').get()
+```
+
+The optional callback receives an `EntityQuery` scoped to the **related** entity with full field-name resolution, so property names and the full `where*` API are available:
+
+```typescript
+// Users with an order totalling more than $50
+const users = await User.whereHas('orders', (q) =>
+  q.where('amount', '>', 50)
+).get()
+
+// Users with an active order placed this year
+const users = await User.whereHas('orders', (q) =>
+  q.where('active', 1).where('year', new Date().getFullYear())
+).get()
+```
+
+`orWhereHas` adds the existence check as an OR condition:
+
+```typescript
+// Users who are admins OR have at least one order
+const users = await User.where('role', 'admin').orWhereHas('orders').get()
+
+// Users named 'Charlie' OR who have a 'Widget' order
+const users = await User
+  .where('name', 'Charlie')
+  .orWhereHas('orders', (q) => q.where('product', 'Widget'))
+  .get()
+```
+
+Both methods are available as static methods on every `BaseEntity` subclass and can be chained freely with any other query method:
+
+```typescript
+const users = await User
+  .where('active', 1)
+  .whereHas('orders')
+  .orderBy('name')
+  .limit(10)
+  .get()
+```
+
+Supported relationship types: `hasOne`, `hasMany`, `belongsTo`, `hasOneThrough`, `hasManyThrough`.
 
 ---
 

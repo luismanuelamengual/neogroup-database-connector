@@ -248,6 +248,14 @@ export class EntityRepository<T> {
     return this.query().when(condition, callback)
   }
 
+  whereHas(relationName: string, callback?: (query: EntityQuery<T>) => void): EntityQuery<T> {
+    return this.query().whereHas(relationName, callback)
+  }
+
+  orWhereHas(relationName: string, callback?: (query: EntityQuery<T>) => void): EntityQuery<T> {
+    return this.query().orWhereHas(relationName, callback)
+  }
+
   joinRelationship(relationName: string): EntityQuery<T> {
     return this.query().joinRelationship(relationName)
   }

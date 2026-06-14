@@ -433,7 +433,7 @@ export class DefaultQueryBuilder extends QueryBuilder {
     } else if ('sql' in condition) {
       const { sql, bindings } = condition
 
-      statement.sql = sql
+      statement.sql += sql
       statement.bindings.push(...bindings)
     } else if ('column' in condition) {
       const { field, operator, column } = condition as ColumnCondition

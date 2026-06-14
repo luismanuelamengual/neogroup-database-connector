@@ -1,5 +1,5 @@
 import { DataTable } from '../database/DataTable'
-import { Field } from '../database/query'
+import { Field, SelectQuery } from '../database/query'
 import { Condition, ConditionGroup } from '../database/query/conditions'
 import { JoinType } from '../database/query/features/HasJoins'
 import { OrderByDirection } from '../database/query/features/HasOrderByFields'
@@ -53,6 +53,81 @@ export class EntityQuery<T> {
 
   public leftJoinRelationship(relationName: string): this {
     return this._applyJoin(JoinType.LEFT_JOIN, relationName)
+  }
+
+  // ── Existence checks ─────────────────────────────────────────────────────────
+
+  public whereHas(relationName: string, callback?: (query: EntityQuery<any>) => void): this {
+    return this._applyWhereHas('AND', relationName, callback)
+  }
+
+  public orWhereHas(relationName: string, callback?: (query: EntityQuery<any>) => void): this {
+    return this._applyWhereHas('OR', relationName, callback)
+  }
+
+  private _applyWhereHas(
+    connector: 'AND' | 'OR',
+    relationName: string,
+    callback?: (query: EntityQuery<any>) => void
+  ): this {
+    const rel = this._repository.relationships[relationName]
+
+    if (!rel) {
+      throw new Error(`Relationship "${relationName}" is not defined on ${this._repository.table}`)
+    }
+
+    const RelatedClass = rel.related()
+    const relatedRepo = Repository.get(RelatedClass)
+    const relatedTable = relatedRepo.table
+    const source = this._repository.getSource()
+    // Build a sub-DataTable and sub-EntityQuery so the callback can constrain
+    // the related entity with proper field-name resolution.
+    const subTable = source.table(relatedTable)
+    const subEntityQuery = new EntityQuery(relatedRepo, subTable)
+
+    if (callback) {
+      callback(subEntityQuery)
+    }
+
+    // Add the correlated join condition between the related table and the parent table.
+    if (rel.type === 'hasOne' || rel.type === 'hasMany') {
+      subTable.whereColumn(`${relatedTable}.${rel.foreignKey}`, `${this._repository.table}.${rel.localKey}`)
+    } else if (rel.type === 'belongsTo') {
+      subTable.whereColumn(`${relatedTable}.${rel.localKey}`, `${this._repository.table}.${rel.foreignKey}`)
+    } else if (rel.type === 'hasOneThrough' || rel.type === 'hasManyThrough') {
+      const ThroughClass = rel.through!()
+      const throughRepo = Repository.get(ThroughClass)
+      const throughTable = throughRepo.table
+
+      // JOIN through table: related.foreign_key = through.through_local_key
+      subTable.join(
+        JoinType.INNER_JOIN,
+        throughTable,
+        `${relatedTable}.${rel.foreignKey}`,
+        `${throughTable}.${rel.throughLocalKey}`
+      )
+      // Correlated condition: through.through_foreign_key = parent.local_key
+      subTable.whereColumn(`${throughTable}.${rel.throughForeignKey}`, `${this._repository.table}.${rel.localKey}`)
+    }
+
+    // Build EXISTS (SELECT 1 FROM related_table [...] WHERE [...])
+    const subSelectQuery = new SelectQuery(relatedTable)
+
+    subSelectQuery.setSelectFields(['1'])
+    subSelectQuery.setWhereConditions(subTable.getWhereConditions())
+    subSelectQuery.setJoins(subTable.getJoins())
+
+    const qb = (source as any).queryBuilder
+    const subStatement = qb.buildQuery(subSelectQuery)
+    const existsRaw = { sql: `EXISTS (${subStatement.sql})`, bindings: subStatement.bindings }
+
+    if (connector === 'AND') {
+      this._table.where(existsRaw as any)
+    } else {
+      this._table.orWhere(existsRaw as any)
+    }
+
+    return this
   }
 
   private _applyJoin(joinType: JoinType, relationName: string): this {

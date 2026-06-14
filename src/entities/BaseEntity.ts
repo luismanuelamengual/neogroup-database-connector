@@ -135,6 +135,22 @@ export abstract class BaseEntity {
     return this._repo().with(relations, ...rest)
   }
 
+  static whereHas<T extends BaseEntity>(
+    this: EntityClass<T>,
+    relationName: string,
+    callback?: (query: EntityQuery<T>) => void
+  ): EntityQuery<T> {
+    return this._repo().whereHas(relationName, callback)
+  }
+
+  static orWhereHas<T extends BaseEntity>(
+    this: EntityClass<T>,
+    relationName: string,
+    callback?: (query: EntityQuery<T>) => void
+  ): EntityQuery<T> {
+    return this._repo().orWhereHas(relationName, callback)
+  }
+
   static joinRelationship<T extends BaseEntity>(this: EntityClass<T>, relationName: string): EntityQuery<T> {
     return this._repo().joinRelationship(relationName)
   }

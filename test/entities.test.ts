@@ -632,6 +632,102 @@ describe('Entities (Active Record — BaseEntity)', () => {
     })
   })
 
+  // ─── whereHas / orWhereHas ────────────────────────────────────────────────
+
+  describe('whereHas / orWhereHas', () => {
+    beforeEach(async () => {
+      await seedCountries()
+      await seedUsers()
+      await seedRelated()
+    })
+
+    it('whereHas(hasMany) — devuelve solo los que tienen relacionados', async () => {
+      const users = await UserModel.whereHas('orders').orderBy('name').get()
+      const names = users.map((u: any) => u.name)
+
+      expect(names).toEqual(['Alice', 'Bob'])
+    })
+
+    it('whereHas(hasMany) con callback — filtra por condición en el relacionado', async () => {
+      const users = await UserModel.whereHas('orders', (q) => q.where('product', 'Widget')).get()
+
+      expect(users).toHaveLength(1)
+      expect(users[0].name).toBe('Alice')
+    })
+
+    it('whereHas(hasMany) con callback y binding numérico', async () => {
+      // Bob solo tiene Doohickey (4.99); Alice tiene Widget (9.99) y Gadget (24.99)
+      const users = await UserModel.whereHas('orders', (q) => q.where('amount', '>', 10)).get()
+
+      expect(users).toHaveLength(1)
+      expect(users[0].name).toBe('Alice')
+    })
+
+    it('whereHas(hasOne) — devuelve solo los que tienen el relacionado', async () => {
+      const users = await UserModel.whereHas('profile').orderBy('name').get()
+      const names = users.map((u: any) => u.name)
+
+      expect(names).toEqual(['Alice', 'Bob'])
+    })
+
+    it('whereHas(belongsTo) — devuelve los que tienen la FK satisfecha', async () => {
+      // Los 3 usuarios tienen país asignado
+      const users = await UserModel.whereHas('country').get()
+
+      expect(users).toHaveLength(3)
+    })
+
+    it('whereHas(hasManyThrough) — filtra entidades que tienen relacionados a través', async () => {
+      // AR tiene órdenes (Alice + Bob), BR (Charlie) no tiene ninguna
+      const countries = await CountryModel.whereHas('orders').get()
+
+      expect(countries).toHaveLength(1)
+      expect(countries[0].code).toBe('AR')
+    })
+
+    it('whereHas devuelve vacío cuando ningún registro tiene relacionados', async () => {
+      // Charlie no tiene órdenes; queremos solo los que tengan producto 'Nonexistent'
+      const users = await UserModel.whereHas('orders', (q) => q.where('product', 'Nonexistent')).get()
+
+      expect(users).toHaveLength(0)
+    })
+
+    it('orWhereHas — combina con OR correctamente', async () => {
+      // Charlie no tiene órdenes → no entra por whereHas; Alice sí tiene Widget → entra
+      // Charlie entra por where('name', 'Charlie')
+      const users = await UserModel
+        .where('name', 'Charlie')
+        .orWhereHas('orders', (q) => q.where('product', 'Widget'))
+        .orderBy('name')
+        .get()
+      const names = users.map((u: any) => u.name)
+
+      expect(names).toEqual(['Alice', 'Charlie'])
+    })
+
+    it('where + whereHas encadenados (AND implícito)', async () => {
+      // active = 1 AND has orders → Alice y Bob están activos y tienen órdenes
+      const users = await UserModel.where('active', 1).whereHas('orders').orderBy('name').get()
+      const names = users.map((u: any) => u.name)
+
+      expect(names).toEqual(['Alice', 'Bob'])
+    })
+
+    it('whereHas encadenado después de otro whereHas', async () => {
+      // Usuarios con orders Y con profile → Alice y Bob
+      const users = await UserModel.whereHas('orders').whereHas('profile').orderBy('name').get()
+      const names = users.map((u: any) => u.name)
+
+      expect(names).toEqual(['Alice', 'Bob'])
+    })
+
+    it('lanza error si la relación no existe', () => {
+      expect(() => UserModel.whereHas('nonexistent')).toThrow(
+        'Relationship "nonexistent" is not defined on users'
+      )
+    })
+  })
+
   // ─── columnName — renombrado de columnas ──────────────────────────────────
 
   describe('columnName — renombrado de columnas', () => {
