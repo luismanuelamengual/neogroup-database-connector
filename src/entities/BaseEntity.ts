@@ -119,6 +119,14 @@ export abstract class BaseEntity {
     return this._repo().select(...fields)
   }
 
+  static when<T extends BaseEntity>(
+    this: EntityClass<T>,
+    condition: any,
+    callback: (query: EntityQuery<T>) => void
+  ): EntityQuery<T> {
+    return this._repo().when(condition, callback)
+  }
+
   static with<T extends BaseEntity>(
     this: EntityClass<T>,
     relations: string | string[],
