@@ -1,11 +1,12 @@
 {
   "name": "@neogroup/neorm",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Database connector and ORM for javascript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "browser": "./dist/entities/index.js",
       "require": "./dist/index.js",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
